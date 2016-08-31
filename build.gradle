@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+repositories {
+    mavenCentral()
+} 
+
+
+sourceCompatibility=1.8
+targetCompatibility=1.8
+
+dependencies {
+	compile 'org.slf4j:slf4j-api:1.7.+'
+  	compile 'org.apache.commons:commons-lang3:3.+'
+  	compile 'commons-io:commons-io:2.4'
+  	compile 'commons-beanutils:commons-beanutils:1.9.+'
+  	
+    testCompile 'junit:junit:4.+'
+}
+
