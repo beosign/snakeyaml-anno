@@ -1,0 +1,17 @@
+# Example YAML file
+stellarObjects
+- name: "Sun"
+  absoluteMag: 4.8
+  radius: 695700
+  type: "Star"
+- name: "Earth"
+  satellites:
+  - name: "Moon"
+  distance: "1 AU"
+  type: "Planet"
+- name: "Ceres"
+  location: "Asteroid Belt"
+  type: "Asteroid"
+- name: "Vesta"
+  location: "Asteroid Belt"
+  type: "Asteroid"
