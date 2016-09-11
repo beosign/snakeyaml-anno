@@ -1,17 +1,22 @@
 # Example YAML file
-stellarObjects
-- name: "Sun"
+#stellarObjects:
+- !!de.beosign.snakeyamlanno.StellarObject
+  name: Sun
   absoluteMag: 4.8
   radius: 695700
-  type: "Star"
-- name: "Earth"
-  satellites:
-  - name: "Moon"
-  distance: "1 AU"
-  type: "Planet"
-- name: "Ceres"
-  location: "Asteroid Belt"
-  type: "Asteroid"
-- name: "Vesta"
-  location: "Asteroid Belt"
-  type: "Asteroid"
+  type: Star
+- !!de.beosign.snakeyamlanno.StellarObject
+  name: Earth
+#  satellites:
+- !!de.beosign.snakeyamlanno.StellarObject
+  name: Moon
+#  distance: 1 AU
+#  type: Planet
+- !!de.beosign.snakeyamlanno.StellarObject
+  name: Ceres
+  location: Asteroid Belt
+  type: Asteroid
+- !!de.beosign.snakeyamlanno.StellarObject
+  name: Vesta
+  location: Asteroid Belt
+  type: Asteroid
