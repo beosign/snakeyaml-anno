@@ -1,6 +1,10 @@
 package de.beosign.snakeyamlanno;
 
+import de.beosign.snakeyamlanno.annotation.Property;
+
 public class StellarObject {
+
+    @Property(key = "nameAlias")
     private String name;
     private String type;
     private String location;
@@ -48,12 +52,19 @@ public class StellarObject {
         this.radius = radius;
     }
 
+    @Property(key = "absMag")
     public double getAbsoluteMag() {
         return absoluteMag;
     }
 
     public void setAbsoluteMag(double absoluteMag) {
         this.absoluteMag = absoluteMag;
+    }
+
+    @Override
+    public String toString() {
+        return "StellarObject [name=" + name + ", type=" + type + ", location=" + location + ", distance=" + distance + ", radius=" + radius + ", absoluteMag="
+                + absoluteMag + "]";
     }
 
 }

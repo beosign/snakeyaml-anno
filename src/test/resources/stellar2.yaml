@@ -1,0 +1,6 @@
+- !!de.beosign.snakeyamlanno.StellarObject
+  nameAlias: Sun
+  radius: 695700
+  type: Star
+- !!de.beosign.snakeyamlanno.StellarObject
+  name: Earth
