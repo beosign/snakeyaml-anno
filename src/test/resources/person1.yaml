@@ -1,0 +1,9 @@
+- !!de.beosign.snakeyamlanno.Person
+  name: Homer
+  height: 1.85 m
+  gender: m
+- !!de.beosign.snakeyamlanno.Person
+  name: Marge
+  gender: f
+  animal: !!de.beosign.snakeyamlanno.Person$Dog
+    loudness: 5

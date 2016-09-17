@@ -53,12 +53,12 @@ public class ParseTest {
 
     /**
      * Parses a YAML that consists of a single custom object with two entries, where one entry uses the new mapped key and the other one uses the old key (which
-     * is forbidden).
+     * is forbidden). Test on field.
      * 
      * @throws IOException on {@link IOException}
      */
     @Test
-    public void parseSingleObjectWithAliasAndUnaliasedInvalidFile() throws IOException {
+    public void parseSingleObjectWithAliasAndUnaliasedFieldInvalidFile() throws IOException {
         try (InputStream is = ClassLoader.getSystemResourceAsStream("stellar2.yaml")) {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
@@ -70,9 +70,36 @@ public class ParseTest {
                 Assert.fail("Expected exception");
             } catch (YAMLException e) {
                 log.debug("Caught expected exception {}", e.getClass().getName());
-                AliasedYAMLException cause = (AliasedYAMLException) e.getCause();
+                AliasedYAMLException cause = (AliasedYAMLException) e.getCause().getCause();
                 assertThat(cause.getAliasedProperty(), is("name"));
                 assertThat(cause.getAlias(), is("nameAlias"));
+            }
+
+        }
+    }
+
+    /**
+     * Parses a YAML that consists of a single custom object with two entries, where one entry uses the new mapped key and the other one uses the old key (which
+     * is forbidden). Test on getter method.
+     * 
+     * @throws IOException on {@link IOException}
+     */
+    @Test
+    public void parseSingleObjectWithAliasAndUnaliasedGetterInvalidFile() throws IOException {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("stellar3.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(new AnnotationAwareConstructor(List.class));
+
+            try {
+                yaml.load(yamlString);
+                Assert.fail("Expected exception");
+            } catch (YAMLException e) {
+                log.debug("Caught expected exception {}", e.getClass().getName());
+                AliasedYAMLException cause = (AliasedYAMLException) e.getCause().getCause();
+                assertThat(cause.getAliasedProperty(), is("absoluteMag"));
+                assertThat(cause.getAlias(), is("absMag"));
             }
 
         }
@@ -101,6 +128,23 @@ public class ParseTest {
             assertThat(parseResult.getStellarObjects(), not(empty()));
             assertThat(parseResult.getStellarObjects().get(0).getAbsoluteMag(), is(4.8));
             assertThat(parseResult.getStellarObjects().get(0).getName(), is("Sun"));
+
+        }
+    }
+
+    @Test
+    public void parseWithConverter() throws IOException {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("person1.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(new AnnotationAwareConstructor(List.class));
+
+            @SuppressWarnings("unchecked")
+            List<Person> parseResult = yaml.loadAs(yamlString, List.class);
+            log.debug("Parsed YAML file:\n{}", parseResult);
+
+            assertThat(parseResult, notNullValue());
 
         }
     }

@@ -6,9 +6,12 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import de.beosign.snakeyamlanno.convert.Converter;
+import de.beosign.snakeyamlanno.convert.NoConverter;
+
 /**
- * Defines an alias for a property. The key must match the key used in the YAML file. The annotation must be placed on the field or getter that is responsible
- * for storing the value found under the given key.
+ * Defines an alias and/or a converter for a property. The key (if present) must match the key used in the YAML file. The annotation must be placed on the field
+ * or getter that is responsible for storing the value found under the given key.
  * 
  * @author florian
  */
@@ -20,5 +23,12 @@ public @interface Property {
      * 
      * @return key
      */
-    String key();
+    String key() default "";
+
+    /**
+     * Converter class used to convert the YAML node to a java object (parsing) or vice versa (dumpming).
+     * 
+     * @return Converter class.
+     */
+    Class<? extends Converter<?>> converter() default NoConverter.class;
 }

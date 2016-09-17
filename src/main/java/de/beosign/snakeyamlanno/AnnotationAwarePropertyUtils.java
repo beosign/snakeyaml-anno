@@ -44,26 +44,60 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
             if (p instanceof AnnotatedFieldProperty) {
                 AnnotatedFieldProperty fp = (AnnotatedFieldProperty) p;
                 de.beosign.snakeyamlanno.annotation.Property property = fp.getPropertyAnnotation();
-                if (name.equals(property.key())) {
-                    return super.getProperty(type, fp.getName());
-                }
-                if (name.equals(fp.getName())) {
-                    throw new AliasedYAMLException("Property '" + name + "' on class: "
-                            + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
-                            property.key());
+
+                if (!property.key().equals("")) {
+                    if (property.key().equals("") && fp.getName().equals(name)) {
+                        // key was not aliased, so compare with field name
+                        return p;
+                    }
+                    if (name.equals(property.key())) {
+                        // return super.getProperty(type, fp.getName());
+                        return p;
+                    }
+                    if (name.equals(fp.getName())) {
+                        throw new AliasedYAMLException("Property '" + name + "' on class: "
+                                + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
+                                property.key());
+                    }
                 }
 
             } else if (p instanceof AnnotatedMethodProperty) {
                 AnnotatedMethodProperty mp = (AnnotatedMethodProperty) p;
 
                 de.beosign.snakeyamlanno.annotation.Property property = mp.getReadMethodPropertyAnnotation();
-                if (property != null && name.equals(property.key())) {
-                    return super.getProperty(type, mp.getName());
+                if (property != null) {
+                    if (property.key().equals("") && mp.getName().equals(name)) {
+                        // key was not aliased, so compare with method name
+                        return p;
+                    }
+                    if (property != null && name.equals(property.key())) {
+                        return p;
+                    }
+
+                    if (name.equals(mp.getName())) {
+                        throw new AliasedYAMLException("Property '" + name + "' on class: "
+                                + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
+                                property.key());
+                    }
+
                 }
 
                 property = mp.getWriteMethodPropertyAnnotation();
-                if (property != null && name.equals(property.key())) {
-                    return super.getProperty(type, mp.getName());
+                if (property != null) {
+                    if (property.key().equals("") && mp.getName().equals(name)) {
+                        // key was not aliased, so compare with method name
+                        return p;
+                    }
+                    if (property != null && name.equals(property.key())) {
+                        // return super.getProperty(type, mp.getName());
+                        return p;
+                    }
+
+                    if (name.equals(mp.getName())) {
+                        throw new AliasedYAMLException("Property '" + name + "' on class: "
+                                + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
+                                property.key());
+                    }
                 }
 
             }
@@ -94,12 +128,16 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
                     .filter(f -> f.getName().equals(propertyName))
                     .findFirst()
                     .orElse(null);
-            log.trace("Found field: " + field);
+            log.trace("Found field: " + field + " for property " + propertyName);
 
-            de.beosign.snakeyamlanno.annotation.Property property = field.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-            if (property != null) {
-                AnnotatedFieldProperty fieldProperty = new AnnotatedFieldProperty(field);
-                annotatedPropertiesMap.put(propertyName, fieldProperty);
+            de.beosign.snakeyamlanno.annotation.Property property = null;
+            if (field != null) {
+                // may be in superclass
+                property = field.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+                if (property != null) {
+                    AnnotatedFieldProperty fieldProperty = new AnnotatedFieldProperty(field);
+                    annotatedPropertiesMap.put(propertyName, fieldProperty);
+                }
             }
 
             PropertyDescriptor[] propertyDescriptors = Introspector.getBeanInfo(type).getPropertyDescriptors();
@@ -107,12 +145,14 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
                     .filter(pd -> pd.getName().equals(propertyName))
                     .findFirst()
                     .orElse(null);
-            log.trace("Found method: " + propertyDescriptor);
+            log.trace("Found method: " + propertyDescriptor + " for property " + propertyName);
 
-            property = propertyDescriptor.getReadMethod().getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-            if (property != null) {
-                AnnotatedMethodProperty methodProperty = new AnnotatedMethodProperty(propertyDescriptor);
-                annotatedPropertiesMap.put(propertyName, methodProperty);
+            if (propertyDescriptor != null) {
+                property = propertyDescriptor.getReadMethod().getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+                if (property != null) {
+                    AnnotatedMethodProperty methodProperty = new AnnotatedMethodProperty(propertyDescriptor);
+                    annotatedPropertiesMap.put(propertyName, methodProperty);
+                }
             }
         }
         log.debug("Annotated Properties Map for type " + type + ":\n" + annotatedPropertiesMap);
