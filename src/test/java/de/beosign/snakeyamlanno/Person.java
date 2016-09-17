@@ -11,6 +11,8 @@ public class Person {
     private String name;
     private int height; // cm
     private Gender gender;
+
+    @Property(ignoreExceptions = true)
     private Animal animal;
 
     public enum Gender {

@@ -1,10 +1,12 @@
 package de.beosign.snakeyamlanno.constructor;
 
 import java.beans.IntrospectionException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.MissingProperty;
@@ -46,6 +48,8 @@ public class AnnotationAwareConstructor extends Constructor {
     protected class AnnotationAwareMappingConstructor extends ConstructMapping {
         @Override
         protected Object constructJavaBean2ndStep(MappingNode node, Object object) {
+            List<NodeTuple> unconstructableNodeTuples = new ArrayList<>();
+
             Class<? extends Object> beanType = node.getType();
             List<NodeTuple> nodeValue = node.getValue();
             for (NodeTuple tuple : nodeValue) {
@@ -65,13 +69,33 @@ public class AnnotationAwareConstructor extends Constructor {
                         AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
                         if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
                             property.set(object, annotatedProperty.getPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
+                        } else {
+                            /* 
+                             * No converter present, so let YAML set the value.
+                             */
+                            if (annotatedProperty.getPropertyAnnotation().ignoreExceptions()) {
+                                try {
+                                    Construct constructor = getConstructor(valueNode);
+                                    constructor.construct(valueNode);
+                                } catch (Exception e) {
+                                    log.info("Could not construct property {}.{}: {}", beanType, key, e.getMessage());
+                                    unconstructableNodeTuples.add(tuple);
+                                }
+                            }
+
                         }
+
                     }
+
                 } catch (Exception e) {
                     throw new YAMLException("Cannot create property=" + key
                             + " for JavaBean=" + object, e);
                 }
             }
+
+            // Remove nodes that are unconstructable
+            unconstructableNodeTuples.forEach(nt -> node.getValue().remove(nt));
+
             return super.constructJavaBean2ndStep(node, object);
         }
 

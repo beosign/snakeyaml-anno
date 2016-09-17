@@ -31,4 +31,11 @@ public @interface Property {
      * @return Converter class.
      */
     Class<? extends Converter<?>> converter() default NoConverter.class;
+
+    /**
+     * If true, exceptions are caught so the parsing process continues. This will leave some objects
+     * in the tree <code>null</code>
+     */
+    boolean ignoreExceptions() default false;
+
 }
