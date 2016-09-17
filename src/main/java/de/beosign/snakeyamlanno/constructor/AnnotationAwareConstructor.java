@@ -26,17 +26,7 @@ public class AnnotationAwareConstructor extends Constructor {
     public AnnotationAwareConstructor(Class<? extends Object> theRoot) {
         super(theRoot);
         setPropertyUtils(new AnnotationAwarePropertyUtils());
-        yamlClassConstructors.put(NodeId.scalar, new AnnotationAwareScalarConstructor());
         yamlClassConstructors.put(NodeId.mapping, new AnnotationAwareMappingConstructor());
-    }
-
-    protected class AnnotationAwareScalarConstructor extends ConstructScalar {
-        @Override
-        public Object construct(Node nnode) {
-            ScalarNode sn = (ScalarNode) nnode;
-            return super.construct(nnode);
-        }
-
     }
 
     protected class AnnotationAwareMappingConstructor extends ConstructMapping {
@@ -65,8 +55,8 @@ public class AnnotationAwareConstructor extends Constructor {
                     } else if (property instanceof AnnotatedMethodProperty) {
                         AnnotatedMethodProperty mp = (AnnotatedMethodProperty) property;
 
-                        if (mp.getReadMethodPropertyAnnotation() != null && mp.getReadMethodPropertyAnnotation().converter() != NoConverter.class) {
-                            mp.set(object, mp.getReadMethodPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
+                        if (mp.getMethodPropertyAnnotation() != null && mp.getMethodPropertyAnnotation().converter() != NoConverter.class) {
+                            mp.set(object, mp.getMethodPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
                         }
                     }
                 } catch (Exception e) {
@@ -91,7 +81,8 @@ public class AnnotationAwareConstructor extends Constructor {
             } else if (property instanceof AnnotatedMethodProperty) {
                 AnnotatedMethodProperty mp = (AnnotatedMethodProperty) property;
 
-                if (mp.getReadMethodPropertyAnnotation() != null && mp.getReadMethodPropertyAnnotation().converter() != NoConverter.class) {
+                if (mp.getMethodPropertyAnnotation() != null && mp.getMethodPropertyAnnotation().converter() != NoConverter.class) {
+                    // already set above
                     return new MissingProperty(name);
                 }
             }

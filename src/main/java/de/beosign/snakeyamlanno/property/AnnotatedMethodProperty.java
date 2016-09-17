@@ -18,11 +18,8 @@ public class AnnotatedMethodProperty extends MethodProperty {
         return propertyDescriptor;
     }
 
-    public Property getReadMethodPropertyAnnotation() {
+    public Property getMethodPropertyAnnotation() {
         return propertyDescriptor.getReadMethod().getAnnotation(Property.class);
     }
 
-    public Property getWriteMethodPropertyAnnotation() {
-        return propertyDescriptor.getWriteMethod().getAnnotation(Property.class);
-    }
 }

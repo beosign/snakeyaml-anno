@@ -64,7 +64,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
             } else if (p instanceof AnnotatedMethodProperty) {
                 AnnotatedMethodProperty mp = (AnnotatedMethodProperty) p;
 
-                de.beosign.snakeyamlanno.annotation.Property property = mp.getReadMethodPropertyAnnotation();
+                de.beosign.snakeyamlanno.annotation.Property property = mp.getMethodPropertyAnnotation();
                 if (property != null) {
                     if (property.key().equals("") && mp.getName().equals(name)) {
                         // key was not aliased, so compare with method name
@@ -81,25 +81,6 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
                     }
 
                 }
-
-                property = mp.getWriteMethodPropertyAnnotation();
-                if (property != null) {
-                    if (property.key().equals("") && mp.getName().equals(name)) {
-                        // key was not aliased, so compare with method name
-                        return p;
-                    }
-                    if (property != null && name.equals(property.key())) {
-                        // return super.getProperty(type, mp.getName());
-                        return p;
-                    }
-
-                    if (name.equals(mp.getName())) {
-                        throw new AliasedYAMLException("Property '" + name + "' on class: "
-                                + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
-                                property.key());
-                    }
-                }
-
             }
         }
 
