@@ -57,6 +57,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
                     return p;
                 }
                 if (name.equals(property.key())) {
+                    log.trace("Type: {}, property {} is mapped to {}", type.getName(), name, property.key());
                     return p;
                 }
                 if (name.equals(p.getName())) {
@@ -78,6 +79,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
      * @throws IntrospectionException on {@link IntrospectionException}
      */
     private void initialize(Class<? extends Object> type) throws IntrospectionException {
+        log.debug("Initializing AnnotatedPropertiesMap for type {}", type.getName());
         Map<String, Property> propertiesMap = getPropertiesMap(type, beanAccess);
 
         Map<String, Property> annotatedPropertiesMap = typeToAnotatedPropertiesMap.get(type);
@@ -91,7 +93,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
                     .filter(f -> f.getName().equals(propertyName))
                     .findFirst()
                     .orElse(null);
-            log.trace("Found field: " + field + " for property " + propertyName);
+            log.trace("Type: {}, found field {} for property {}", type.getName(), field, propertyName);
 
             de.beosign.snakeyamlanno.annotation.Property property = null;
             if (field != null) {
@@ -108,7 +110,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
                     .filter(pd -> pd.getName().equals(propertyName))
                     .findFirst()
                     .orElse(null);
-            log.trace("Found method: " + propertyDescriptor + " for property " + propertyName);
+            log.trace("Type: {}, found method {} for property {}", type.getName(), propertyDescriptor, propertyName);
 
             if (propertyDescriptor != null) {
                 property = propertyDescriptor.getReadMethod().getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
