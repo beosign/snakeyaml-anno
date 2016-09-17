@@ -6,7 +6,7 @@ import org.yaml.snakeyaml.introspector.MethodProperty;
 
 import de.beosign.snakeyamlanno.annotation.Property;
 
-public class AnnotatedMethodProperty extends MethodProperty {
+public class AnnotatedMethodProperty extends MethodProperty implements AnnotatedProperty {
     private PropertyDescriptor propertyDescriptor;
 
     public AnnotatedMethodProperty(PropertyDescriptor property) {
@@ -18,7 +18,8 @@ public class AnnotatedMethodProperty extends MethodProperty {
         return propertyDescriptor;
     }
 
-    public Property getMethodPropertyAnnotation() {
+    @Override
+    public Property getPropertyAnnotation() {
         return propertyDescriptor.getReadMethod().getAnnotation(Property.class);
     }
 

@@ -17,8 +17,7 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.convert.NoConverter;
-import de.beosign.snakeyamlanno.property.AnnotatedFieldProperty;
-import de.beosign.snakeyamlanno.property.AnnotatedMethodProperty;
+import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 
 public class AnnotationAwareConstructor extends Constructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
@@ -47,16 +46,10 @@ public class AnnotationAwareConstructor extends Constructor {
                 String key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
                 try {
                     Property property = super.getProperty(beanType, key);
-                    if (property instanceof AnnotatedFieldProperty) {
-                        AnnotatedFieldProperty fp = (AnnotatedFieldProperty) property;
-                        if (fp.getPropertyAnnotation().converter() != NoConverter.class) {
-                            fp.set(object, fp.getPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
-                        }
-                    } else if (property instanceof AnnotatedMethodProperty) {
-                        AnnotatedMethodProperty mp = (AnnotatedMethodProperty) property;
-
-                        if (mp.getMethodPropertyAnnotation() != null && mp.getMethodPropertyAnnotation().converter() != NoConverter.class) {
-                            mp.set(object, mp.getMethodPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
+                    if (property instanceof AnnotatedProperty) {
+                        AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
+                        if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
+                            property.set(object, annotatedProperty.getPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
                         }
                     }
                 } catch (Exception e) {
@@ -72,17 +65,10 @@ public class AnnotationAwareConstructor extends Constructor {
             log.debug("type = " + type.getName() + ", name = " + name);
 
             Property property = super.getProperty(type, name);
-            if (property instanceof AnnotatedFieldProperty) {
-                AnnotatedFieldProperty fp = (AnnotatedFieldProperty) property;
-                if (fp.getPropertyAnnotation().converter() != NoConverter.class) {
-                    // already set above
-                    return new MissingProperty(name);
-                }
-            } else if (property instanceof AnnotatedMethodProperty) {
-                AnnotatedMethodProperty mp = (AnnotatedMethodProperty) property;
-
-                if (mp.getMethodPropertyAnnotation() != null && mp.getMethodPropertyAnnotation().converter() != NoConverter.class) {
-                    // already set above
+            if (property instanceof AnnotatedProperty) {
+                AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
+                if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
+                    // value has already set above in constructJavaBean2ndStep
                     return new MissingProperty(name);
                 }
             }

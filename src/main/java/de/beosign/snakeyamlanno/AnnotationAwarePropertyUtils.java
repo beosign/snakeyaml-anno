@@ -18,7 +18,7 @@ import org.yaml.snakeyaml.introspector.PropertyUtils;
 import de.beosign.snakeyamlanno.exception.AliasedYAMLException;
 import de.beosign.snakeyamlanno.property.AnnotatedFieldProperty;
 import de.beosign.snakeyamlanno.property.AnnotatedMethodProperty;
-
+import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 public class AnnotationAwarePropertyUtils extends PropertyUtils {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwarePropertyUtils.class);
 
@@ -41,51 +41,26 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         }
 
         for (Property p : typeToAnotatedPropertiesMap.get(type).values()) {
-            if (p instanceof AnnotatedFieldProperty) {
-                AnnotatedFieldProperty fp = (AnnotatedFieldProperty) p;
-                de.beosign.snakeyamlanno.annotation.Property property = fp.getPropertyAnnotation();
+            if (p instanceof AnnotatedProperty) {
+                AnnotatedProperty annotatedProperty = (AnnotatedProperty) p;
+                de.beosign.snakeyamlanno.annotation.Property property = annotatedProperty.getPropertyAnnotation();
 
-                if (!property.key().equals("")) {
-                    if (property.key().equals("") && fp.getName().equals(name)) {
-                        // key was not aliased, so compare with field name
-                        return p;
-                    }
-                    if (name.equals(property.key())) {
-                        // return super.getProperty(type, fp.getName());
-                        return p;
-                    }
-                    if (name.equals(fp.getName())) {
-                        throw new AliasedYAMLException("Property '" + name + "' on class: "
-                                + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
-                                property.key());
-                    }
+                if (property.key().equals("") && p.getName().equals(name)) {
+                    // key was not aliased, so compare with field name
+                    return p;
+                }
+                if (name.equals(property.key())) {
+                    return p;
+                }
+                if (name.equals(p.getName())) {
+                    throw new AliasedYAMLException("Property '" + name + "' on class: "
+                            + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
+                            property.key());
                 }
 
-            } else if (p instanceof AnnotatedMethodProperty) {
-                AnnotatedMethodProperty mp = (AnnotatedMethodProperty) p;
-
-                de.beosign.snakeyamlanno.annotation.Property property = mp.getMethodPropertyAnnotation();
-                if (property != null) {
-                    if (property.key().equals("") && mp.getName().equals(name)) {
-                        // key was not aliased, so compare with method name
-                        return p;
-                    }
-                    if (property != null && name.equals(property.key())) {
-                        return p;
-                    }
-
-                    if (name.equals(mp.getName())) {
-                        throw new AliasedYAMLException("Property '" + name + "' on class: "
-                                + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
-                                property.key());
-                    }
-
-                }
             }
         }
-
         return super.getProperty(type, name);
-
     }
 
     /**

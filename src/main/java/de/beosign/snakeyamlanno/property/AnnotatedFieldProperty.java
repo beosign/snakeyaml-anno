@@ -6,7 +6,7 @@ import org.yaml.snakeyaml.introspector.FieldProperty;
 
 import de.beosign.snakeyamlanno.annotation.Property;
 
-public class AnnotatedFieldProperty extends FieldProperty {
+public class AnnotatedFieldProperty extends FieldProperty implements AnnotatedProperty {
     private Field field;
 
     public AnnotatedFieldProperty(Field field) {
@@ -14,6 +14,7 @@ public class AnnotatedFieldProperty extends FieldProperty {
         this.field = field;
     }
 
+    @Override
     public Property getPropertyAnnotation() {
         return field.getAnnotation(Property.class);
     }
