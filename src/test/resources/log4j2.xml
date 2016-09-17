@@ -10,7 +10,6 @@
       <AppenderRef ref="Console"/>
     </Root>
     <Logger name="de.beosign" level="trace">
-      <AppenderRef ref="Console"/>
     </Logger>
   </Loggers>
 </Configuration>
