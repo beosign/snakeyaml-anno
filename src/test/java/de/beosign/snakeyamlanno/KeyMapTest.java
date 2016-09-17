@@ -22,8 +22,13 @@ import org.yaml.snakeyaml.error.YAMLException;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.exception.AliasedYAMLException;
 
-public class ParseTest {
-    private static final Logger log = LoggerFactory.getLogger(ParseTest.class);
+/**
+ * Tests the key mapping functionality.
+ * 
+ * @author florian
+ */
+public class KeyMapTest {
+    private static final Logger log = LoggerFactory.getLogger(KeyMapTest.class);
 
     /**
      * Parses a YAML that consists of a single custom object. The custom object defines
@@ -128,23 +133,6 @@ public class ParseTest {
             assertThat(parseResult.getStellarObjects(), not(empty()));
             assertThat(parseResult.getStellarObjects().get(0).getAbsoluteMag(), is(4.8));
             assertThat(parseResult.getStellarObjects().get(0).getName(), is("Sun"));
-
-        }
-    }
-
-    @Test
-    public void parseWithConverter() throws IOException {
-        try (InputStream is = ClassLoader.getSystemResourceAsStream("person1.yaml")) {
-            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
-            log.debug("Loaded YAML file:\n{}", yamlString);
-
-            Yaml yaml = new Yaml(new AnnotationAwareConstructor(List.class));
-
-            @SuppressWarnings("unchecked")
-            List<Person> parseResult = yaml.loadAs(yamlString, List.class);
-            log.debug("Parsed YAML file:\n{}", parseResult);
-
-            assertThat(parseResult, notNullValue());
 
         }
     }
