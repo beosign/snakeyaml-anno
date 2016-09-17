@@ -6,6 +6,7 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.annotation.Property;
 import de.beosign.snakeyamlanno.convert.Converter;
 
+//CHECKSTYLE:OFF
 public class Person {
     private String name;
     private int height; // cm

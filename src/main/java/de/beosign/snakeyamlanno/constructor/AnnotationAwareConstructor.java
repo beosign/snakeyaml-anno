@@ -19,15 +19,30 @@ import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 
+/**
+ * When parsing, this constructor must be used in order to honor annotations on the target bean class.
+ * 
+ * @author florian
+ */
 public class AnnotationAwareConstructor extends Constructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
 
+    /**
+     * Creates constructor.
+     * 
+     * @param theRoot root class - you can cast the result of the parsing process to this class
+     */
     public AnnotationAwareConstructor(Class<? extends Object> theRoot) {
         super(theRoot);
         setPropertyUtils(new AnnotationAwarePropertyUtils());
         yamlClassConstructors.put(NodeId.mapping, new AnnotationAwareMappingConstructor());
     }
 
+    /**
+     * This constructor checks for converter information on annotated properties and calls the converter's methods.
+     * 
+     * @author florian
+     */
     protected class AnnotationAwareMappingConstructor extends ConstructMapping {
         @Override
         protected Object constructJavaBean2ndStep(MappingNode node, Object object) {

@@ -2,6 +2,7 @@ package de.beosign.snakeyamlanno;
 
 import de.beosign.snakeyamlanno.annotation.Property;
 
+// CHECKSTYLE:OFF
 public class StellarObject {
 
     @Property(key = "nameAlias")

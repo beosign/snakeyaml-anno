@@ -2,6 +2,11 @@ package de.beosign.snakeyamlanno.convert;
 
 import org.yaml.snakeyaml.nodes.Node;
 
+/**
+ * Class that is used as the default value in the Property annotation.
+ * 
+ * @author florian
+ */
 public class NoConverter implements Converter<Object> {
 
     @Override

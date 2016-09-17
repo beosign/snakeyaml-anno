@@ -19,6 +19,13 @@ import de.beosign.snakeyamlanno.exception.AliasedYAMLException;
 import de.beosign.snakeyamlanno.property.AnnotatedFieldProperty;
 import de.beosign.snakeyamlanno.property.AnnotatedMethodProperty;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
+
+/**
+ * Property Utils that instantiates property subclasses of {@link AnnotatedProperty}. These properties have an annotation where
+ * mapping and converting information can be set.
+ * 
+ * @author florian
+ */
 public class AnnotationAwarePropertyUtils extends PropertyUtils {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwarePropertyUtils.class);
 
