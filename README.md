@@ -49,4 +49,60 @@ It is also possible to annotate the getter instead:
 ```
 
 ### Converting
+You can apply a converter to a field or getter. This feature is especially useful for converting enum values as Snakeyaml as of version 1.17 supports only basic converting, e.g. the string in the yaml file must match the enum constant definition in Java (uppercase).
+The following example shows how to convert ```m``` to the enum constant ```MALE```:
 
+```javascript
+- name: Homer
+  gender: m
+- name: Marge
+  gender: f
+```
+
+```java
+public enum Gender {
+    MALE("m"),
+    FEMALE("f");
+
+    private String abbr;
+
+    private Gender(String abbr) {
+        this.abbr = abbr;
+    }
+
+    public String getAbbr() {
+        return abbr;
+    }
+}
+```
+
+```java 
+ public class Person {     
+    private String name;
+   
+    @Property(converter=GenderConverter.class)
+    private Gender gender;
+}
+```
+
+```java 
+public class GenderConverter implements Converter<Gender> {
+
+    @Override
+    public String convertToYaml(Gender modelValue) {
+        return modelValue.getAbbr();
+    }
+
+    @Override
+    public Gender convertToModel(Node yamlNode) {
+        if (yamlNode instanceof ScalarNode) {
+            for (Gender g : Gender.values()) {
+                if (g.getAbbr().equals(((ScalarNode) yamlNode).getValue())) {
+                    return g;
+                }
+            }
+        }
+        return null;
+    }
+}
+```
