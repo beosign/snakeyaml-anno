@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/beosign/snakeyaml-anno.svg?branch=development)](https://travis-ci.org/beosign/snakeyaml-anno)
+
 # snakeyaml-anno
 Parse YAML files using Snakeyaml and annotations in POJOS.
 
