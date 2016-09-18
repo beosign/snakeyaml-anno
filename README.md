@@ -3,7 +3,7 @@
 [![Code Coverage](https://img.shields.io/codecov/c/github/pvorb/property-providers/develop.svg)](https://codecov.io/gh/beosign/snakeyaml-anno?branch=develop)
 
 # snakeyaml-anno
-Parse YAML files using Snakeyaml and annotations in POJOS.
+Parse YAML files by using annotation in POJOS - based on SnakeYaml.
 
 ## Features
 
