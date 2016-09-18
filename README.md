@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/beosign/snakeyaml-anno.svg?branch=development)](https://travis-ci.org/beosign/snakeyaml-anno)
 
+[![Code Coverage](https://img.shields.io/codecov/c/github/pvorb/property-providers/develop.svg)](https://codecov.io/gh/beosign/snakeyaml-anno?branch=develop)
+
 # snakeyaml-anno
 Parse YAML files using Snakeyaml and annotations in POJOS.
 
