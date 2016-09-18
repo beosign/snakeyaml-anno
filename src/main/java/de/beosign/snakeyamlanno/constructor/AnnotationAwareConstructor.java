@@ -2,6 +2,7 @@ package de.beosign.snakeyamlanno.constructor;
 
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -18,8 +19,11 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
+import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
+import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
+import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
 /**
  * When parsing, this constructor must be used in order to honor annotations on the target bean class.
@@ -46,6 +50,92 @@ public class AnnotationAwareConstructor extends Constructor {
      * @author florian
      */
     protected class AnnotationAwareMappingConstructor extends ConstructMapping {
+        @Override
+        protected Object createEmptyJavaBean(MappingNode node) {
+            Class<?> type = node.getType();
+            Type typeAnnotation = type.getAnnotation(Type.class);
+
+            if (typeAnnotation != null && typeAnnotation.substitutionTypes().length > 0) {
+                // One or more substitution types have been defined
+                List<Class<?>> validSubstitutionTypes = new ArrayList<>();
+                SubstitutionTypeSelector substitutionTypeSelector = null;
+
+                if (typeAnnotation.substitutionTypeSelector() != NoSubstitutionTypeSelector.class) {
+                    try {
+                        // check if default detection algorithm is to be applied
+                        substitutionTypeSelector = typeAnnotation.substitutionTypeSelector().newInstance();
+                        if (!substitutionTypeSelector.disableDefaultAlgorithm()) {
+                            validSubstitutionTypes = getValidSubstitutionTypes(type, node.getValue());
+                        }
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new YAMLException("Cannot instantiate substitutionTypeSelector of type " + typeAnnotation.substitutionTypeSelector().getName(),
+                                e);
+                    }
+                } else {
+                    validSubstitutionTypes = getValidSubstitutionTypes(type, node.getValue());
+                }
+
+                if (substitutionTypeSelector != null) {
+                    node.setType(substitutionTypeSelector.getSelectedType(node, validSubstitutionTypes));
+                    log.debug("Type = {}, using substitution type {} calculated by SubstitutionTypeSelector {}", type, node.getType(),
+                            typeAnnotation.substitutionTypeSelector().getName());
+                } else {
+                    if (validSubstitutionTypes.size() == 0) {
+                        log.warn("Type = {}, NO possible substitution types found, using default YAML algorithm", type);
+                    } else {
+                        if (validSubstitutionTypes.size() > 1) {
+                            log.info("Type = {}, using substitution types = {}, choosing first", type, validSubstitutionTypes);
+                        } else {
+                            log.trace("Type = {}, using substitution type = {}", type, validSubstitutionTypes.get(0));
+                        }
+                        node.setType(validSubstitutionTypes.get(0));
+                    }
+                }
+
+            }
+            return super.createEmptyJavaBean(node);
+        }
+
+        /**
+         * Returns all valid substitution types from the list given by the {@link Type#substitutionTypes()} method.
+         * 
+         * @param type type
+         * @param nodeValue node values
+         */
+        private List<Class<?>> getValidSubstitutionTypes(Class<?> type, List<NodeTuple> nodeValue) {
+            Type typeAnnotation = type.getAnnotation(Type.class);
+            List<Class<?>> validSubstitutionTypes = new ArrayList<>();
+            List<? extends Class<?>> substitutionTypeList = Arrays.asList(typeAnnotation.substitutionTypes());
+            /*
+             *  For each possible substitution type, check if all YAML properties match a Bean property.
+             *  If this is the case, this subtype is a valid substitution
+             */
+            for (Class<?> substitutionType : substitutionTypeList) {
+                for (NodeTuple tuple : nodeValue) {
+                    String key = null;
+                    try {
+                        ScalarNode keyNode;
+                        if (tuple.getKeyNode() instanceof ScalarNode) {
+                            keyNode = (ScalarNode) tuple.getKeyNode();
+                        } else {
+                            throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
+                        }
+                        key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
+                        getProperty(substitutionType, key);
+                        validSubstitutionTypes.add(substitutionType);
+                    } catch (YAMLException | IntrospectionException e) {
+                        log.debug("Evaluating subsitution of type {}: Could not construct property {}.{}: {}", type, substitutionType.getName(), key,
+                                e.getMessage());
+                        break;
+                    }
+                }
+
+            }
+
+            log.trace("Type = {}, found valid substitution types: {}", type, validSubstitutionTypes);
+            return validSubstitutionTypes;
+        }
+
         @Override
         protected Object constructJavaBean2ndStep(MappingNode node, Object object) {
             List<NodeTuple> unconstructableNodeTuples = new ArrayList<>();

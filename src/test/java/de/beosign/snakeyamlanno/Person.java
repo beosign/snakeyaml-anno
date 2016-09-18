@@ -4,6 +4,7 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.annotation.Property;
+import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.convert.Converter;
 
 //CHECKSTYLE:OFF
@@ -100,6 +101,7 @@ public class Person {
         return "Person [name=" + name + ", height=" + height + ", gender=" + gender + ", animal=" + animal + "]";
     }
 
+    @Type(substitutionTypes = { Dog.class, Cat.class })
     public static abstract class Animal {
         private String name;
 
@@ -119,6 +121,7 @@ public class Person {
 
     public static class Dog extends Animal {
         private int loudness;
+        private String aliasedProperty;
 
         public int getLoudness() {
             return loudness;
@@ -130,7 +133,16 @@ public class Person {
 
         @Override
         public String toString() {
-            return "Dog [loudness=" + loudness + ", getName()=" + getName() + "]";
+            return "Dog [loudness=" + loudness + ", aliasedProperty=" + aliasedProperty + ", getName()=" + getName() + "]";
+        }
+
+        @Property(key = "alias")
+        public String getAliasedProperty() {
+            return aliasedProperty;
+        }
+
+        public void setAliasedProperty(String aliasedProperty) {
+            this.aliasedProperty = aliasedProperty;
         }
 
     }

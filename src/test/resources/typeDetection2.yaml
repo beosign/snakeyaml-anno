@@ -1,0 +1,6 @@
+!!de.beosign.snakeyamlanno.Person
+name: Homer
+gender: m
+animal:
+  loudness: 5
+  alias: aliased
