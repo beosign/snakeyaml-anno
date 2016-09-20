@@ -9,10 +9,9 @@ import java.lang.annotation.Target;
 
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
-import de.beosign.snakeyamlanno.type.TypeConstructor;
 
 /**
- * Can be defined on an (abstract) class or interface to define how a type is constructed and which possible (sub)types yaml should try to use when parsing a
+ * Can be defined on an (abstract) class or interface to define which possible (sub)types yaml should try to use when parsing a
  * property of the given type. This eliminates the need to specify a tag for that property in the YAML file.
  * 
  * @author florian
@@ -36,6 +35,4 @@ public @interface Type {
      * </p>
      */
     Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() default NoSubstitutionTypeSelector.class;
-
-    Class<? extends TypeConstructor> typeConstructor() default TypeConstructor.class;
 }

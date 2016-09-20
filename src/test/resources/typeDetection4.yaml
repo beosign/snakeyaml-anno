@@ -1,0 +1,8 @@
+!!de.beosign.snakeyamlanno.Company
+workingPersons:
+- name: Homer
+  gender: m
+  salary: 1000
+- name: Monty
+  gender: m
+  nrEmployees: 100

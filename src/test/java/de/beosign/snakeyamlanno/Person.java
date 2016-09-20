@@ -8,6 +8,7 @@ import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.convert.Converter;
 
 //CHECKSTYLE:OFF
+
 public class Person {
     private String name;
     private int height; // cm

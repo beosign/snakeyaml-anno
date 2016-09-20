@@ -84,7 +84,7 @@ public class AnnotationAwareConstructor extends Constructor {
                         log.warn("Type = {}, NO possible substitution types found, using default YAML algorithm", type);
                     } else {
                         if (validSubstitutionTypes.size() > 1) {
-                            log.info("Type = {}, using substitution types = {}, choosing first", type, validSubstitutionTypes);
+                            log.debug("Type = {}, using substitution types = {}, choosing first", type, validSubstitutionTypes);
                         } else {
                             log.trace("Type = {}, using substitution type = {}", type, validSubstitutionTypes.get(0));
                         }
@@ -111,6 +111,7 @@ public class AnnotationAwareConstructor extends Constructor {
              *  If this is the case, this subtype is a valid substitution
              */
             for (Class<?> substitutionType : substitutionTypeList) {
+                boolean isValidType = true;
                 for (NodeTuple tuple : nodeValue) {
                     String key = null;
                     try {
@@ -122,12 +123,15 @@ public class AnnotationAwareConstructor extends Constructor {
                         }
                         key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
                         getProperty(substitutionType, key);
-                        validSubstitutionTypes.add(substitutionType);
                     } catch (YAMLException | IntrospectionException e) {
                         log.debug("Evaluating subsitution of type {}: Could not construct property {}.{}: {}", type, substitutionType.getName(), key,
                                 e.getMessage());
+                        isValidType = false;
                         break;
                     }
+                }
+                if (isValidType) {
+                    validSubstitutionTypes.add(substitutionType);
                 }
 
             }
@@ -168,7 +172,7 @@ public class AnnotationAwareConstructor extends Constructor {
                                     Construct constructor = getConstructor(valueNode);
                                     constructor.construct(valueNode);
                                 } catch (Exception e) {
-                                    log.info("Could not construct property {}.{}: {}", beanType, key, e.getMessage());
+                                    log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
                                     unconstructableNodeTuples.add(tuple);
                                 }
                             }
