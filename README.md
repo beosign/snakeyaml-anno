@@ -5,15 +5,27 @@
 # snakeyaml-anno
 Parse YAML files by using annotation in POJOS - based on SnakeYaml.
 
-## Features Overview
+## Usage
+You must use the ```AnnotationAwareConstructor``` when parsing:
+
+```java
+Yaml yaml = new Yaml(new AnnotationAwareConstructor(MyRoot.class));
+```
+
+## Features
+
+### Quick Overview
+
 * Property name mapping
 * Converting
 * Ignore parsing errors in a subtree
 * Auto type detection
 
-## Features
+### Feature Details
 
-### Property name mapping
+This section covers the details of the feature including examples how to use them. 
+
+#### Property name mapping
 If the properties of your POJO and in your yaml do not match regarding the names, you can supply a mapping by using the ```Property``` annotation.
 
 Suppose you have the following yaml:
@@ -56,7 +68,7 @@ It is also possible to annotate the getter instead:
 }
 ```
 
-### Converting
+#### Converting
 You can apply a converter to a field or getter. This feature is especially useful for converting enum values as Snakeyaml as of version 1.17 supports only basic converting, e.g. the string in the yaml file must match the enum constant definition in Java (uppercase).
 The following example shows how to convert ```m``` to the enum constant ```MALE```:
 
@@ -115,7 +127,7 @@ public class GenderConverter implements Converter<Gender> {
 }
 ```
 
-### Ignore parsing errors
+#### Ignore parsing errors
 In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain ```null```. To allow the parsing process to skip unparsable parts instead of aborting, you can use ```ignoreExceptions = true``` on a property or a getter:
 
 ```java 
@@ -131,7 +143,7 @@ In a complex hierarchy it may be desirable to ignore parse errors in a given sub
 
 So in case the gender property cannot be parsed, you still get a parsed Person object, just with the gender property being ```null```.
 
-### Auto type detection
+#### Auto type detection
 YAML uses the concept of _Tags_ to provide type information. However, to keep the YAML file as simple and concise as possible, it may be desirable to omit a tag declaration if the concrete type to use can already be deducted from the properties. Suppose you have the following interface:
 
 ```java 
