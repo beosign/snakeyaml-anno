@@ -5,6 +5,12 @@
 # snakeyaml-anno
 Parse YAML files by using annotation in POJOS - based on SnakeYaml.
 
+## Features Overview
+* Property name mapping
+* Converting
+* Ignore parsing errors in a subtree
+* Auto type detection
+
 ## Features
 
 ### Property name mapping
@@ -108,3 +114,70 @@ public class GenderConverter implements Converter<Gender> {
     }
 }
 ```
+
+### Ignore parsing errors
+In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain ```null```. To allow the parsing process to skip unparsable parts instead of aborting, you can use ```ignoreExceptions = true``` on a property or a getter:
+
+```java 
+ public class Person {     
+    private String firstName;
+    private String lastName;
+    
+    @Property(ignoreExceptions = true)
+    private Gender gender;
+  
+}
+```
+
+So in case the gender property cannot be parsed, you still get a parsed Person object, just with the gender property being ```null```.
+
+### Auto type detection
+YAML uses the concept of _Tags_ to provide type information. However, to keep the YAML file as simple and concise as possible, it may be desirable to omit a tag declaration if the concrete type to use can already be deducted from the properties. Suppose you have the following interface:
+
+```java 
+public interface Animal {     
+    String getName();  
+}
+```
+
+And two implementations:
+
+```java 
+public class Dog implements Animal {     
+   private int nrOfBarksPerDay;  
+   ...
+}
+```
+
+```java 
+public class Cat implements Animal {     
+   private int miceCaughtCounter;  
+   ...
+}
+```
+
+And the container:
+```java 
+public class Person {     
+   private List<Animal> pets;  
+   ...
+}
+```
+
+For the following YAML, the first object in the list must be of type ```Dog``` and the second of type ```Cat```.
+
+```javascript
+pets:
+- name: Santas Little Helper
+  nrOfBarksPerDay: 20
+- name: Snowball
+  miceCaughtCounter: 20
+```
+
+To tell YAML to autodetect the types, you have to annotate the ```Animal``` interface with ```@Type(substitutionTypes = { Dog.class, Cat.class })```.
+
+So you must provide possible subtypes because classpath scanning of classes implementing a given interface is not yet implemented.
+If no valid substitution class if found, the default SnakeYaml algorithm for choosing the type will be used. If multiple substitution types are possible, the first possible type (determined by the order of the classes in ```substitutionTypes```) is chosen.
+
+You can also provide your own ```SubstitutionTypeSelector``` implementation and set it with ```@Type(substitutionTypes = { Dog.class, Cat.class }, substitutionTypeSelector = MyTypeSelector.class)```.  ```MyTypeSelector``` must implement ```SubstitutionTypeSelector``` and must have a no-arg constructor.
+ 
