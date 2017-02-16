@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
-import org.yaml.snakeyaml.introspector.MissingProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -22,6 +21,7 @@ import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
+import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
@@ -202,7 +202,7 @@ public class AnnotationAwareConstructor extends Constructor {
                 AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
                 if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
                     // value has already set above in constructJavaBean2ndStep
-                    return new MissingProperty(name);
+                    return new ConvertedProperty(name);
                 }
             }
             return super.getProperty(type, name);
