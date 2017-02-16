@@ -1,8 +1,8 @@
-- !!de.beosign.snakeyamlanno.StellarObject
+- !!de.beosign.snakeyamlanno.property.StellarObject
   nameAlias: Sun
   radius: 695700
   type: Star
   absMag: 4.8
-- !!de.beosign.snakeyamlanno.StellarObject
+- !!de.beosign.snakeyamlanno.property.StellarObject
   nameAlias: Earth
   absoluteMag: 0.1

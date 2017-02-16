@@ -1,7 +1,7 @@
 # Example YAML file
 age: 12.7
 stellarObjects:
-- !!de.beosign.snakeyamlanno.StellarObject
+- !!de.beosign.snakeyamlanno.property.StellarObject
   nameAlias: Sun
   absMag: 4.8
   radius: 695700

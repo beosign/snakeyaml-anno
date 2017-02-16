@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno;
+package de.beosign.snakeyamlanno.convert;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.core.Is.*;
@@ -14,8 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import de.beosign.snakeyamlanno.Person.Gender;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
+import de.beosign.snakeyamlanno.property.Person;
+import de.beosign.snakeyamlanno.property.Person.Gender;
 
 /**
  * Tests the converter functionality.

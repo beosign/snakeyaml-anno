@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno;
+package de.beosign.snakeyamlanno.property;
 
 import de.beosign.snakeyamlanno.annotation.Property;
 

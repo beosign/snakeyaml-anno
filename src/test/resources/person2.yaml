@@ -1,7 +1,7 @@
-- !!de.beosign.snakeyamlanno.Person
+- !!de.beosign.snakeyamlanno.property.Person
   name: Homer
   height: 1.85 m
-- !!de.beosign.snakeyamlanno.Person
+- !!de.beosign.snakeyamlanno.property.Person
   name: Marge
-  animal: !!de.beosign.snakeyamlanno.Person$Dog
+  animal: !!de.beosign.snakeyamlanno.property.Person$Dog
     loudness: 5

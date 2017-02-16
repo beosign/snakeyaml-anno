@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno;
+package de.beosign.snakeyamlanno.property;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.collection.IsEmptyCollection.*;

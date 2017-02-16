@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno;
+package de.beosign.snakeyamlanno.property;
 
 import java.util.List;
 

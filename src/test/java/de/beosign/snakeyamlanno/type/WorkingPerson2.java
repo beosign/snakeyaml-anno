@@ -1,10 +1,11 @@
-package de.beosign.snakeyamlanno;
+package de.beosign.snakeyamlanno.type;
 
 import java.util.List;
 
 import org.yaml.snakeyaml.nodes.MappingNode;
 
 import de.beosign.snakeyamlanno.annotation.Type;
+import de.beosign.snakeyamlanno.property.Person;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
 //CHECKSTYLE:OFF

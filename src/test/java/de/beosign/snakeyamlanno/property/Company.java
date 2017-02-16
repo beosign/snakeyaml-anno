@@ -1,6 +1,8 @@
-package de.beosign.snakeyamlanno;
+package de.beosign.snakeyamlanno.property;
 
 import java.util.List;
+
+import de.beosign.snakeyamlanno.type.WorkingPerson;
 
 public class Company {
     private List<WorkingPerson> workingPersons;

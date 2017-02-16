@@ -1,8 +1,8 @@
-- !!de.beosign.snakeyamlanno.Person
+- !!de.beosign.snakeyamlanno.property.Person
   name: Homer
   gender: m
-- !!de.beosign.snakeyamlanno.Person
+- !!de.beosign.snakeyamlanno.property.Person
   name: Marge
   gender: f
-  animal: !!de.beosign.snakeyamlanno.Person$Dog
+  animal: !!de.beosign.snakeyamlanno.property.Person$Dog
     loudness: 5
