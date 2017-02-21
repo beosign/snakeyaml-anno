@@ -13,6 +13,12 @@ You must use the ```AnnotationAwareConstructor``` when parsing:
 Yaml yaml = new Yaml(new AnnotationAwareConstructor(MyRoot.class));
 ```
 
+You must use the ```AnnotationAwareRepresenter``` when dumping:
+
+```java
+Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+```
+
 ## Features
 
 ### Quick Overview
@@ -21,6 +27,7 @@ Yaml yaml = new Yaml(new AnnotationAwareConstructor(MyRoot.class));
 * Converting
 * Ignore parsing errors in a subtree
 * Auto type detection
+* Skipping properties
 
 ### Feature Details
 
@@ -193,4 +200,25 @@ So you must provide possible subtypes because classpath scanning of classes impl
 If no valid substitution class if found, the default SnakeYaml algorithm for choosing the type will be used. If multiple substitution types are possible, the first possible type (determined by the order of the classes in ```substitutionTypes```) is chosen.
 
 You can also provide your own ```SubstitutionTypeSelector``` implementation and set it with ```@Type(substitutionTypes = { Dog.class, Cat.class }, substitutionTypeSelector = MyTypeSelector.class)```.  ```MyTypeSelector``` must implement ```SubstitutionTypeSelector``` and must have a no-arg constructor.
+
+#### Skipping properties
+It is possible to skip properties during load or dump. In order to skip a property during load, thus preventing snakeyaml to override a model value with the value read from the yaml file that is being loaded, annotate the property with ```skipAtLoad```:
+
+```java 
+public class Person {
+
+   @Property(skipAtLoad = true)     
+   private String name;
+}
+```
+
+In order to prevent dumping of a property, use ```skipAtDump```:
+ 
+```java 
+public class Person {
+
+   @Property(skipAtDump = true)     
+   private String name;
+}
+``` 
  
