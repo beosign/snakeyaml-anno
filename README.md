@@ -28,6 +28,7 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 * Ignore parsing errors in a subtree
 * Auto type detection
 * Skipping properties
+* Ordering properties
 
 ### Feature Details
 
@@ -221,4 +222,30 @@ public class Person {
    private String name;
 }
 ``` 
+
+#### Ordering properties
+It is possible to order properties during the dump process by providing a value for the ```order``` property:
+
+```java 
+public class Person {
+
+   @Property(order = 5)     
+   private String first;
+
+     
+   private String between;
+
+   @Property(order = -5)     
+   private String last;
+}
+```
+
+This will dump the properties in the order:
+
+1. first
+2. between
+3. last
+
+The default value for ```order``` is 0. A higher value means that the property is dumped before a property with a lower value. So in order to dump a property at the beginning, you can provide a positive value. To make sure that a property is dumped at the end, you can provide a negative value. The order of properties with the same ```order``` value is unspecified.
+
  

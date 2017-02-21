@@ -1,7 +1,10 @@
 package de.beosign.snakeyamlanno.representer;
 
 import java.beans.IntrospectionException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +48,13 @@ public class AnnotationAwareRepresenter extends Representer {
             }
         }
 
-        return propertySet;
+        List<Property> orderedList = new ArrayList<>(propertySet);
+        orderedList.sort(AnnotatedProperty.ORDER_COMPARATOR);
+
+        Set<Property> orderedProperties = new LinkedHashSet<>(orderedList);
+        orderedProperties.addAll(propertySet);
+
+        return orderedProperties;
     }
 
     @Override

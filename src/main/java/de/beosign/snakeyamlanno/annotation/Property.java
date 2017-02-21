@@ -48,4 +48,12 @@ public @interface Property {
      */
     boolean skipAtDump() default false;
 
+    /**
+     * Specifies the order of this property during dumping. A higher value means the property appears further up. The default value is 0. So for properties to
+     * appear at the beginning, use a positive value and for properties to appear at the end use a negative value.
+     * 
+     * @return order; defaults to 0
+     */
+    int order() default 0;
+
 }
