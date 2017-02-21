@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,26 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         this.beanAccess = beanAccess;
     }
 
+    /**
+     * Used during dumping. Searches the type for annotations and then replaces each property by its {@link AnnotatedProperty} version.
+     */
+    @Override
+    public Set<Property> getProperties(Class<? extends Object> type, BeanAccess bAccess) throws IntrospectionException {
+        if (!classInitialized.getOrDefault(type, false)) {
+            initialize(type);
+            classInitialized.put(type, true);
+        }
+
+        Set<Property> originSet = super.getProperties(type, bAccess);
+        originSet.removeIf(origin -> typeToAnotatedPropertiesMap.get(type).containsValue(origin));
+        originSet.addAll(typeToAnotatedPropertiesMap.get(type).values());
+        return originSet;
+    }
+
+    /**
+     * Used during loading. Searches the type for annotations and then returns the {@link AnnotatedProperty} instead of the normal one (if property is
+     * annotated).
+     */
     @Override
     public Property getProperty(Class<? extends Object> type, String name) throws IntrospectionException {
         if (!classInitialized.getOrDefault(type, false)) {

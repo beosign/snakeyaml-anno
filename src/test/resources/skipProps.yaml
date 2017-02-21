@@ -1,0 +1,4 @@
+!!de.beosign.snakeyamlanno.property.SkipPropsTest.SkipProps
+skipDump: mustNotBeOutput
+skipLoad: mustNotBeSet
+name: name1

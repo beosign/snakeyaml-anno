@@ -42,4 +42,10 @@ public @interface Property {
      * If true, this property will not be overridden by the value given in the imported yaml file.
      */
     boolean skipAtLoad() default false;
+
+    /**
+     * If true, this property will not be output when dumping.
+     */
+    boolean skipAtDump() default false;
+
 }
