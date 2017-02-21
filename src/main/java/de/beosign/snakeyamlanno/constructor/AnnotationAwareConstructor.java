@@ -22,6 +22,7 @@ import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 import de.beosign.snakeyamlanno.property.ConvertedProperty;
+import de.beosign.snakeyamlanno.property.SkippedProperty;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
@@ -200,6 +201,10 @@ public class AnnotationAwareConstructor extends Constructor {
             Property property = super.getProperty(type, name);
             if (property instanceof AnnotatedProperty) {
                 AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
+                if (annotatedProperty.getPropertyAnnotation().skipAtLoad()) {
+                    // value must not be set
+                    return new SkippedProperty(name);
+                }
                 if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
                     // value has already set above in constructJavaBean2ndStep
                     return new ConvertedProperty(name);
