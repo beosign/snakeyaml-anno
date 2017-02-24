@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
@@ -16,6 +17,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
+import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
 
 /**
  * Representer that is aware of annotations.
@@ -59,6 +61,22 @@ public class AnnotationAwareRepresenter extends Representer {
 
     @Override
     protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
+        if (property instanceof AnnotatedProperty) {
+            AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
+            if (!annotatedProperty.getPropertyAnnotation().skipAtDump()
+                    && annotatedProperty.getPropertyAnnotation().skipAtDumpIf() != SkipAtDumpPredicate.class) {
+                try {
+                    SkipAtDumpPredicate skipAtDumpPredicate = annotatedProperty.getPropertyAnnotation().skipAtDumpIf().newInstance();
+                    if (skipAtDumpPredicate.skip(javaBean, property, propertyValue, customTag)) {
+                        return null;
+                    }
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new YAMLException("Cannot create an instance of " + annotatedProperty.getPropertyAnnotation().skipAtDumpIf().getName(), e);
+                }
+
+            }
+        }
+
         NodeTuple nodeTuple = super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
 
         if (property instanceof AnnotatedProperty) {

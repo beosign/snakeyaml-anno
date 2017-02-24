@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 
 import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.convert.NoConverter;
+import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
 
 /**
  * Defines an alias and/or a converter for a property. The key (if present) must match the key used in the YAML file. The annotation must be placed on the field
@@ -44,9 +45,19 @@ public @interface Property {
     boolean skipAtLoad() default false;
 
     /**
-     * If true, this property will not be output when dumping.
+     * If true, this property will not be output when dumping. This <b>overrides</b> any value set by {@link #skipAtDumpIf()}.
      */
     boolean skipAtDump() default false;
+
+    /**
+     * <p>
+     * If the given predicate evaluates to <code>true</code>, this property will not be output when dumping.
+     * </p>
+     * <p>
+     * If {@link #skipAtDump()} is set to <code>true</code>, this property is <b>ignored</b>.
+     * </p>
+     */
+    Class<? extends SkipAtDumpPredicate> skipAtDumpIf() default SkipAtDumpPredicate.class;
 
     /**
      * Specifies the order of this property during dumping. A higher value means the property appears further up. The default value is 0. So for properties to
