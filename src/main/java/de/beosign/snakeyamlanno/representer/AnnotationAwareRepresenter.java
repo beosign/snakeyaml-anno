@@ -2,7 +2,6 @@ package de.beosign.snakeyamlanno.representer;
 
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,22 +36,9 @@ public class AnnotationAwareRepresenter extends Representer {
     protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
         Set<Property> propertySet = super.getProperties(type);
 
-        // Remove properties that must be skipped during dumping
-        Iterator<Property> iterator = propertySet.iterator();
-        while (iterator.hasNext()) {
-            Property prop = iterator.next();
-
-            if (prop instanceof AnnotatedProperty) {
-                AnnotatedProperty annotatedProperty = (AnnotatedProperty) prop;
-                if (annotatedProperty.getPropertyAnnotation().skipAtDump()) {
-                    iterator.remove();
-                }
-            }
-        }
-
+        // order properties
         List<Property> orderedList = new ArrayList<>(propertySet);
         orderedList.sort(AnnotatedProperty.ORDER_COMPARATOR);
-
         Set<Property> orderedProperties = new LinkedHashSet<>(orderedList);
         orderedProperties.addAll(propertySet);
 
@@ -63,8 +49,11 @@ public class AnnotationAwareRepresenter extends Representer {
     protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
         if (property instanceof AnnotatedProperty) {
             AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
-            if (!annotatedProperty.getPropertyAnnotation().skipAtDump()
-                    && annotatedProperty.getPropertyAnnotation().skipAtDumpIf() != SkipAtDumpPredicate.class) {
+            if (annotatedProperty.getPropertyAnnotation().skipAtDump()) {
+                return null;
+            }
+
+            if (annotatedProperty.getPropertyAnnotation().skipAtDumpIf() != SkipAtDumpPredicate.class) {
                 try {
                     SkipAtDumpPredicate skipAtDumpPredicate = annotatedProperty.getPropertyAnnotation().skipAtDumpIf().newInstance();
                     if (skipAtDumpPredicate.skip(javaBean, property, propertyValue, customTag)) {

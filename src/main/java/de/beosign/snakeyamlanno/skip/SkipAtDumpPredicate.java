@@ -12,7 +12,7 @@ public interface SkipAtDumpPredicate {
     /**
      * Must return <code>true</code> iff the property is not to be dumped.
      * 
-     * @param javaBean java bean
+     * @param javaBean the java object that is to be dumped
      * @param property property
      * @param propertyValue value
      * @param customTag custom tag

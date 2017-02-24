@@ -223,6 +223,21 @@ public class Person {
 }
 ``` 
 
+You can also skip dumping conditionally by implementing the ```SkipAtDumpPredicate``` interface. The only method to implement is ```skip```. One of the parameters passed into this method is the property value, so you can make decisions whether to skip a property based on its value.
+You can use your implementation by using the ```skipAtDumpIf``` member:
+ 
+```java 
+public class Person {
+
+   @Property(skipAtDumpIf = SkipIfNull.class)     
+   private String name;
+}
+``` 
+
+**Be aware** that if ```skipAtDump``` is also supplied and set to true, it will take precedence over the ```` skipAtDumpIf```!
+
+Predefined are two classes: ```SkipIfNull``` and ```SkipIfEmpty```. The first one skips a property if it is ```null```, the latter one skips a property if it is of type ```Map```, ```Collection``` or ```String``` and the property is empty (empty map/collection or String of length 0).
+
 #### Ordering properties
 It is possible to order properties during the dump process by providing a value for the ```order``` property:
 
