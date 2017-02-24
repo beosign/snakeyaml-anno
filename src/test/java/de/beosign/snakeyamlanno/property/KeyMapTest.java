@@ -78,6 +78,7 @@ public class KeyMapTest {
                 AliasedYAMLException cause = (AliasedYAMLException) e.getCause().getCause();
                 assertThat(cause.getAliasedProperty(), is("name"));
                 assertThat(cause.getAlias(), is("nameAlias"));
+                assertThat(cause.toString() != null, is(true));
             }
 
         }
