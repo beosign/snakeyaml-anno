@@ -4,7 +4,7 @@
 
 
 # snakeyaml-anno
-Parse YAML files by using annotation in POJOS - based on SnakeYaml.
+Parse YAML files by using annotation in POJOS - based on SnakeYaml 1.17 by Sergey Pariev, https://github.com/spariev/snakeyaml/
 
 ## Usage
 You must use the ```AnnotationAwareConstructor``` when parsing:
