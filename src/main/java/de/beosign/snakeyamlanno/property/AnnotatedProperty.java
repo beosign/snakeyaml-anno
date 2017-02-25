@@ -34,7 +34,7 @@ public interface AnnotatedProperty {
     };
 
     /**
-     * Returns the annotation on the field / method.
+     * @return the annotation on the field / method.
      */
     Property getPropertyAnnotation();
 

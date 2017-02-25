@@ -21,7 +21,7 @@ import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 @Documented
 public @interface Type {
     /**
-     * List of possible substitution classes.
+     * @return List of possible substitution classes.
      */
     Class<?>[] substitutionTypes() default {};
 
@@ -33,6 +33,8 @@ public @interface Type {
      * <p>
      * Has <b>no</b> effect if {@link #substitutionTypes()} is empty!
      * </p>
+     * 
+     * @return SubstitutionTypeSelector implementation class
      */
     Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() default NoSubstitutionTypeSelector.class;
 }
