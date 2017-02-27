@@ -6,7 +6,6 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 
 import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.property.Person;
-import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
 //CHECKSTYLE:OFF
 @Type(substitutionTypeSelector = WorkingPerson2.WorkingPerson2TypeSelector.class,

@@ -2,8 +2,9 @@ package de.beosign.snakeyamlanno.constructor;
 
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 public class AnnotationAwareConstructor extends Constructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
 
+    private Map<Class<?>, Type> typesMap = new HashMap<>();
+
     /**
      * Creates constructor.
      * 
@@ -54,7 +57,7 @@ public class AnnotationAwareConstructor extends Constructor {
         @Override
         protected Object createEmptyJavaBean(MappingNode node) {
             Class<?> type = node.getType();
-            Type typeAnnotation = type.getAnnotation(Type.class);
+            Type typeAnnotation = getTypeForClass(type);
 
             if (typeAnnotation != null && typeAnnotation.substitutionTypes().length > 0) {
                 // One or more substitution types have been defined
@@ -66,14 +69,14 @@ public class AnnotationAwareConstructor extends Constructor {
                         // check if default detection algorithm is to be applied
                         substitutionTypeSelector = typeAnnotation.substitutionTypeSelector().newInstance();
                         if (!substitutionTypeSelector.disableDefaultAlgorithm()) {
-                            validSubstitutionTypes = getValidSubstitutionTypes(type, node.getValue());
+                            validSubstitutionTypes = getValidSubstitutionTypes(type, typeAnnotation, node.getValue());
                         }
                     } catch (InstantiationException | IllegalAccessException e) {
                         throw new YAMLException("Cannot instantiate substitutionTypeSelector of type " + typeAnnotation.substitutionTypeSelector().getName(),
                                 e);
                     }
                 } else {
-                    validSubstitutionTypes = getValidSubstitutionTypes(type, node.getValue());
+                    validSubstitutionTypes = getValidSubstitutionTypes(type, typeAnnotation, node.getValue());
                 }
 
                 if (substitutionTypeSelector != null) {
@@ -98,20 +101,34 @@ public class AnnotationAwareConstructor extends Constructor {
         }
 
         /**
-         * Returns all valid substitution types from the list given by the {@link Type#substitutionTypes()} method.
+         * Returns the {@link Type} that is registered for the given class. If a type has been manually registered, this is returned. Otherwise, the
+         * {@link Type}
+         * annotation on the given class is returned.
          * 
-         * @param type type
+         * @param clazz class
+         * @return {@link Type} for given type
+         */
+        protected Type getTypeForClass(Class<?> clazz) {
+            Type typeAnnotation = clazz.getAnnotation(Type.class);
+
+            return typesMap.getOrDefault(clazz, typeAnnotation);
+        }
+
+        /**
+         * Returns all <b>valid</b> substitution types from the list given by the {@link Type#substitutionTypes()} method.
+         * 
+         * @param clazz type
+         * @param typeAnnotation the {@link Type} annotation to use for the given class
          * @param nodeValue node values
          */
-        private List<Class<?>> getValidSubstitutionTypes(Class<?> type, List<NodeTuple> nodeValue) {
-            Type typeAnnotation = type.getAnnotation(Type.class);
+        private List<Class<?>> getValidSubstitutionTypes(Class<?> clazz, Type typeAnnotation, List<NodeTuple> nodeValue) {
             List<Class<?>> validSubstitutionTypes = new ArrayList<>();
-            List<? extends Class<?>> substitutionTypeList = Arrays.asList(typeAnnotation.substitutionTypes());
+
             /*
              *  For each possible substitution type, check if all YAML properties match a Bean property.
              *  If this is the case, this subtype is a valid substitution
              */
-            for (Class<?> substitutionType : substitutionTypeList) {
+            for (Class<?> substitutionType : typeAnnotation.substitutionTypes()) {
                 boolean isValidType = true;
                 for (NodeTuple tuple : nodeValue) {
                     String key = null;
@@ -125,7 +142,7 @@ public class AnnotationAwareConstructor extends Constructor {
                         key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
                         getProperty(substitutionType, key);
                     } catch (YAMLException | IntrospectionException e) {
-                        log.debug("Evaluating subsitution of type {}: Could not construct property {}.{}: {}", type, substitutionType.getName(), key,
+                        log.debug("Evaluating subsitution of type {}: Could not construct property {}.{}: {}", clazz, substitutionType.getName(), key,
                                 e.getMessage());
                         isValidType = false;
                         break;
@@ -137,7 +154,7 @@ public class AnnotationAwareConstructor extends Constructor {
 
             }
 
-            log.trace("Type = {}, found valid substitution types: {}", type, validSubstitutionTypes);
+            log.trace("Type = {}, found valid substitution types: {}", clazz, validSubstitutionTypes);
             return validSubstitutionTypes;
         }
 
@@ -213,5 +230,16 @@ public class AnnotationAwareConstructor extends Constructor {
             return super.getProperty(type, name);
         }
 
+    }
+
+    /**
+     * Can be modified to manually define types for a given type. This is the programmatic counterpart to the {@link Type} annotation.
+     * It can only be used to add additional types. If you want to override / disable a {@link Type} annotation that is already set on a class, override
+     * the {@link AnnotationAwareMappingConstructor#getTypeForClass(Class)} method and return a restricted map.
+     * 
+     * @return map from a type to its substitution types
+     */
+    public Map<Class<?>, Type> getTypesMap() {
+        return typesMap;
     }
 }
