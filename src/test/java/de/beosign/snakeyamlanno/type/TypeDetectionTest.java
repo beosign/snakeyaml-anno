@@ -1,8 +1,8 @@
 package de.beosign.snakeyamlanno.type;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -10,10 +10,13 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.property.Company;
@@ -30,6 +33,9 @@ import de.beosign.snakeyamlanno.type.WorkingPerson.Employer;
  */
 public class TypeDetectionTest {
     private static final Logger log = LoggerFactory.getLogger(TypeDetectionTest.class);
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     /**
      * Tests that the type detection works if there is only a single possibility.
@@ -163,6 +169,51 @@ public class TypeDetectionTest {
             assertThat(monty.getName(), is("Monty"));
             assertThat(monty.getGender(), is(Gender.MALE));
             assertThat(monty.getNrEmployees(), is(100));
+
+        }
+    }
+
+    /**
+     * Tests that the type detection works if there are different types in a list, e.g. the list contains Employee, Employer,...
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void typeDetectionDisableDefault() throws Exception {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("typeDetection5.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(WorkingPerson3.class);
+            Yaml yaml = new Yaml(constructor);
+
+            Person parseResult = yaml.loadAs(yamlString, WorkingPerson3.class);
+            log.debug("Parsed YAML file:\n{}", parseResult);
+
+            assertThat(parseResult, notNullValue());
+            Assert.assertTrue(parseResult.getClass().equals(WorkingPerson3.Employee.class));
+            assertThat(parseResult.getName(), is("Homer"));
+            assertThat(parseResult.getGender(), is(Gender.MALE));
+
+        }
+    }
+
+    /**
+     * Tests that the type detection works if there are different types in a list, e.g. the list contains Employee, Employer,...
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void typeDetectionNoSubstitutionTypesFound() throws Exception {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("typeDetection6.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(WorkingPerson4.class);
+            Yaml yaml = new Yaml(constructor);
+
+            thrown.expect(ConstructorException.class);
+            yaml.loadAs(yamlString, WorkingPerson4.class);
 
         }
     }
