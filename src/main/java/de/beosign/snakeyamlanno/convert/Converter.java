@@ -16,7 +16,7 @@ public interface Converter<T> {
      * @return string
      * @throws ConverterException if conversion failed
      */
-    String convertToYaml(T modelValue) throws ConverterException;
+    String convertToYaml(T modelValue);
 
     /**
      * Converts to the Java bean property.
@@ -25,5 +25,5 @@ public interface Converter<T> {
      * @return converted value
      * @throws ConverterException if conversion failed
      */
-    T convertToModel(Node yamlNode) throws ConverterException;
+    T convertToModel(Node yamlNode);
 }
