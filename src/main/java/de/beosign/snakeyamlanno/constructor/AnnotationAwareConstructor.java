@@ -207,9 +207,8 @@ public class AnnotationAwareConstructor extends Constructor {
                     // value must not be set
                     return new SkippedProperty(name);
                 }
-                if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
+                if (annotatedProperty.isConverterPresent()) {
                     // value has already set above in constructJavaBean2ndStep
-                    // TODO fda: use method "isConverterPresent"
                     return new ConvertedProperty(name);
                 }
             }

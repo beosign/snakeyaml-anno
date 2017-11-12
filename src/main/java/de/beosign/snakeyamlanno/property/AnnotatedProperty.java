@@ -3,6 +3,7 @@ package de.beosign.snakeyamlanno.property;
 import java.util.Comparator;
 
 import de.beosign.snakeyamlanno.annotation.Property;
+import de.beosign.snakeyamlanno.convert.NoConverter;
 
 /**
  * Common interface for annotated properties.
@@ -38,4 +39,12 @@ public interface AnnotatedProperty {
      */
     Property getPropertyAnnotation();
 
+    /**
+     * Returns true if a converter is present.
+     * 
+     * @return true if a converter is present
+     */
+    default boolean isConverterPresent() {
+        return getPropertyAnnotation() != null && !getPropertyAnnotation().converter().equals(NoConverter.class);
+    }
 }
