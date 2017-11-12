@@ -14,14 +14,16 @@ public interface Converter<T> {
      * 
      * @param modelValue value form java bean property
      * @return string
+     * @throws ConverterException if conversion failed
      */
-    String convertToYaml(T modelValue);
+    String convertToYaml(T modelValue) throws ConverterException;
 
     /**
      * Converts to the Java bean property.
      * 
      * @param yamlNode the node that is to be converted.
      * @return converted value
+     * @throws ConverterException if conversion failed
      */
-    T convertToModel(Node yamlNode);
+    T convertToModel(Node yamlNode) throws ConverterException;
 }

@@ -163,7 +163,6 @@ public class AnnotationAwareConstructor extends Constructor {
                     if (property instanceof AnnotatedProperty) {
                         AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
                         if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
-                            // TODO fda: rethink exception handling for converter
                             property.set(object, annotatedProperty.getPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
                         } else {
                             /* 
