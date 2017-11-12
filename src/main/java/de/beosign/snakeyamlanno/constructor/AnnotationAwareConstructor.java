@@ -163,6 +163,7 @@ public class AnnotationAwareConstructor extends Constructor {
                     if (property instanceof AnnotatedProperty) {
                         AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
                         if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
+                            // TODO fda: rethink exception handling for converter
                             property.set(object, annotatedProperty.getPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
                         } else {
                             /* 
@@ -181,7 +182,8 @@ public class AnnotationAwareConstructor extends Constructor {
                         }
 
                     }
-
+                } catch (YAMLException e) {
+                    throw e;
                 } catch (Exception e) {
                     throw new YAMLException("Cannot create property=" + key
                             + " for JavaBean=" + object, e);
@@ -207,6 +209,7 @@ public class AnnotationAwareConstructor extends Constructor {
                 }
                 if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
                     // value has already set above in constructJavaBean2ndStep
+                    // TODO fda: use method "isConverterPresent"
                     return new ConvertedProperty(name);
                 }
             }
