@@ -218,4 +218,25 @@ public class TypeDetectionTest {
         }
     }
 
+    /**
+     * Tests that the type detection works if there are different types in a list, e.g. the list contains Employee, Employer,...
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void typeDetectionSubstitutionTypeNotInstantiable() throws Exception {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("typeDetection7.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(WorkingPerson5.class);
+            Yaml yaml = new Yaml(constructor);
+
+            thrown.expect(ConstructorException.class);
+            thrown.expectMessage("Cannot instantiate substitutionTypeSelector of type");
+            yaml.loadAs(yamlString, WorkingPerson5.class);
+
+        }
+    }
+
 }
