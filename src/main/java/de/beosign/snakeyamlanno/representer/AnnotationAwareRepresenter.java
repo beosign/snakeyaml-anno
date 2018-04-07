@@ -1,6 +1,7 @@
 package de.beosign.snakeyamlanno.representer;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +15,6 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
-import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
 
 /**
@@ -23,6 +23,28 @@ import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
  * @author florian
  */
 public class AnnotationAwareRepresenter extends Representer {
+    /**
+     * Returns a comparator that orders the properties according to their order value.
+     */
+    public static final Comparator<org.yaml.snakeyaml.introspector.Property> ORDER_COMPARATOR = new Comparator<org.yaml.snakeyaml.introspector.Property>() {
+
+        @Override
+        public int compare(org.yaml.snakeyaml.introspector.Property property1, org.yaml.snakeyaml.introspector.Property property2) {
+            int order1 = 0;
+            int order2 = 0;
+
+            de.beosign.snakeyamlanno.annotation.Property propertyAnnotation1 = property1.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+            de.beosign.snakeyamlanno.annotation.Property propertyAnnotation2 = property2.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+            if (propertyAnnotation1 != null) {
+                order1 = propertyAnnotation1.order();
+            }
+            if (propertyAnnotation2 != null) {
+                order2 = propertyAnnotation2.order();
+            }
+
+            return order2 - order1;
+        }
+    };
 
     /**
      * Sets the {@link AnnotationAwarePropertyUtils} into this representer.
@@ -37,7 +59,7 @@ public class AnnotationAwareRepresenter extends Representer {
 
         // order properties
         List<Property> orderedList = new ArrayList<>(propertySet);
-        orderedList.sort(AnnotatedProperty.ORDER_COMPARATOR);
+        orderedList.sort(ORDER_COMPARATOR);
         Set<Property> orderedProperties = new LinkedHashSet<>(orderedList);
         orderedProperties.addAll(propertySet);
 
