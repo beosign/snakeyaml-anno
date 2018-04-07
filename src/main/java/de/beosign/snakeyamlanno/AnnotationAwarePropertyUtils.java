@@ -21,6 +21,7 @@ import org.yaml.snakeyaml.introspector.PropertyUtils;
 
 import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.property.ConvertedProperty;
+import de.beosign.snakeyamlanno.property.AliasedProperty;
 
 /**
  * Property Utils that considers defined aliases when loooking for a property by its name.
@@ -117,15 +118,17 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         String replacementName = defaultProperty.getName();
 
         de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = defaultProperty.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-        if (propertyAnnotation != null && !propertyAnnotation.key().equals("")) {
-            replacementName = propertyAnnotation.key();
-        }
-
         if (propertyAnnotation != null) {
             if (propertyAnnotation.converter() != NoConverter.class) {
-                return new ReplacementResult(new ConvertedProperty(replacementProperty, propertyAnnotation.converter()));
+                replacementProperty = new ConvertedProperty(replacementProperty, propertyAnnotation.converter());
             }
         }
+
+        if (propertyAnnotation != null && !propertyAnnotation.key().equals("")) {
+            replacementName = propertyAnnotation.key();
+            replacementProperty = new AliasedProperty(replacementProperty, replacementName);
+        }
+
         return new ReplacementResult(replacementName, replacementProperty);
     }
 
@@ -134,7 +137,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
      * 
      * @author florian
      */
-    private static class ReplacementResult {
+    private static final class ReplacementResult {
         private final Property property;
         private final String name;
 
@@ -143,7 +146,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
          * 
          * @param property property
          */
-        ReplacementResult(Property property) {
+        private ReplacementResult(Property property) {
             this(property.getName(), property);
         }
 
@@ -153,7 +156,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
          * @param name of the property (alias)
          * @param property property
          */
-        ReplacementResult(String name, Property property) {
+        private ReplacementResult(String name, Property property) {
             this.name = name;
             this.property = property;
         }

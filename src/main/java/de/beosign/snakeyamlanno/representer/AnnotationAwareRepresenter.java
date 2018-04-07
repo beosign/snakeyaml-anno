@@ -6,11 +6,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
@@ -87,14 +85,6 @@ public class AnnotationAwareRepresenter extends Representer {
             }
         }
 
-        NodeTuple nodeTuple = super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
-
-        if (propertyAnnotation != null) {
-            if (StringUtils.isNotBlank(propertyAnnotation.key())) {
-                ScalarNode keyNode = (ScalarNode) representData(propertyAnnotation.key());
-                return new NodeTuple(keyNode, nodeTuple.getValueNode());
-            }
-        }
         return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
     }
 
