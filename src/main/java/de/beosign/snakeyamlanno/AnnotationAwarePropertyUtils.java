@@ -32,6 +32,10 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
 
     @Override
     protected Map<String, Property> getPropertiesMap(Class<?> type, BeanAccess bAccess) {
+        if (typeToPropertiesMap.containsKey(type)) {
+            return typeToPropertiesMap.get(type);
+        }
+
         Map<String, Property> properties = new LinkedHashMap<String, Property>();
         boolean inaccessableFieldsExist = false;
         switch (bAccess) {
