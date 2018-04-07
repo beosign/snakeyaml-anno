@@ -21,13 +21,13 @@ public interface AnnotatedProperty {
             int order1 = 0;
             int order2 = 0;
 
-            if (property1 instanceof AnnotatedProperty) {
-                AnnotatedProperty anno1 = (AnnotatedProperty) property1;
-                order1 = anno1.getPropertyAnnotation().order();
+            Property propertyAnnotation1 = property1.getAnnotation(Property.class);
+            Property propertyAnnotation2 = property2.getAnnotation(Property.class);
+            if (propertyAnnotation1 != null) {
+                order1 = propertyAnnotation1.order();
             }
-            if (property2 instanceof AnnotatedProperty) {
-                AnnotatedProperty anno2 = (AnnotatedProperty) property2;
-                order2 = anno2.getPropertyAnnotation().order();
+            if (propertyAnnotation2 != null) {
+                order2 = propertyAnnotation2.order();
             }
 
             return order2 - order1;

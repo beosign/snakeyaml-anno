@@ -1,6 +1,7 @@
 package de.beosign.snakeyamlanno.constructor;
 
 import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,8 +21,6 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.convert.NoConverter;
-import de.beosign.snakeyamlanno.property.AnnotatedProperty;
-import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.property.SkippedProperty;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
@@ -45,15 +44,12 @@ public class AnnotationAwareConstructor extends Constructor {
         yamlClassConstructors.put(NodeId.mapping, new AnnotationAwareMappingConstructor());
     }
 
-    /**
-     * This constructor checks for converter information on annotated properties and calls the converter's methods.
-     * 
-     * @author florian
-     */
-    protected class AnnotationAwareMappingConstructor extends ConstructMapping {
-        @Override
-        protected Object createEmptyJavaBean(MappingNode node) {
-            Class<?> type = node.getType();
+    @Override
+    protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException {
+        if (node instanceof MappingNode) {
+            MappingNode mappingNode = (MappingNode) node;
+
+            Class<?> type = mappingNode.getType();
             Type typeAnnotation = type.getAnnotation(Type.class);
 
             if (typeAnnotation != null && typeAnnotation.substitutionTypes().length > 0) {
@@ -66,18 +62,18 @@ public class AnnotationAwareConstructor extends Constructor {
                         // check if default detection algorithm is to be applied
                         substitutionTypeSelector = typeAnnotation.substitutionTypeSelector().newInstance();
                         if (!substitutionTypeSelector.disableDefaultAlgorithm()) {
-                            validSubstitutionTypes = getValidSubstitutionTypes(type, node.getValue());
+                            validSubstitutionTypes = getValidSubstitutionTypes(type, mappingNode.getValue());
                         }
                     } catch (InstantiationException | IllegalAccessException e) {
                         throw new YAMLException("Cannot instantiate substitutionTypeSelector of type " + typeAnnotation.substitutionTypeSelector().getName(),
                                 e);
                     }
                 } else {
-                    validSubstitutionTypes = getValidSubstitutionTypes(type, node.getValue());
+                    validSubstitutionTypes = getValidSubstitutionTypes(type, mappingNode.getValue());
                 }
 
                 if (substitutionTypeSelector != null) {
-                    node.setType(substitutionTypeSelector.getSelectedType(node, validSubstitutionTypes));
+                    node.setType(substitutionTypeSelector.getSelectedType(mappingNode, validSubstitutionTypes));
                     log.debug("Type = {}, using substitution type {} calculated by SubstitutionTypeSelector {}", type, node.getType(),
                             typeAnnotation.substitutionTypeSelector().getName());
                 } else {
@@ -94,56 +90,79 @@ public class AnnotationAwareConstructor extends Constructor {
                 }
 
             }
-            return super.createEmptyJavaBean(node);
         }
+        return super.newInstance(ancestor, node, tryDefault);
+    }
 
-        /**
-         * Returns all valid substitution types from the list given by the {@link Type#substitutionTypes()} method.
-         * 
-         * @param type type
-         * @param nodeValue node values
+    /**
+     * Returns all valid substitution types from the list given by the {@link Type#substitutionTypes()} method.
+     * 
+     * @param type type
+     * @param nodeValue node values
+     */
+    private List<Class<?>> getValidSubstitutionTypes(Class<?> type, List<NodeTuple> nodeValue) {
+        Type typeAnnotation = type.getAnnotation(Type.class);
+        List<Class<?>> validSubstitutionTypes = new ArrayList<>();
+        List<? extends Class<?>> substitutionTypeList = Arrays.asList(typeAnnotation.substitutionTypes());
+        /*
+         *  For each possible substitution type, check if all YAML properties match a Bean property.
+         *  If this is the case, this subtype is a valid substitution
          */
-        private List<Class<?>> getValidSubstitutionTypes(Class<?> type, List<NodeTuple> nodeValue) {
-            Type typeAnnotation = type.getAnnotation(Type.class);
-            List<Class<?>> validSubstitutionTypes = new ArrayList<>();
-            List<? extends Class<?>> substitutionTypeList = Arrays.asList(typeAnnotation.substitutionTypes());
-            /*
-             *  For each possible substitution type, check if all YAML properties match a Bean property.
-             *  If this is the case, this subtype is a valid substitution
-             */
-            for (Class<?> substitutionType : substitutionTypeList) {
-                boolean isValidType = true;
-                for (NodeTuple tuple : nodeValue) {
-                    String key = null;
-                    try {
-                        ScalarNode keyNode;
-                        if (tuple.getKeyNode() instanceof ScalarNode) {
-                            keyNode = (ScalarNode) tuple.getKeyNode();
-                        } else {
-                            throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
-                        }
-                        key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
-                        getProperty(substitutionType, key);
-                    } catch (YAMLException | IntrospectionException e) {
-                        log.debug("Evaluating subsitution of type {}: Could not construct property {}.{}: {}", type, substitutionType.getName(), key,
-                                e.getMessage());
-                        isValidType = false;
-                        break;
+        for (Class<?> substitutionType : substitutionTypeList) {
+            boolean isValidType = true;
+            for (NodeTuple tuple : nodeValue) {
+                String key = null;
+                try {
+                    ScalarNode keyNode;
+                    if (tuple.getKeyNode() instanceof ScalarNode) {
+                        keyNode = (ScalarNode) tuple.getKeyNode();
+                    } else {
+                        throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
                     }
-                }
-                if (isValidType) {
-                    validSubstitutionTypes.add(substitutionType);
-                }
+                    key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
+                    final String propName = key;
 
+                    boolean found = Arrays.stream(Introspector.getBeanInfo(substitutionType).getPropertyDescriptors())
+                            .anyMatch(pd -> pd.getName().equals(propName));
+                    if (!found) { // search in aliases
+                        found = getPropertyUtils().getProperties(substitutionType).stream()
+                                .map(p -> p.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class))
+                                .filter(anno -> anno != null)
+                                .anyMatch(anno -> propName.equals(anno.key()));
+
+                    }
+                    if (!found) {
+                        throw new YAMLException("Cannot find a property named " + propName + " in type " + substitutionType.getTypeName());
+                    }
+
+                } catch (YAMLException | IntrospectionException e) {
+                    log.debug("Evaluating subsitution of type {}: Could not construct property {}.{}: {}", type, substitutionType.getName(), key,
+                            e.getMessage());
+                    isValidType = false;
+                    break;
+                }
+            }
+            if (isValidType) {
+                validSubstitutionTypes.add(substitutionType);
             }
 
-            log.trace("Type = {}, found valid substitution types: {}", type, validSubstitutionTypes);
-            return validSubstitutionTypes;
         }
+
+        log.trace("Type = {}, found valid substitution types: {}", type, validSubstitutionTypes);
+        return validSubstitutionTypes;
+    }
+
+    /**
+     * This constructor checks for converter information on annotated properties and calls the converter's methods.
+     * 
+     * @author florian
+     */
+    protected class AnnotationAwareMappingConstructor extends ConstructMapping {
 
         @Override
         protected Object constructJavaBean2ndStep(MappingNode node, Object object) {
             List<NodeTuple> unconstructableNodeTuples = new ArrayList<>();
+            List<NodeTuple> handledNodeTuples = new ArrayList<>();
 
             Class<? extends Object> beanType = node.getType();
             List<NodeTuple> nodeValue = node.getValue();
@@ -159,16 +178,17 @@ public class AnnotationAwareConstructor extends Constructor {
                 keyNode.setType(String.class);
                 String key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
                 try {
-                    Property property = super.getProperty(beanType, key);
-                    if (property instanceof AnnotatedProperty) {
-                        AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
-                        if (annotatedProperty.getPropertyAnnotation().converter() != NoConverter.class) {
-                            property.set(object, annotatedProperty.getPropertyAnnotation().converter().newInstance().convertToModel(valueNode));
+                    Property property = getProperty(beanType, key);
+                    de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+                    if (propertyAnnotation != null) {
+                        if (propertyAnnotation.converter() != NoConverter.class) {
+                            property.set(object, propertyAnnotation.converter().newInstance().convertToModel(valueNode));
+                            handledNodeTuples.add(tuple);
                         } else {
                             /* 
                              * No converter present, so let YAML set the value.
                              */
-                            if (annotatedProperty.getPropertyAnnotation().ignoreExceptions()) {
+                            if (propertyAnnotation.ignoreExceptions()) {
                                 try {
                                     Construct constructor = getConstructor(valueNode);
                                     constructor.construct(valueNode);
@@ -181,6 +201,9 @@ public class AnnotationAwareConstructor extends Constructor {
                         }
 
                     }
+                    if (property instanceof SkippedProperty) {
+                        handledNodeTuples.add(tuple);
+                    }
                 } catch (YAMLException e) {
                     throw e;
                 } catch (Exception e) {
@@ -191,27 +214,26 @@ public class AnnotationAwareConstructor extends Constructor {
 
             // Remove nodes that are unconstructable
             unconstructableNodeTuples.forEach(nt -> node.getValue().remove(nt));
+            handledNodeTuples.forEach(nt -> node.getValue().remove(nt));
 
             return super.constructJavaBean2ndStep(node, object);
         }
 
         @Override
-        protected Property getProperty(Class<? extends Object> type, String name) throws IntrospectionException {
+        protected Property getProperty(Class<? extends Object> type, String name) {
             log.debug("type = " + type.getName() + ", name = " + name);
 
             Property property = super.getProperty(type, name);
-            if (property instanceof AnnotatedProperty) {
-                AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
-                if (annotatedProperty.getPropertyAnnotation().skipAtLoad()) {
+
+            de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+            if (propertyAnnotation != null) {
+                if (propertyAnnotation.skipAtLoad()) {
                     // value must not be set
-                    return new SkippedProperty(name);
-                }
-                if (annotatedProperty.isConverterPresent()) {
-                    // value has already set above in constructJavaBean2ndStep
-                    return new ConvertedProperty(name);
+                    return new SkippedProperty(property.getName());
                 }
             }
-            return super.getProperty(type, name);
+
+            return property;
         }
 
     }

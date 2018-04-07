@@ -1,6 +1,5 @@
 package de.beosign.snakeyamlanno.representer;
 
-import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,7 +32,7 @@ public class AnnotationAwareRepresenter extends Representer {
     }
 
     @Override
-    protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
+    protected Set<Property> getProperties(Class<? extends Object> type) {
         Set<Property> propertySet = super.getProperties(type);
 
         // order properties
@@ -47,20 +46,20 @@ public class AnnotationAwareRepresenter extends Representer {
 
     @Override
     protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
-        if (property instanceof AnnotatedProperty) {
-            AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
-            if (annotatedProperty.getPropertyAnnotation().skipAtDump()) {
+        de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+        if (propertyAnnotation != null) {
+            if (propertyAnnotation.skipAtDump()) {
                 return null;
             }
 
-            if (annotatedProperty.getPropertyAnnotation().skipAtDumpIf() != SkipAtDumpPredicate.class) {
+            if (propertyAnnotation.skipAtDumpIf() != SkipAtDumpPredicate.class) {
                 try {
-                    SkipAtDumpPredicate skipAtDumpPredicate = annotatedProperty.getPropertyAnnotation().skipAtDumpIf().newInstance();
+                    SkipAtDumpPredicate skipAtDumpPredicate = propertyAnnotation.skipAtDumpIf().newInstance();
                     if (skipAtDumpPredicate.skip(javaBean, property, propertyValue, customTag)) {
                         return null;
                     }
                 } catch (InstantiationException | IllegalAccessException e) {
-                    throw new YAMLException("Cannot create an instance of " + annotatedProperty.getPropertyAnnotation().skipAtDumpIf().getName(), e);
+                    throw new YAMLException("Cannot create an instance of " + propertyAnnotation.skipAtDumpIf().getName(), e);
                 }
 
             }
@@ -68,10 +67,9 @@ public class AnnotationAwareRepresenter extends Representer {
 
         NodeTuple nodeTuple = super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
 
-        if (property instanceof AnnotatedProperty) {
-            AnnotatedProperty annotatedProperty = (AnnotatedProperty) property;
-            if (StringUtils.isNotBlank(annotatedProperty.getPropertyAnnotation().key())) {
-                ScalarNode keyNode = (ScalarNode) representData(annotatedProperty.getPropertyAnnotation().key());
+        if (propertyAnnotation != null) {
+            if (StringUtils.isNotBlank(propertyAnnotation.key())) {
+                ScalarNode keyNode = (ScalarNode) representData(propertyAnnotation.key());
                 return new NodeTuple(keyNode, nodeTuple.getValueNode());
             }
         }

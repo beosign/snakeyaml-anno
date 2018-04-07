@@ -4,5 +4,5 @@
 - !!de.beosign.snakeyamlanno.property.Person
   name: Marge
   gender: f
-  animal: !!de.beosign.snakeyamlanno.property.Person$Dog
+  animal: !!de.beosign.snakeyamlanno.type.Animal$Dog
     loudness: 5

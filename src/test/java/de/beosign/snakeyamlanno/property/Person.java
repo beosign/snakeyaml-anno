@@ -12,7 +12,6 @@ public class Person {
     private int height; // cm
     private Gender gender;
 
-    @Property(ignoreExceptions = true)
     private Animal animal;
 
     public enum Gender {
@@ -52,6 +51,7 @@ public class Person {
         return "Person [name=" + name + ", height=" + height + ", gender=" + gender + ", animal=" + animal + "]";
     }
 
+    @Property(ignoreExceptions = true)
     public Animal getAnimal() {
         return animal;
     }

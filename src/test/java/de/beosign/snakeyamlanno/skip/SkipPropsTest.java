@@ -311,9 +311,9 @@ public class SkipPropsTest {
     }
 
     public static class SkipPropsBadClass {
-        @Property(skipAtDumpIf = PrivatePredicate.class)
         private String prop;
 
+        @Property(skipAtDumpIf = PrivatePredicate.class)
         public String getProp() {
             return prop;
         }

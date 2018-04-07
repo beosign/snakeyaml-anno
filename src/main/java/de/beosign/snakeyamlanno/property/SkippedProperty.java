@@ -1,5 +1,9 @@
 package de.beosign.snakeyamlanno.property;
 
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.List;
+
 import org.yaml.snakeyaml.introspector.Property;
 
 /**
@@ -32,6 +36,16 @@ public class SkippedProperty extends Property {
     @Override
     public Object get(Object object) {
         return object;
+    }
+
+    @Override
+    public List<Annotation> getAnnotations() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+        return null;
     }
 
 }

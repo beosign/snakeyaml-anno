@@ -5,7 +5,6 @@ import de.beosign.snakeyamlanno.annotation.Property;
 // CHECKSTYLE:OFF
 public class StellarObject {
 
-    @Property(key = "nameAlias", order = 10)
     private String name;
     private String type;
     private String location;
@@ -13,6 +12,7 @@ public class StellarObject {
     private long radius;
     private double absoluteMag;
 
+    @Property(key = "nameAlias", order = 10)
     public String getName() {
         return name;
     }
