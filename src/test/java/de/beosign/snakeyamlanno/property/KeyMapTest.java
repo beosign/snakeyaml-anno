@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,7 +23,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
-import de.beosign.snakeyamlanno.exception.AliasedYAMLException;
 
 /**
  * Tests the key mapping functionality.
@@ -80,10 +80,7 @@ public class KeyMapTest {
                 Assert.fail("Expected exception");
             } catch (YAMLException e) {
                 log.debug("Caught expected exception {}", e.getClass().getName());
-                AliasedYAMLException cause = (AliasedYAMLException) e.getCause();
-                assertThat(cause.getAliasedProperty(), is("name"));
-                assertThat(cause.getAlias(), is("nameAlias"));
-                assertThat(cause.toString() != null, is(true));
+                assertThat(e.getMessage(), StringContains.containsString("name"));
             }
 
         }
@@ -108,11 +105,8 @@ public class KeyMapTest {
                 Assert.fail("Expected exception");
             } catch (YAMLException e) {
                 log.debug("Caught expected exception {}", e.getClass().getName());
-                AliasedYAMLException cause = (AliasedYAMLException) e.getCause();
-                assertThat(cause.getAliasedProperty(), is("absoluteMag"));
-                assertThat(cause.getAlias(), is("absMag"));
+                assertThat(e.getMessage(), StringContains.containsString("absoluteMag"));
             }
-
         }
     }
 

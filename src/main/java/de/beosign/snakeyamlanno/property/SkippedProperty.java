@@ -12,13 +12,17 @@ import org.yaml.snakeyaml.introspector.Property;
  * @author florian
  */
 public class SkippedProperty extends Property {
+    private final de.beosign.snakeyamlanno.annotation.Property propertyAnnotation;
+
     /**
      * New instance.
      * 
      * @param name name of property
+     * @param propertyAnnotation {@link de.beosign.snakeyamlanno.annotation.Property} annotation
      */
-    public SkippedProperty(String name) {
+    public SkippedProperty(String name, de.beosign.snakeyamlanno.annotation.Property propertyAnnotation) {
         super(name, Object.class);
+        this.propertyAnnotation = propertyAnnotation;
     }
 
     @Override
@@ -33,18 +37,25 @@ public class SkippedProperty extends Property {
     public void set(Object object, Object value) throws Exception {
     }
 
+    /**
+     * Gettern returns null.
+     */
     @Override
     public Object get(Object object) {
-        return object;
+        return null;
     }
 
     @Override
     public List<Annotation> getAnnotations() {
-        return Collections.emptyList();
+        return Collections.singletonList(propertyAnnotation);
     }
 
     @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+        if (annotationType.isAssignableFrom(propertyAnnotation.getClass())) {
+            return annotationType.cast(propertyAnnotation);
+        }
+
         return null;
     }
 

@@ -20,7 +20,6 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
-import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.property.SkippedProperty;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
@@ -180,27 +179,19 @@ public class AnnotationAwareConstructor extends Constructor {
                 try {
                     Property property = getProperty(beanType, key);
                     de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-                    if (propertyAnnotation != null) {
-                        if (propertyAnnotation.converter() != NoConverter.class) {
-                            property.set(object, propertyAnnotation.converter().newInstance().convertToModel(valueNode));
-                            handledNodeTuples.add(tuple);
-                        } else {
-                            /* 
-                             * No converter present, so let YAML set the value.
-                             */
-                            if (propertyAnnotation.ignoreExceptions()) {
-                                try {
-                                    Construct constructor = getConstructor(valueNode);
-                                    constructor.construct(valueNode);
-                                } catch (Exception e) {
-                                    log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
-                                    unconstructableNodeTuples.add(tuple);
-                                }
-                            }
-
+                    if (propertyAnnotation != null && propertyAnnotation.ignoreExceptions()) {
+                        /* 
+                         * Let YAML set the value.
+                         */
+                        try {
+                            Construct constructor = getConstructor(valueNode);
+                            constructor.construct(valueNode);
+                        } catch (Exception e) {
+                            log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
+                            unconstructableNodeTuples.add(tuple);
                         }
-
                     }
+
                     if (property instanceof SkippedProperty) {
                         handledNodeTuples.add(tuple);
                     }
@@ -229,10 +220,9 @@ public class AnnotationAwareConstructor extends Constructor {
             if (propertyAnnotation != null) {
                 if (propertyAnnotation.skipAtLoad()) {
                     // value must not be set
-                    return new SkippedProperty(property.getName());
+                    return new SkippedProperty(property.getName(), propertyAnnotation);
                 }
             }
-
             return property;
         }
 
