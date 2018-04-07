@@ -1,7 +1,5 @@
 package de.beosign.snakeyamlanno.convert;
 
-import org.yaml.snakeyaml.nodes.Node;
-
 import de.beosign.snakeyamlanno.annotation.Property;
 
 //CHECKSTYLE:OFF
@@ -34,7 +32,7 @@ public class PersonWithConverter2 {
         }
 
         @Override
-        public Integer convertToModel(Node yamlValue) {
+        public Integer convertToModel(String yamlValue) {
             throw new ConverterException("Cannot convert", new IllegalArgumentException("Cause"));
         }
     }

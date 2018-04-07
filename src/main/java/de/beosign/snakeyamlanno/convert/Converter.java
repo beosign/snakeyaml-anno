@@ -1,7 +1,5 @@
 package de.beosign.snakeyamlanno.convert;
 
-import org.yaml.snakeyaml.nodes.Node;
-
 /**
  * Converter that converts between a YAML node and its Java representation.
  * 
@@ -21,9 +19,9 @@ public interface Converter<T> {
     /**
      * Converts to the Java bean property.
      * 
-     * @param yamlNode the node that is to be converted.
+     * @param value that is to be converted.
      * @return converted value
      * @throws ConverterException if conversion failed
      */
-    T convertToModel(Node yamlNode);
+    T convertToModel(String value);
 }

@@ -1,13 +1,10 @@
 package de.beosign.snakeyamlanno.property;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.Tag;
 
 import de.beosign.snakeyamlanno.convert.Converter;
 
@@ -17,8 +14,8 @@ import de.beosign.snakeyamlanno.convert.Converter;
  * @author florian
  */
 public class ConvertedProperty extends Property {
-    private final Converter<?> converter;
-    private Property originalProperty;
+    private final Converter<Object> converter;
+    private final Property originalProperty;
 
     /**
      * New instance.
@@ -28,15 +25,16 @@ public class ConvertedProperty extends Property {
      * @throws IllegalAccessException if converter class cannot be accessed
      * @throws InstantiationException if converter class cannot be instantiated
      */
+    @SuppressWarnings("unchecked")
     public ConvertedProperty(Property originalProperty, Class<? extends Converter<?>> converterClass) throws InstantiationException, IllegalAccessException {
         super(originalProperty.getName(), Object.class);
-        this.converter = converterClass.newInstance();
+        this.converter = (Converter<Object>) converterClass.newInstance();
         this.originalProperty = originalProperty;
     }
 
     @Override
     public Class<?>[] getActualTypeArguments() {
-        return new Class[0];
+        return originalProperty.getActualTypeArguments();
     }
 
     /**
@@ -44,23 +42,25 @@ public class ConvertedProperty extends Property {
      */
     @Override
     public void set(Object object, Object value) throws Exception {
-        Object convertedValue = converter.convertToModel(new ScalarNode(Tag.STR, Objects.toString(value), null, null, null));
+        Object convertedValue = converter.convertToModel(Objects.toString(value));
         originalProperty.set(object, convertedValue);
     }
 
     @Override
     public Object get(Object object) {
-        return object;
+        Object value = originalProperty.get(object);
+        String convertedValue = converter.convertToYaml(value);
+        return convertedValue;
     }
 
     @Override
     public List<Annotation> getAnnotations() {
-        return Collections.emptyList();
+        return originalProperty.getAnnotations();
     }
 
     @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-        return null;
+        return originalProperty.getAnnotation(annotationType);
     }
 
 }
