@@ -4,7 +4,13 @@
 
 
 # snakeyaml-anno
-Parse YAML files by using annotation in POJOS - based on SnakeYaml 1.17 by Sergey Pariev, https://github.com/spariev/snakeyaml/
+Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.19** by Sergey Pariev, https://github.com/spariev/snakeyaml/.
+
+## Compatibility
+| snakeyaml-anno | SnakeYaml | 1.17 | 1.18 | 1.19 |
+|----------------------------|------|------|------|
+| 0.3.0                      | YES  | YES  | NO   |
+| 0.4.0                      | NO   | NO   | YES  |
 
 ## Usage
 You must use the ```AnnotationAwareConstructor``` when parsing:
@@ -79,7 +85,7 @@ It is also possible to annotate the getter instead:
 
 #### Converting
 You can apply a converter to a field or getter. This feature is especially useful for converting enum values as Snakeyaml as of version 1.17 supports only basic converting, e.g. the string in the yaml file must match the enum constant definition in Java (uppercase).
-The following example shows how to convert ```m``` to the enum constant ```MALE```:
+The following example shows how to convert ``m`` to the enum constant ``MALE``:
 
 ```javascript
 - name: Homer
@@ -123,21 +129,23 @@ public class GenderConverter implements Converter<Gender> {
     }
 
     @Override
-    public Gender convertToModel(Node yamlNode) {
-        if (yamlNode instanceof ScalarNode) {
-            for (Gender g : Gender.values()) {
-                if (g.getAbbr().equals(((ScalarNode) yamlNode).getValue())) {
-                    return g;
-                }
+    public Gender convertToModel(String value) {
+        for (Gender g : Gender.values()) {
+            if (g.getAbbr().equals(value)) {
+                 return g;
             }
         }
+        
         return null;
     }
 }
 ```
 
+As of version 0.4.0, conversion is also implemented for dumping. The interface has changed; the ``convertToModel`` 
+
+
 #### Ignore parsing errors
-In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain ```null```. To allow the parsing process to skip unparsable parts instead of aborting, you can use ```ignoreExceptions = true``` on a property or a getter:
+In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain ``null``. To allow the parsing process to skip unparsable parts instead of aborting, you can use ``ignoreExceptions = true`` on a property or a getter:
 
 ```java 
  public class Person {     
@@ -150,7 +158,7 @@ In a complex hierarchy it may be desirable to ignore parse errors in a given sub
 }
 ```
 
-So in case the gender property cannot be parsed, you still get a parsed Person object, just with the gender property being ```null```.
+So in case the gender property cannot be parsed, you still get a parsed Person object, just with the gender property being ``null``.
 
 #### Auto type detection
 YAML uses the concept of _Tags_ to provide type information. However, to keep the YAML file as simple and concise as possible, it may be desirable to omit a tag declaration if the concrete type to use can already be deducted from the properties. Suppose you have the following interface:
@@ -185,7 +193,7 @@ public class Person {
 }
 ```
 
-For the following YAML, the first object in the list must be of type ```Dog``` and the second of type ```Cat```.
+For the following YAML, the first object in the list must be of type ``Dog`` and the second of type ``Cat``.
 
 ```javascript
 pets:
@@ -195,15 +203,15 @@ pets:
   miceCaughtCounter: 20
 ```
 
-To tell YAML to autodetect the types, you have to annotate the ```Animal``` interface with ```@Type(substitutionTypes = { Dog.class, Cat.class })```.
+To tell YAML to autodetect the types, you have to annotate the ``Animal`` interface with ``@Type(substitutionTypes = { Dog.class, Cat.class })``.
 
 So you must provide possible subtypes because classpath scanning of classes implementing a given interface is not yet implemented.
-If no valid substitution class if found, the default SnakeYaml algorithm for choosing the type will be used. If multiple substitution types are possible, the first possible type (determined by the order of the classes in ```substitutionTypes```) is chosen.
+If no valid substitution class if found, the default SnakeYaml algorithm for choosing the type will be used. If multiple substitution types are possible, the first possible type (determined by the order of the classes in ``substitutionTypes``) is chosen.
 
-You can also provide your own ```SubstitutionTypeSelector``` implementation and set it with ```@Type(substitutionTypes = { Dog.class, Cat.class }, substitutionTypeSelector = MyTypeSelector.class)```.  ```MyTypeSelector``` must implement ```SubstitutionTypeSelector``` and must have a no-arg constructor.
+You can also provide your own ``SubstitutionTypeSelector`` implementation and set it with ``@Type(substitutionTypes = { Dog.class, Cat.class }, substitutionTypeSelector = MyTypeSelector.class)``.  ``MyTypeSelector`` must implement ``SubstitutionTypeSelector`` and must have a no-arg constructor.
 
 #### Skipping properties
-It is possible to skip properties during load or dump. In order to skip a property during load, thus preventing snakeyaml to override a model value with the value read from the yaml file that is being loaded, annotate the property with ```skipAtLoad```:
+It is possible to skip properties during load or dump. In order to skip a property during load, thus preventing snakeyaml to override a model value with the value read from the yaml file that is being loaded, annotate the property with ``skipAtLoad``:
 
 ```java 
 public class Person {
@@ -213,7 +221,7 @@ public class Person {
 }
 ```
 
-In order to prevent dumping of a property, use ```skipAtDump```:
+In order to prevent dumping of a property, use ``skipAtDump``:
  
 ```java 
 public class Person {
@@ -221,10 +229,10 @@ public class Person {
    @Property(skipAtDump = true)     
    private String name;
 }
-``` 
+```
 
-You can also skip dumping conditionally by implementing the ```SkipAtDumpPredicate``` interface. The only method to implement is ```skip```. One of the parameters passed into this method is the property value, so you can make decisions whether to skip a property based on its value.
-You can use your implementation by using the ```skipAtDumpIf``` member:
+You can also skip dumping conditionally by implementing the ``SkipAtDumpPredicate`` interface. The only method to implement is ``skip``. One of the parameters passed into this method is the property value, so you can make decisions whether to skip a property based on its value.
+You can use your implementation by using the ``skipAtDumpIf`` member:
  
 ```java 
 public class Person {
@@ -232,14 +240,14 @@ public class Person {
    @Property(skipAtDumpIf = SkipIfNull.class)     
    private String name;
 }
-``` 
+```
 
-**Be aware** that if ```skipAtDump``` is also supplied and set to true, it will take precedence over the ```` skipAtDumpIf```!
+**Be aware** that if ``skipAtDump`` is also supplied and set to true, it will take precedence over the `` skipAtDumpIf``!
 
-Predefined are two classes: ```SkipIfNull``` and ```SkipIfEmpty```. The first one skips a property if it is ```null```, the latter one skips a property if it is of type ```Map```, ```Collection``` or ```String``` and the property is empty (empty map/collection or String of length 0).
+Predefined are two classes: ``SkipIfNull`` and ``SkipIfEmpty``. The first one skips a property if it is ``null``, the latter one skips a property if it is of type ``Map``, ``Collection`` or ``String`` and the property is empty (empty map/collection or String of length 0).
 
 #### Ordering properties
-It is possible to order properties during the dump process by providing a value for the ```order``` property:
+It is possible to order properties during the dump process by providing a value for the ``order`` property:
 
 ```java 
 public class Person {
@@ -261,6 +269,6 @@ This will dump the properties in the order:
 2. between
 3. last
 
-The default value for ```order``` is 0. A higher value means that the property is dumped before a property with a lower value. So in order to dump a property at the beginning, you can provide a positive value. To make sure that a property is dumped at the end, you can provide a negative value. The order of properties with the same ```order``` value is unspecified.
+The default value for ``order`` is 0. A higher value means that the property is dumped before a property with a lower value. So in order to dump a property at the beginning, you can provide a positive value. To make sure that a property is dumped at the end, you can provide a negative value. The order of properties with the same ``order`` value is unspecified.
 
  
