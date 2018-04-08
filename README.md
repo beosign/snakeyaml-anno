@@ -7,10 +7,33 @@
 Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.19** by Sergey Pariev, https://github.com/spariev/snakeyaml/.
 
 ## Compatibility
-| snakeyaml-anno | SnakeYaml | 1.17 | 1.18 | 1.19 |
-|----------------------------|------|------|------|
-| 0.3.0                      | YES  | YES  | NO   |
-| 0.4.0                      | NO   | NO   | YES  |
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-us36{border-color:inherit;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-us36">snakeyaml-anno | SnakeYaml<br></th>
+    <th class="tg-us36">1.17</th>
+    <th class="tg-us36">1.18<br></th>
+    <th class="tg-us36">1.19</th>
+  </tr>
+  <tr>
+    <td class="tg-us36">0.3.0<br></td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">NO</td>
+  </tr>
+  <tr>
+    <td class="tg-us36">0.4.0</td>
+    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">YES</td>
+  </tr>
+</table>
 
 ## Usage
 You must use the ```AnnotationAwareConstructor``` when parsing:
