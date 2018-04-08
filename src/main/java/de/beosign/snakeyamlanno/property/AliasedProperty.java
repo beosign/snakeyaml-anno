@@ -1,8 +1,5 @@
 package de.beosign.snakeyamlanno.property;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
 import org.yaml.snakeyaml.introspector.Property;
 
 /**
@@ -10,9 +7,7 @@ import org.yaml.snakeyaml.introspector.Property;
  * 
  * @author florian
  */
-public class AliasedProperty extends Property {
-    private Property targetProperty;
-
+public class AliasedProperty extends AnnotatedProperty {
     /**
      * New instance.
      * 
@@ -20,36 +15,7 @@ public class AliasedProperty extends Property {
      * @param alias the alias under which the property is now accessible
      */
     public AliasedProperty(Property targetProperty, String alias) {
-        super(alias, targetProperty.getType());
-        this.targetProperty = targetProperty;
-    }
-
-    @Override
-    public Class<?>[] getActualTypeArguments() {
-        return targetProperty.getActualTypeArguments();
-    }
-
-    /**
-     * Setter does nothing.
-     */
-    @Override
-    public void set(Object object, Object value) throws Exception {
-        targetProperty.set(object, value);
-    }
-
-    @Override
-    public Object get(Object object) {
-        return targetProperty.get(object);
-    }
-
-    @Override
-    public List<Annotation> getAnnotations() {
-        return targetProperty.getAnnotations();
-    }
-
-    @Override
-    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-        return targetProperty.getAnnotation(annotationType);
+        super(alias, targetProperty);
     }
 
 }

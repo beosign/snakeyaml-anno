@@ -21,6 +21,7 @@ import org.yaml.snakeyaml.introspector.PropertyUtils;
 
 import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.property.AliasedProperty;
+import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.property.SkippedProperty;
 
@@ -129,8 +130,14 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
             }
 
             if (propertyAnnotation.skipAtLoad()) {
-                replacementProperty = new SkippedProperty(replacementProperty, propertyAnnotation);
+                replacementProperty = new SkippedProperty(replacementProperty);
             }
+
+            if (!(replacementProperty instanceof AnnotatedProperty)) {
+                // be sure to use the AnnotatedProperty as base class, so common functionality works
+                replacementProperty = new AnnotatedProperty(replacementProperty);
+            }
+
         }
 
         return new ReplacementResult(replacementName, replacementProperty);

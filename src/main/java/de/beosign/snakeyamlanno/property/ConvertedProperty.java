@@ -1,7 +1,5 @@
 package de.beosign.snakeyamlanno.property;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
 import java.util.Objects;
 
 import org.yaml.snakeyaml.introspector.Property;
@@ -13,9 +11,8 @@ import de.beosign.snakeyamlanno.convert.Converter;
  * 
  * @author florian
  */
-public class ConvertedProperty extends Property {
+public class ConvertedProperty extends AnnotatedProperty {
     private final Converter<Object> converter;
-    private final Property originalProperty;
 
     /**
      * New instance.
@@ -28,15 +25,9 @@ public class ConvertedProperty extends Property {
     @SuppressWarnings("unchecked")
     public ConvertedProperty(Property originalProperty, Class<? extends Converter<?>> converterClass) throws InstantiationException, IllegalAccessException {
         // use Object.class because otherwise Snakeyaml tries to already construct the concrete type without using the converted value which will fail
-        super(originalProperty.getName(), Object.class);
+        super(originalProperty.getName(), Object.class, originalProperty);
 
         this.converter = (Converter<Object>) converterClass.newInstance();
-        this.originalProperty = originalProperty;
-    }
-
-    @Override
-    public Class<?>[] getActualTypeArguments() {
-        return originalProperty.getActualTypeArguments();
     }
 
     /**
@@ -45,24 +36,14 @@ public class ConvertedProperty extends Property {
     @Override
     public void set(Object object, Object value) throws Exception {
         Object convertedValue = converter.convertToModel(Objects.toString(value));
-        originalProperty.set(object, convertedValue);
+        getTargetProperty().set(object, convertedValue);
     }
 
     @Override
     public Object get(Object object) {
-        Object value = originalProperty.get(object);
+        Object value = getTargetProperty().get(object);
         String convertedValue = converter.convertToYaml(value);
         return convertedValue;
-    }
-
-    @Override
-    public List<Annotation> getAnnotations() {
-        return originalProperty.getAnnotations();
-    }
-
-    @Override
-    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-        return originalProperty.getAnnotation(annotationType);
     }
 
 }
