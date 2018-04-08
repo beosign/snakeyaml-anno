@@ -27,7 +27,9 @@ public class ConvertedProperty extends Property {
      */
     @SuppressWarnings("unchecked")
     public ConvertedProperty(Property originalProperty, Class<? extends Converter<?>> converterClass) throws InstantiationException, IllegalAccessException {
+        // use Object.class because otherwise Snakeyaml tries to already construct the concrete type without using the converted value which will fail
         super(originalProperty.getName(), Object.class);
+
         this.converter = (Converter<Object>) converterClass.newInstance();
         this.originalProperty = originalProperty;
     }
