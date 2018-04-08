@@ -5,6 +5,12 @@ import java.lang.annotation.Annotation;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
+/**
+ * Implementation for {@link Type} annotation.
+ * 
+ * @author florian
+ */
+@SuppressWarnings({ "all" })
 public class TypeImpl implements Type {
     private Class<?>[] substitutionTypes;
     private Class<? extends SubstitutionTypeSelector> typeSelector;
