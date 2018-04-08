@@ -8,10 +8,12 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
+import org.yaml.snakeyaml.introspector.PropertySubstitute;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
@@ -191,10 +193,6 @@ public class AnnotationAwareConstructor extends Constructor {
                             unconstructableNodeTuples.add(tuple);
                         }
                     }
-
-                    if (property instanceof SkippedProperty) {
-                        handledNodeTuples.add(tuple);
-                    }
                 } catch (YAMLException e) {
                     throw e;
                 } catch (Exception e) {
@@ -220,6 +218,16 @@ public class AnnotationAwareConstructor extends Constructor {
             if (propertyAnnotation != null) {
                 if (propertyAnnotation.skipAtLoad()) {
                     // value must not be set
+                    TypeDescription typeDescription = typeDefinitions.get(type);
+                    if (typeDescription != null) {
+                        PropertySubstitute propertySubstitute = new PropertySubstitute(name, property.getType(), (Class<?>[]) null) {
+                            @Override
+                            public void set(Object object, Object value) throws Exception {
+                                // do nothing
+                            }
+                        };
+                        typeDescription.substituteProperty(propertySubstitute);
+                    }
                     return new SkippedProperty(property.getName(), propertyAnnotation);
                 }
             }
