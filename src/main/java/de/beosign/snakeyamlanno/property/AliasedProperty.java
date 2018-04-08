@@ -20,7 +20,7 @@ public class AliasedProperty extends Property {
      * @param alias the alias under which the property is now accessible
      */
     public AliasedProperty(Property targetProperty, String alias) {
-        super(alias, Object.class);
+        super(alias, targetProperty.getType());
         this.targetProperty = targetProperty;
     }
 
