@@ -65,4 +65,20 @@ public class AnnotatedProperty extends Property {
         return targetProperty.getAnnotation(annotationType);
     }
 
+    /**
+     * Overridden so this property is retrieved from the delegate instead of returning just <code>true</code>.
+     */
+    @Override
+    public boolean isReadable() {
+        return targetProperty.isWritable();
+    }
+
+    /**
+     * Overridden so this property is retrieved from the delegate instead of returning just <code>true</code>.
+     */
+    @Override
+    public boolean isWritable() {
+        return targetProperty.isWritable();
+    }
+
 }
