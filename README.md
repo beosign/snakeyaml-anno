@@ -34,7 +34,7 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.19** by S
     <td class="tg-us36">0.5.0</td>
     <td class="tg-us36">NO<br></td>
     <td class="tg-us36">NO<br></td>
-    <td class="tg-us36">?</td>
+    <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
   </tr>
 </table>
