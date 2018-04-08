@@ -5,6 +5,17 @@ import java.util.List;
 
 import org.yaml.snakeyaml.introspector.Property;
 
+/**
+ * <p>
+ * All annotated properties should have this class as base class.
+ * </p>
+ * <p>
+ * The delegation seems to be unnecessary at first glance, but it has the advantage that we do not have decide whether we extend from FieldProperty or
+ * MethodProperty. Or we could extend from GenericProperty, but then we would have to deal with the generic type detection on our own.
+ * </p>
+ * 
+ * @author florian
+ */
 public class AnnotatedProperty extends Property {
     private Property targetProperty;
 
