@@ -1,8 +1,8 @@
 package de.beosign.snakeyamlanno.type;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.WorkingPerson.Employe
 import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.WorkingPerson.Employer;
 
 /**
- * Tests that properties can be skipped during loading and dumping.
+ * Tests that substitution types can also be defined in a programmatic way.
  * 
  * @author florian
  */

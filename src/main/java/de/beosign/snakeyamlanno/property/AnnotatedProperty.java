@@ -1,41 +1,84 @@
 package de.beosign.snakeyamlanno.property;
 
-import java.util.Comparator;
+import java.lang.annotation.Annotation;
+import java.util.List;
 
-import de.beosign.snakeyamlanno.annotation.Property;
+import org.yaml.snakeyaml.introspector.Property;
 
 /**
- * Common interface for annotated properties.
+ * <p>
+ * All annotated properties should have this class as base class.
+ * </p>
+ * <p>
+ * The delegation seems to be unnecessary at first glance, but it has the advantage that we do not have decide whether we extend from FieldProperty or
+ * MethodProperty. Or we could extend from GenericProperty, but then we would have to deal with the generic type detection on our own.
+ * </p>
  * 
  * @author florian
  */
-public interface AnnotatedProperty {
+public class AnnotatedProperty extends Property {
+    private Property targetProperty;
+
+    public AnnotatedProperty(Property targetProperty) {
+        this(targetProperty.getName(), targetProperty);
+    }
+
+    public AnnotatedProperty(String name, Property targetProperty) {
+        this(name, targetProperty.getType(), targetProperty);
+    }
+
+    public AnnotatedProperty(String name, Class<?> type, Property targetProperty) {
+        super(name, type);
+        this.targetProperty = targetProperty;
+    }
+
+    public Property getTargetProperty() {
+        return targetProperty;
+    }
+
+    public de.beosign.snakeyamlanno.annotation.Property getPropertyAnnotation() {
+        return getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+    }
+
+    @Override
+    public Class<?>[] getActualTypeArguments() {
+        return targetProperty.getActualTypeArguments();
+    }
+
+    @Override
+    public void set(Object object, Object value) throws Exception {
+        targetProperty.set(object, value);
+    }
+
+    @Override
+    public Object get(Object object) {
+        return targetProperty.get(object);
+    }
+
+    @Override
+    public List<Annotation> getAnnotations() {
+        return targetProperty.getAnnotations();
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+        return targetProperty.getAnnotation(annotationType);
+    }
+
     /**
-     * Returns a comparator that orders the properties according to their order value.
+     * Overridden so this property is retrieved from the delegate instead of returning just <code>true</code>.
      */
-    Comparator<org.yaml.snakeyaml.introspector.Property> ORDER_COMPARATOR = new Comparator<org.yaml.snakeyaml.introspector.Property>() {
-
-        @Override
-        public int compare(org.yaml.snakeyaml.introspector.Property property1, org.yaml.snakeyaml.introspector.Property property2) {
-            int order1 = 0;
-            int order2 = 0;
-
-            if (property1 instanceof AnnotatedProperty) {
-                AnnotatedProperty anno1 = (AnnotatedProperty) property1;
-                order1 = anno1.getPropertyAnnotation().order();
-            }
-            if (property2 instanceof AnnotatedProperty) {
-                AnnotatedProperty anno2 = (AnnotatedProperty) property2;
-                order2 = anno2.getPropertyAnnotation().order();
-            }
-
-            return order2 - order1;
-        }
-    };
+    @Override
+    public boolean isReadable() {
+        return targetProperty.isWritable();
+    }
 
     /**
-     * @return the annotation on the field / method.
+     * Overridden so this property is retrieved from the delegate instead of returning just <code>true</code>.
      */
-    Property getPropertyAnnotation();
+    @Override
+    public boolean isWritable() {
+        return targetProperty.isWritable();
+    }
 
 }

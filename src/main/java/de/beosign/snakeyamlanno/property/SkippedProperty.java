@@ -7,19 +7,15 @@ import org.yaml.snakeyaml.introspector.Property;
  * 
  * @author florian
  */
-public class SkippedProperty extends Property {
+public class SkippedProperty extends AnnotatedProperty {
+
     /**
      * New instance.
      * 
-     * @param name name of property
+     * @param originalProperty property that was discovered and is now used as a delegate for this property
      */
-    public SkippedProperty(String name) {
-        super(name, Object.class);
-    }
-
-    @Override
-    public Class<?>[] getActualTypeArguments() {
-        return new Class[0];
+    public SkippedProperty(Property originalProperty) {
+        super(originalProperty);
     }
 
     /**
@@ -27,11 +23,6 @@ public class SkippedProperty extends Property {
      */
     @Override
     public void set(Object object, Object value) throws Exception {
-    }
-
-    @Override
-    public Object get(Object object) {
-        return object;
     }
 
 }

@@ -1,10 +1,10 @@
 package de.beosign.snakeyamlanno.property;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.collection.IsEmptyCollection.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNot.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.IsNull.notNullValue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,15 +12,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.StringContains;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
-import de.beosign.snakeyamlanno.exception.AliasedYAMLException;
 
 /**
  * Tests the key mapping functionality.
@@ -29,6 +31,9 @@ import de.beosign.snakeyamlanno.exception.AliasedYAMLException;
  */
 public class KeyMapTest {
     private static final Logger log = LoggerFactory.getLogger(KeyMapTest.class);
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     /**
      * Parses a YAML that consists of a single custom object. The custom object defines
@@ -75,10 +80,7 @@ public class KeyMapTest {
                 Assert.fail("Expected exception");
             } catch (YAMLException e) {
                 log.debug("Caught expected exception {}", e.getClass().getName());
-                AliasedYAMLException cause = (AliasedYAMLException) e.getCause().getCause();
-                assertThat(cause.getAliasedProperty(), is("name"));
-                assertThat(cause.getAlias(), is("nameAlias"));
-                assertThat(cause.toString() != null, is(true));
+                assertThat(e.getMessage(), StringContains.containsString("name"));
             }
 
         }
@@ -103,11 +105,8 @@ public class KeyMapTest {
                 Assert.fail("Expected exception");
             } catch (YAMLException e) {
                 log.debug("Caught expected exception {}", e.getClass().getName());
-                AliasedYAMLException cause = (AliasedYAMLException) e.getCause().getCause();
-                assertThat(cause.getAliasedProperty(), is("absoluteMag"));
-                assertThat(cause.getAlias(), is("absMag"));
+                assertThat(e.getMessage(), StringContains.containsString("absoluteMag"));
             }
-
         }
     }
 

@@ -4,143 +4,182 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.util.Arrays;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.BeanAccess;
+import org.yaml.snakeyaml.introspector.FieldProperty;
+import org.yaml.snakeyaml.introspector.MethodProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
 
-import de.beosign.snakeyamlanno.exception.AliasedYAMLException;
-import de.beosign.snakeyamlanno.property.AnnotatedFieldProperty;
-import de.beosign.snakeyamlanno.property.AnnotatedMethodProperty;
+import de.beosign.snakeyamlanno.convert.NoConverter;
+import de.beosign.snakeyamlanno.property.AliasedProperty;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
+import de.beosign.snakeyamlanno.property.ConvertedProperty;
+import de.beosign.snakeyamlanno.property.SkippedProperty;
 
 /**
- * Property Utils that instantiates property subclasses of {@link AnnotatedProperty}. These properties have an annotation where
- * mapping and converting information can be set.
+ * Property Utils that considers defined aliases when loooking for a property by its name.
  * 
  * @author florian
  */
 public class AnnotationAwarePropertyUtils extends PropertyUtils {
-    private static final Logger log = LoggerFactory.getLogger(AnnotationAwarePropertyUtils.class);
+    private Map<Class<?>, Map<String, Property>> typeToPropertiesMap = new HashMap<>();
 
-    private BeanAccess beanAccess = BeanAccess.DEFAULT;
-    private Map<Class<?>, Map<String, Property>> typeToAnotatedPropertiesMap = new LinkedHashMap<>();
-    private Map<Class<?>, Boolean> classInitialized = new HashMap<>();
-
-    // Store bean access as there is no getter and member is private
     @Override
-    public void setBeanAccess(BeanAccess beanAccess) {
-        super.setBeanAccess(beanAccess);
-        this.beanAccess = beanAccess;
-    }
-
-    /**
-     * Used during dumping. Searches the type for annotations and then replaces each property by its {@link AnnotatedProperty} version.
-     */
-    @Override
-    public Set<Property> getProperties(Class<? extends Object> type, BeanAccess bAccess) throws IntrospectionException {
-        if (!classInitialized.getOrDefault(type, false)) {
-            initialize(type);
-            classInitialized.put(type, true);
+    protected Map<String, Property> getPropertiesMap(Class<?> type, BeanAccess bAccess) {
+        if (typeToPropertiesMap.containsKey(type)) {
+            return typeToPropertiesMap.get(type);
         }
 
-        Set<Property> originSet = super.getProperties(type, bAccess);
-        originSet.removeIf(origin -> typeToAnotatedPropertiesMap.get(type).containsValue(origin));
-        originSet.addAll(typeToAnotatedPropertiesMap.get(type).values());
-        return originSet;
-    }
+        Map<String, Property> properties = new LinkedHashMap<String, Property>();
+        boolean inaccessableFieldsExist = false;
+        switch (bAccess) {
+        case FIELD:
+            for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+                for (Field field : c.getDeclaredFields()) {
+                    int modifiers = field.getModifiers();
+                    if (!Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)
+                            && !properties.containsKey(field.getName())) {
+                        properties.put(field.getName(), new FieldProperty(field));
+                    }
+                }
+            }
+            break;
+        default:
+            // add JavaBean properties
+            try {
+                for (PropertyDescriptor property : Introspector.getBeanInfo(type)
+                        .getPropertyDescriptors()) {
+                    Method readMethod = property.getReadMethod();
+                    if ((readMethod == null || !readMethod.getName().equals("getClass"))) {
+                        // TODO && !isTransient(property)) {
+                        properties.put(property.getName(), new MethodProperty(property));
+                    }
+                }
+            } catch (IntrospectionException e) {
+                throw new YAMLException(e);
+            }
 
-    /**
-     * Used during loading. Searches the type for annotations and then returns the {@link AnnotatedProperty} instead of the normal one (if property is
-     * annotated).
-     */
-    @Override
-    public Property getProperty(Class<? extends Object> type, String name) throws IntrospectionException {
-        if (!classInitialized.getOrDefault(type, false)) {
-            initialize(type);
-            classInitialized.put(type, true);
+            // add public fields
+            for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+                for (Field field : c.getDeclaredFields()) {
+                    int modifiers = field.getModifiers();
+                    if (!Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
+                        if (Modifier.isPublic(modifiers)) {
+                            properties.put(field.getName(), new FieldProperty(field));
+                        } else {
+                            inaccessableFieldsExist = true;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        if (properties.isEmpty() && inaccessableFieldsExist) {
+            throw new YAMLException("No JavaBean properties found in " + type.getName());
         }
 
-        for (Property p : typeToAnotatedPropertiesMap.get(type).values()) {
-            if (p instanceof AnnotatedProperty) {
-                AnnotatedProperty annotatedProperty = (AnnotatedProperty) p;
-                de.beosign.snakeyamlanno.annotation.Property property = annotatedProperty.getPropertyAnnotation();
-
-                if (property.key().equals("") && p.getName().equals(name)) {
-                    // key was not aliased, so compare with field name
-                    return p;
-                }
-                if (name.equals(property.key())) {
-                    log.trace("Type: {}, property {} is mapped to {}", type.getName(), name, property.key());
-                    return p;
-                }
-                if (name.equals(p.getName())) {
-                    throw new AliasedYAMLException("Property '" + name + "' on class: "
-                            + type.getName() + " was found, but has been aliased to " + property.key() + ", so it is not considered visible.", name,
-                            property.key());
-                }
-
+        Map<String, Property> replacedMap = new HashMap<String, Property>();
+        for (String name : properties.keySet()) {
+            ReplacementResult replacementResult;
+            try {
+                replacementResult = getReplacement(new HashSet<>(properties.values()), type, properties.get(name));
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new YAMLException("Error while calculating a replacement property for property " + type.getTypeName() + "." + properties.get(name), e);
+            }
+            if (replacementResult != null) {
+                replacedMap.put(replacementResult.getName(), replacementResult.getProperty());
             }
         }
-        return super.getProperty(type, name);
+
+        typeToPropertiesMap.put(type, replacedMap);
+        return replacedMap;
     }
 
     /**
-     * Scans the given type for {@link de.beosign.snakeyamlanno.annotation.Property} annotations and stores a mapping from a property name to its property
-     * including annotation in a map.
+     * Calculate a name/property pair that will be used instead of the default property by evaluating the annotations on the property.
      * 
+     * @param properties properties
      * @param type type
-     * @throws IntrospectionException on {@link IntrospectionException}
+     * @param defaultProperty property that was found by default
+     * @return
+     * @throws IllegalAccessException if converter could not be accessed
+     * @throws InstantiationException if converer couuld not be instantiated
      */
-    private void initialize(Class<? extends Object> type) throws IntrospectionException {
-        log.debug("Initializing AnnotatedPropertiesMap for type {}", type.getName());
-        Map<String, Property> propertiesMap = getPropertiesMap(type, beanAccess);
+    private ReplacementResult getReplacement(Set<Property> properties, Class<? extends Object> type, Property defaultProperty)
+            throws InstantiationException, IllegalAccessException {
+        Property replacementProperty = defaultProperty;
+        String replacementName = defaultProperty.getName();
 
-        Map<String, Property> annotatedPropertiesMap = typeToAnotatedPropertiesMap.get(type);
-        if (annotatedPropertiesMap == null) {
-            annotatedPropertiesMap = new HashMap<>();
-            typeToAnotatedPropertiesMap.put(type, annotatedPropertiesMap);
-        }
-
-        for (String propertyName : propertiesMap.keySet()) {
-            Field field = Arrays.asList(type.getDeclaredFields()).stream()
-                    .filter(f -> f.getName().equals(propertyName))
-                    .findFirst()
-                    .orElse(null);
-            log.trace("Type: {}, found field {} for property {}", type.getName(), field, propertyName);
-
-            de.beosign.snakeyamlanno.annotation.Property property = null;
-            if (field != null) {
-                // may be in superclass
-                property = field.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-                if (property != null) {
-                    AnnotatedFieldProperty fieldProperty = new AnnotatedFieldProperty(field);
-                    annotatedPropertiesMap.put(propertyName, fieldProperty);
-                }
+        de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = defaultProperty.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+        if (propertyAnnotation != null) {
+            if (propertyAnnotation.converter() != NoConverter.class) {
+                replacementProperty = new ConvertedProperty(replacementProperty, propertyAnnotation.converter());
+            }
+            if (!propertyAnnotation.key().equals("")) {
+                replacementName = propertyAnnotation.key();
+                replacementProperty = new AliasedProperty(replacementProperty, replacementName);
             }
 
-            PropertyDescriptor[] propertyDescriptors = Introspector.getBeanInfo(type).getPropertyDescriptors();
-            PropertyDescriptor propertyDescriptor = Arrays.asList(propertyDescriptors).stream()
-                    .filter(pd -> pd.getName().equals(propertyName))
-                    .findFirst()
-                    .orElse(null);
-            log.trace("Type: {}, found method {} for property {}", type.getName(), propertyDescriptor, propertyName);
-
-            if (propertyDescriptor != null) {
-                property = propertyDescriptor.getReadMethod().getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-                if (property != null) {
-                    AnnotatedMethodProperty methodProperty = new AnnotatedMethodProperty(propertyDescriptor);
-                    annotatedPropertiesMap.put(propertyName, methodProperty);
-                }
+            if (propertyAnnotation.skipAtLoad()) {
+                replacementProperty = new SkippedProperty(replacementProperty);
             }
+
+            if (!(replacementProperty instanceof AnnotatedProperty)) {
+                // be sure to use the AnnotatedProperty as base class, so common functionality works
+                replacementProperty = new AnnotatedProperty(replacementProperty);
+            }
+
         }
-        log.debug("Annotated Properties Map for type " + type + ":\n" + annotatedPropertiesMap);
+
+        return new ReplacementResult(replacementName, replacementProperty);
     }
+
+    /**
+     * Name/Property value holder.
+     * 
+     * @author florian
+     */
+    private static final class ReplacementResult {
+        private final Property property;
+        private final String name;
+
+        /**
+         * New ReplacementResult.
+         * 
+         * @param property property
+         */
+        private ReplacementResult(Property property) {
+            this(property.getName(), property);
+        }
+
+        /**
+         * New ReplacementResult.
+         * 
+         * @param name of the property (alias)
+         * @param property property
+         */
+        private ReplacementResult(String name, Property property) {
+            this.name = name;
+            this.property = property;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Property getProperty() {
+            return property;
+        }
+
+    }
+
 }
