@@ -8,12 +8,10 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.introspector.PropertySubstitute;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
@@ -22,7 +20,6 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
-import de.beosign.snakeyamlanno.property.SkippedProperty;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
@@ -163,7 +160,6 @@ public class AnnotationAwareConstructor extends Constructor {
         @Override
         protected Object constructJavaBean2ndStep(MappingNode node, Object object) {
             List<NodeTuple> unconstructableNodeTuples = new ArrayList<>();
-            List<NodeTuple> handledNodeTuples = new ArrayList<>();
 
             Class<? extends Object> beanType = node.getType();
             List<NodeTuple> nodeValue = node.getValue();
@@ -203,36 +199,8 @@ public class AnnotationAwareConstructor extends Constructor {
 
             // Remove nodes that are unconstructable
             unconstructableNodeTuples.forEach(nt -> node.getValue().remove(nt));
-            handledNodeTuples.forEach(nt -> node.getValue().remove(nt));
 
             return super.constructJavaBean2ndStep(node, object);
         }
-
-        @Override
-        protected Property getProperty(Class<? extends Object> type, String name) {
-            log.debug("type = " + type.getName() + ", name = " + name);
-
-            Property property = super.getProperty(type, name);
-
-            de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-            if (propertyAnnotation != null) {
-                if (propertyAnnotation.skipAtLoad()) {
-                    // value must not be set
-                    TypeDescription typeDescription = typeDefinitions.get(type);
-                    if (typeDescription != null) {
-                        PropertySubstitute propertySubstitute = new PropertySubstitute(name, property.getType(), (Class<?>[]) null) {
-                            @Override
-                            public void set(Object object, Object value) throws Exception {
-                                // do nothing
-                            }
-                        };
-                        typeDescription.substituteProperty(propertySubstitute);
-                    }
-                    return new SkippedProperty(property.getName(), propertyAnnotation);
-                }
-            }
-            return property;
-        }
-
     }
 }

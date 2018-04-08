@@ -1,7 +1,6 @@
 package de.beosign.snakeyamlanno.property;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.List;
 
 import org.yaml.snakeyaml.introspector.Property;
@@ -13,21 +12,23 @@ import org.yaml.snakeyaml.introspector.Property;
  */
 public class SkippedProperty extends Property {
     private final de.beosign.snakeyamlanno.annotation.Property propertyAnnotation;
+    private final Property defaultProperty;
 
     /**
      * New instance.
      * 
-     * @param name name of property
+     * @param defaultProperty property that would have been used normally
      * @param propertyAnnotation {@link de.beosign.snakeyamlanno.annotation.Property} annotation
      */
-    public SkippedProperty(String name, de.beosign.snakeyamlanno.annotation.Property propertyAnnotation) {
-        super(name, Object.class);
+    public SkippedProperty(Property defaultProperty, de.beosign.snakeyamlanno.annotation.Property propertyAnnotation) {
+        super(defaultProperty.getName(), defaultProperty.getType());
+        this.defaultProperty = defaultProperty;
         this.propertyAnnotation = propertyAnnotation;
     }
 
     @Override
     public Class<?>[] getActualTypeArguments() {
-        return new Class[0];
+        return defaultProperty.getActualTypeArguments();
     }
 
     /**
@@ -35,6 +36,9 @@ public class SkippedProperty extends Property {
      */
     @Override
     public void set(Object object, Object value) throws Exception {
+        if (!propertyAnnotation.skipAtLoad()) {
+            defaultProperty.set(object, value);
+        }
     }
 
     /**
@@ -42,21 +46,17 @@ public class SkippedProperty extends Property {
      */
     @Override
     public Object get(Object object) {
-        return null;
+        return defaultProperty.get(object);
     }
 
     @Override
     public List<Annotation> getAnnotations() {
-        return Collections.singletonList(propertyAnnotation);
+        return defaultProperty.getAnnotations();
     }
 
     @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-        if (annotationType.isAssignableFrom(propertyAnnotation.getClass())) {
-            return annotationType.cast(propertyAnnotation);
-        }
-
-        return null;
+        return defaultProperty.getAnnotation(annotationType);
     }
 
 }

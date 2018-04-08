@@ -20,8 +20,9 @@ import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
 
 import de.beosign.snakeyamlanno.convert.NoConverter;
-import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.property.AliasedProperty;
+import de.beosign.snakeyamlanno.property.ConvertedProperty;
+import de.beosign.snakeyamlanno.property.SkippedProperty;
 
 /**
  * Property Utils that considers defined aliases when loooking for a property by its name.
@@ -122,11 +123,14 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
             if (propertyAnnotation.converter() != NoConverter.class) {
                 replacementProperty = new ConvertedProperty(replacementProperty, propertyAnnotation.converter());
             }
-        }
+            if (!propertyAnnotation.key().equals("")) {
+                replacementName = propertyAnnotation.key();
+                replacementProperty = new AliasedProperty(replacementProperty, replacementName);
+            }
 
-        if (propertyAnnotation != null && !propertyAnnotation.key().equals("")) {
-            replacementName = propertyAnnotation.key();
-            replacementProperty = new AliasedProperty(replacementProperty, replacementName);
+            if (propertyAnnotation.skipAtLoad()) {
+                replacementProperty = new SkippedProperty(replacementProperty, propertyAnnotation);
+            }
         }
 
         return new ReplacementResult(replacementName, replacementProperty);
