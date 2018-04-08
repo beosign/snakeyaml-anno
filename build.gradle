@@ -66,6 +66,7 @@ artifacts {
     archives javadocJar
 }
 
+// TODO fda: gradle build is enough to also build sources and javadoc
 // run 'gradle release' to build JAR, sources and Javadoc
 task release(dependsOn: ['build', 'jar', 'sourcesJar', 'javadocJar']) {
     
