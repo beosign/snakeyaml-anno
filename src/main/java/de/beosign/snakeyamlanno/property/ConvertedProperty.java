@@ -35,15 +35,12 @@ public class ConvertedProperty extends AnnotatedProperty {
      */
     @Override
     public void set(Object object, Object value) throws Exception {
-        Object convertedValue = converter.convertToModel(Objects.toString(value));
-        getTargetProperty().set(object, convertedValue);
+        super.set(object,  converter.convertToModel(Objects.toString(value)));
     }
 
     @Override
     public Object get(Object object) {
-        Object value = getTargetProperty().get(object);
-        String convertedValue = converter.convertToYaml(value);
-        return convertedValue;
+        return converter.convertToYaml(super.get(object));
     }
 
 }
