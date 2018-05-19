@@ -40,9 +40,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new YAMLException("Error while calculating a replacement property for property " + type.getTypeName() + "." + properties.get(name), e);
             }
-            if (replacementResult != null) {
-                replacedMap.put(replacementResult.getName(), replacementResult.getProperty());
-            }
+            replacedMap.put(replacementResult.getName(), replacementResult.getProperty());
         }
 
         typeToPropertiesMap.put(type, replacedMap);
@@ -96,15 +94,6 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
     private static final class ReplacementResult {
         private final Property property;
         private final String name;
-
-        /**
-         * New ReplacementResult.
-         * 
-         * @param property property
-         */
-        private ReplacementResult(Property property) {
-            this(property.getName(), property);
-        }
 
         /**
          * New ReplacementResult.

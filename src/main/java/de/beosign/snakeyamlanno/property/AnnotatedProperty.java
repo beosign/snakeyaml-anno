@@ -36,10 +36,6 @@ public class AnnotatedProperty extends Property {
         return targetProperty;
     }
 
-    public de.beosign.snakeyamlanno.annotation.Property getPropertyAnnotation() {
-        return getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-    }
-
     @Override
     public Class<?>[] getActualTypeArguments() {
         return targetProperty.getActualTypeArguments();

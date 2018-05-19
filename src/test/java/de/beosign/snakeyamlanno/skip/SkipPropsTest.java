@@ -3,6 +3,7 @@ package de.beosign.snakeyamlanno.skip;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -118,6 +119,12 @@ public class SkipPropsTest {
 
         Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfNull")));
         Assert.assertThat(dumped, StringContains.containsString("name1"));
+
+        skipProps.setSkipDumpIfNull("MUSTBEDUMPED");
+        dumped = yaml.dumpAsMap(skipProps);
+
+        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
+        Assert.assertThat(dumped, StringContains.containsString("name1"));
     }
 
     /**
@@ -137,6 +144,14 @@ public class SkipPropsTest {
         System.out.println(dumped);
 
         Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmpty")));
+        Assert.assertThat(dumped, StringContains.containsString("name1"));
+
+        skipProps.setSkipDumpIfEmpty("MUSTBEDUMPED");
+        dumped = yaml.dumpAsMap(skipProps);
+
+        System.out.println(dumped);
+
+        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
         Assert.assertThat(dumped, StringContains.containsString("name1"));
     }
 
@@ -159,6 +174,14 @@ public class SkipPropsTest {
 
         Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmptyCollection")));
         Assert.assertThat(dumped, StringContains.containsString("name1"));
+
+        skipProps.setSkipDumpIfEmptyCollection(Arrays.asList("MUSTBEDUMPED"));
+        dumped = yaml.dumpAsMap(skipProps);
+
+        System.out.println(dumped);
+
+        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
+        Assert.assertThat(dumped, StringContains.containsString("name1"));
     }
 
     /**
@@ -179,6 +202,17 @@ public class SkipPropsTest {
         System.out.println(dumped);
 
         Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmptyMap")));
+        Assert.assertThat(dumped, StringContains.containsString("name1"));
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("1", "MUSTBEDUMPED");
+        skipProps.setSkipDumpIfEmptyMap(map);
+        dumped = yaml.dumpAsMap(skipProps);
+
+        System.out.println(dumped);
+
+        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
+        Assert.assertThat(dumped, StringContains.containsString("1"));
         Assert.assertThat(dumped, StringContains.containsString("name1"));
     }
 

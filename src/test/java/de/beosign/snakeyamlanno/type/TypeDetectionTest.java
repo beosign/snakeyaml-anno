@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.Is;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.ConstructorException;
 
+import de.beosign.snakeyamlanno.annotation.Type;
+import de.beosign.snakeyamlanno.annotation.TypeImpl;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.property.Company;
 import de.beosign.snakeyamlanno.property.Person;
@@ -59,6 +62,8 @@ public class TypeDetectionTest {
             assertThat(parseResult.getGender(), is(Gender.MALE));
             Assert.assertTrue(parseResult.getAnimal() instanceof Dog);
             assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(5));
+
+            assertThat(new TypeImpl(null).annotationType().getTypeName(), Is.is(Type.class.getName()));
         }
     }
 
