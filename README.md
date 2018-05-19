@@ -168,7 +168,7 @@ public class GenderConverter implements Converter<Gender> {
 }
 ```
 
-As of version 0.4.0, conversion is also implemented for dumping. The interface has changed; the ``convertToModel`` 
+As of version 0.4.0, conversion is also implemented for dumping. The interface has changed; the ``convertToModel`` method now takes a ``String`` as parameter instead of ``Node``.
 
 
 #### Ignore parsing errors
@@ -213,6 +213,7 @@ public class Cat implements Animal {
 ```
 
 And the container:
+
 ```java 
 public class Person {     
    private List<Animal> pets;  
@@ -230,12 +231,27 @@ pets:
   miceCaughtCounter: 20
 ```
 
-To tell YAML to autodetect the types, you have to annotate the ``Animal`` interface with ``@Type(substitutionTypes = { Dog.class, Cat.class })``.
+You have two ways of telling YAML to autodetect the types: annotation based or programmatic. In either way, use must provide possible subtypes for a given supertype because classpath scanning of classes implementing a given interface is not yet implemented.
+If no valid substitution class if found, the default SnakeYaml algorithm for choosing the type will be used. If multiple substitution types are possible, the first possible type (determined by the order of the classes in ``substitutionTypes``) is chosen. You can also provide your own ``SubstitutionTypeSelector`` implementation and set it with ``@Type(substitutionTypes = { Dog.class, Cat.class }, substitutionTypeSelector = MyTypeSelector.class)``.  ``MyTypeSelector`` must implement ``SubstitutionTypeSelector`` and must have a no-arg constructor.
 
-So you must provide possible subtypes because classpath scanning of classes implementing a given interface is not yet implemented.
-If no valid substitution class if found, the default SnakeYaml algorithm for choosing the type will be used. If multiple substitution types are possible, the first possible type (determined by the order of the classes in ``substitutionTypes``) is chosen.
+##### Annotation-based
+To tell YAML to autodetect the types, you have to annotate the ``Animal`` interface with ``@Type(substitutionTypes = { Dog.class, Cat.class })``. Optionally, you can register a ``SubstitutionTypeSelector``.
 
-You can also provide your own ``SubstitutionTypeSelector`` implementation and set it with ``@Type(substitutionTypes = { Dog.class, Cat.class }, substitutionTypeSelector = MyTypeSelector.class)``.  ``MyTypeSelector`` must implement ``SubstitutionTypeSelector`` and must have a no-arg constructor.
+##### Programmatic
+Before loading, you can register a mapping from an interface to ``@Type`` annotation instance. Optionally, you can modify and/or remove any mappings that have already been determined by evaluating the annotations.
+
+```java
+ AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(BaseClassOrInterface.class);
+
+// optionally override given entries that have been inserted by evaluating annotations
+constructor.getTypesMap().clear();
+
+// register type programmatically
+// this has the same effect as putting an annotation of the form @Type(substitutionTypes = {Concrete1.class, Concrete2.class} on BaseClassOrInterface class
+constructor.getTypesMap().put(BaseClassOrInterface.class, new TypeImpl(new Class<?>[] { Concrete1.class, Concrete2.class }));
+
+Yaml yaml = new Yaml(constructor);
+```
 
 #### Skipping properties
 It is possible to skip properties during load or dump. In order to skip a property during load, thus preventing snakeyaml to override a model value with the value read from the yaml file that is being loaded, annotate the property with ``skipAtLoad``:
