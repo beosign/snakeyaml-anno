@@ -41,8 +41,19 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param theRoot root class - you can cast the result of the parsing process to this class
      */
     public AnnotationAwareConstructor(Class<? extends Object> theRoot) {
+        this(theRoot, false);
+
+    }
+
+    /**
+     * Creates constructor.
+     * 
+     * @param theRoot root class - you can cast the result of the parsing process to this class
+     * @param caseInsensitive true if parsing should be independent of case of keys
+     */
+    public AnnotationAwareConstructor(Class<? extends Object> theRoot, boolean caseInsensitive) {
         super(theRoot);
-        setPropertyUtils(new AnnotationAwarePropertyUtils());
+        setPropertyUtils(new AnnotationAwarePropertyUtils(caseInsensitive));
         yamlClassConstructors.put(NodeId.mapping, new AnnotationAwareMappingConstructor());
     }
 

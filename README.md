@@ -58,6 +58,7 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 
 * Property name mapping
 * Converting
+* Case insensitive parsing
 * Ignore parsing errors in a subtree
 * Auto type detection
 * Skipping properties
@@ -170,6 +171,18 @@ public class GenderConverter implements Converter<Gender> {
 
 As of version 0.4.0, conversion is also implemented for dumping. The interface has changed; the ``convertToModel`` method now takes a ``String`` as parameter instead of ``Node``.
 
+#### Case insensitive parsing
+A flag can be passed so that parsing is possible even if the keys in the yaml file do not match the case of the java property where it sould be parsed into. To enable it, use ``AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class, true)``.
+So for example, all of the following variants can be parsed using the same Person class (see above):
+
+```javascript
+  Name: Homer
+  nAME: Marge
+  NaMe: Bart
+  name: Lisa
+```
+
+In the very unlikely case that a Java Bean class contains two properties that differ only in case, the result which property is used is undetermined.
 
 #### Ignore parsing errors
 In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain ``null``. To allow the parsing process to skip unparsable parts instead of aborting, you can use ``ignoreExceptions = true`` on a property or a getter:
