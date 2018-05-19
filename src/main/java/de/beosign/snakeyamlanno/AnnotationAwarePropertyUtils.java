@@ -143,17 +143,23 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
     /**
      * Taken from <a href="https://stackoverflow.com/questions/8236945/case-insensitive-string-as-hashmap-key">here</a>.
      * 
+     * @param <T> type of values in map
      * @return a case insensitive map
      */
     private static <T> Map<String, T> caseInsensitiveMap() {
         return new TreeMap<String, T>(String.CASE_INSENSITIVE_ORDER);
     }
 
+    /**
+     * Creates a new map that is case insensitive and contains all entries of the given map.
+     * 
+     * @param <T> type of values in map
+     * @param map map
+     * @return case insensitive version of given map
+     */
     private static <T> Map<String, T> toCaseInsensitiveMap(Map<String, T> map) {
         Map<String, T> caseInsensitiveMap = caseInsensitiveMap();
-
         caseInsensitiveMap.putAll(map);
-
         return caseInsensitiveMap;
     }
 
