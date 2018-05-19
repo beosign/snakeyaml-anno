@@ -1,10 +1,8 @@
 package de.beosign.snakeyamlanno.representer;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
@@ -40,7 +38,11 @@ public class AnnotationAwareRepresenter extends Representer {
                 order2 = propertyAnnotation2.order();
             }
 
-            return order2 - order1;
+            if (order2 != order1) {
+                return order2 - order1;
+            }
+
+            return property1.compareTo(property2); // default comparison
         }
     };
 
@@ -56,9 +58,7 @@ public class AnnotationAwareRepresenter extends Representer {
         Set<Property> propertySet = super.getProperties(type);
 
         // order properties
-        List<Property> orderedList = new ArrayList<>(propertySet);
-        orderedList.sort(ORDER_COMPARATOR);
-        Set<Property> orderedProperties = new LinkedHashSet<>(orderedList);
+        TreeSet<Property> orderedProperties = new TreeSet<>(ORDER_COMPARATOR);
         orderedProperties.addAll(propertySet);
 
         return orderedProperties;
