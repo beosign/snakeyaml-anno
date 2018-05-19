@@ -15,10 +15,13 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.MappingNode;
 
 import de.beosign.snakeyamlanno.annotation.Property;
+import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.annotation.TypeImpl;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.type.Animal.Cat;
 import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.Animal.Dog;
+import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.AnnotatedAnimal.AnnotatedCat;
+import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.AnnotatedAnimal.AnnotatedDog;
 import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.WorkingPerson.Employee;
 import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.WorkingPerson.Employer;
 
@@ -177,6 +180,45 @@ public class ProgrammaticTypesTest {
         Employer monty = (Employer) parseResult.getWorkingPersons().get(1);
         assertThat(monty.getName(), is("Monty"));
         assertThat(monty.getNrEmployees(), is(100));
+
+    }
+
+    /**
+     * Tests that the an annotated type definition can be overridden programmatically.
+     *
+     * @throws Exception on any exception
+     */
+    @Test
+    public void typeDetectionAnnotationOverride() throws Exception {
+        String yamlString = "!!de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.AnnotatedAnimalsHolder\n";
+        yamlString += "animals:\n";
+        yamlString += "- loudness: 5\n";
+        yamlString += "  alias: aliased\n";
+        yamlString += "- length: 5\n";
+
+        log.debug("Loaded YAML file:\n{}", yamlString);
+
+        AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(AnnotatedAnimal.class);
+
+        // override given annotation
+        constructor.getTypesMap().clear();
+        constructor.getTypesMap().put(AnnotatedAnimal.class, new TypeImpl(new Class<?>[] { AnnotatedDog.class, AnnotatedCat.class }));
+
+        Yaml yaml = new Yaml(constructor);
+
+        AnnotatedAnimalsHolder parseResult = yaml.loadAs(yamlString, AnnotatedAnimalsHolder.class);
+        log.debug("Parsed YAML file:\n{}", parseResult);
+
+        assertThat(parseResult, notNullValue());
+
+        assertThat(parseResult.getAnimals().get(0), IsInstanceOf.instanceOf(AnnotatedDog.class));
+        AnnotatedDog dog = (AnnotatedDog) parseResult.getAnimals().get(0);
+        assertThat(dog.getAliasedProperty(), is("aliased"));
+        assertThat(dog.getLoudness(), is(5));
+
+        assertThat(parseResult.getAnimals().get(1), IsInstanceOf.instanceOf(AnnotatedCat.class));
+        AnnotatedCat cat = (AnnotatedCat) parseResult.getAnimals().get(1);
+        assertThat(cat.getLength(), is(5));
 
     }
 
@@ -386,5 +428,81 @@ public class ProgrammaticTypesTest {
             return "Company [workingPersons=" + workingPersons + "]";
         }
 
+    }
+
+    public static class AnnotatedAnimalsHolder {
+        private List<AnnotatedAnimal> animals;
+
+        public List<AnnotatedAnimal> getAnimals() {
+            return animals;
+        }
+
+        public void setAnimals(List<AnnotatedAnimal> animals) {
+            this.animals = animals;
+        }
+    }
+
+    @Type(substitutionTypes = { Animal.Cat.class, Animal.Dog.class })
+    public static abstract class AnnotatedAnimal {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public static class AnnotatedDog extends AnnotatedAnimal {
+            private int loudness;
+            private String aliasedProperty;
+
+            public int getLoudness() {
+                return loudness;
+            }
+
+            public void setLoudness(int loudness) {
+                this.loudness = loudness;
+            }
+
+            @Override
+            public String toString() {
+                return "Dog [loudness=" + loudness + ", aliasedProperty=" + aliasedProperty + ", getName()=" + getName() + "]";
+            }
+
+            @Property(key = "alias")
+            public String getAliasedProperty() {
+                return aliasedProperty;
+            }
+
+            public void setAliasedProperty(String aliasedProperty) {
+                this.aliasedProperty = aliasedProperty;
+            }
+
+        }
+
+        public static class AnnotatedCat extends AnnotatedAnimal {
+            private int length;
+
+            public int getLength() {
+                return length;
+            }
+
+            public void setLength(int length) {
+                this.length = length;
+            }
+
+            @Override
+            public String toString() {
+                return "Cat [length=" + length + ", getName()=" + getName() + "]";
+            }
+
+        }
+
+        @Override
+        public String toString() {
+            return "Animal [name=" + name + "]";
+        }
     }
 }
