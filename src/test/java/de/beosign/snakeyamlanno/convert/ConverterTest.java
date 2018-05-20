@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
@@ -112,11 +113,49 @@ public class ConverterTest {
             yaml.setBeanAccess(BeanAccess.FIELD);
 
             try {
-                yaml.loadAs(yamlString, PersonWithConverter.class);
+                yaml.loadAs(yamlString, PersonWithConverter2.class);
                 Assert.fail("Expected exception");
             } catch (YAMLException e) {
                 ConverterException cause = (ConverterException) e.getCause();
                 Assert.assertNotNull(cause);
+            }
+        }
+    }
+
+    @Test
+    public void parseWithConverterThrowingException3() throws Exception {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("personWithConverter.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(new AnnotationAwareConstructor(PersonWithConverter3.class));
+            yaml.setBeanAccess(BeanAccess.FIELD);
+
+            try {
+                yaml.loadAs(yamlString, PersonWithConverter3.class);
+                Assert.fail("Expected exception");
+            } catch (ConstructorException e) {
+                InstantiationException causeCause = (InstantiationException) e.getCause().getCause();
+                Assert.assertNotNull(causeCause);
+            }
+        }
+    }
+
+    @Test
+    public void parseWithConverterThrowingException4() throws Exception {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("personWithConverter.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(new AnnotationAwareConstructor(PersonWithConverter4.class));
+            yaml.setBeanAccess(BeanAccess.FIELD);
+
+            try {
+                yaml.loadAs(yamlString, PersonWithConverter4.class);
+                Assert.fail("Expected exception");
+            } catch (ConstructorException e) {
+                IllegalAccessException causeCause = (IllegalAccessException) e.getCause().getCause();
+                Assert.assertNotNull(causeCause);
             }
         }
     }

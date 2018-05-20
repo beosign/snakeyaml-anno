@@ -113,15 +113,6 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         /**
          * New ReplacementResult.
          * 
-         * @param property property
-         */
-        private ReplacementResult(Property property) {
-            this(property.getName(), property);
-        }
-
-        /**
-         * New ReplacementResult.
-         * 
          * @param name of the property (alias)
          * @param property property
          */
