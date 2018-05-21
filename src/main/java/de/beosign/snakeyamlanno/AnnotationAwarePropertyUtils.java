@@ -1,10 +1,8 @@
 package de.beosign.snakeyamlanno;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.yaml.snakeyaml.error.YAMLException;
@@ -19,7 +17,7 @@ import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.property.SkippedProperty;
 
 /**
- * Property Utils that considers defined aliases when loooking for a property by its name.
+ * Property Utils where properties are replaced by delegating properties so features like converting and aliasing can be implemented.
  * 
  * @author florian
  */
@@ -43,11 +41,12 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
 
         Map<String, Property> properties = super.getPropertiesMap(type, bAccess);
 
+        // Search for annotations and create instances of AnnotatedProperty in this case
         Map<String, Property> replacedMap = new LinkedHashMap<String, Property>();
         for (String name : properties.keySet()) {
             ReplacementResult replacementResult;
             try {
-                replacementResult = getReplacement(new HashSet<>(properties.values()), type, properties.get(name));
+                replacementResult = getReplacement(properties.get(name));
                 replacedMap.put(replacementResult.getName(), replacementResult.getProperty());
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new YAMLException("Error while calculating a replacement property for property " + type.getTypeName() + "." + properties.get(name), e);
@@ -55,6 +54,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         }
 
         if (caseInsensitive) {
+            // Case Insensitivity feature - that's all that needs to be done for it
             replacedMap = toCaseInsensitiveMap(replacedMap);
         }
 
@@ -65,14 +65,12 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
     /**
      * Calculate a name/property pair that will be used instead of the default property by evaluating the annotations on the property.
      * 
-     * @param properties properties
-     * @param type type
      * @param defaultProperty property that was found by default
-     * @return
+     * @return {@link ReplacementResult}
      * @throws IllegalAccessException if converter could not be accessed
-     * @throws InstantiationException if converer couuld not be instantiated
+     * @throws InstantiationException if converter could not be instantiated
      */
-    private ReplacementResult getReplacement(Set<Property> properties, Class<? extends Object> type, Property defaultProperty)
+    private ReplacementResult getReplacement(Property defaultProperty)
             throws InstantiationException, IllegalAccessException {
         Property replacementProperty = defaultProperty;
         String replacementName = defaultProperty.getName();
@@ -102,6 +100,29 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
     }
 
     /**
+     * Taken from <a href="https://stackoverflow.com/questions/8236945/case-insensitive-string-as-hashmap-key">here</a>.
+     * 
+     * @param <T> type of values in map
+     * @return a case insensitive map
+     */
+    private static <T> Map<String, T> caseInsensitiveMap() {
+        return new TreeMap<String, T>(String.CASE_INSENSITIVE_ORDER);
+    }
+
+    /**
+     * Creates a new map that is case insensitive and contains all entries of the given map.
+     * 
+     * @param <T> type of values in map
+     * @param map map
+     * @return case insensitive version of given map
+     */
+    private static <T> Map<String, T> toCaseInsensitiveMap(Map<String, T> map) {
+        Map<String, T> caseInsensitiveMap = caseInsensitiveMap();
+        caseInsensitiveMap.putAll(map);
+        return caseInsensitiveMap;
+    }
+
+    /**
      * Name/Property value holder.
      * 
      * @author florian
@@ -128,30 +149,5 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         public Property getProperty() {
             return property;
         }
-
     }
-
-    /**
-     * Taken from <a href="https://stackoverflow.com/questions/8236945/case-insensitive-string-as-hashmap-key">here</a>.
-     * 
-     * @param <T> type of values in map
-     * @return a case insensitive map
-     */
-    private static <T> Map<String, T> caseInsensitiveMap() {
-        return new TreeMap<String, T>(String.CASE_INSENSITIVE_ORDER);
-    }
-
-    /**
-     * Creates a new map that is case insensitive and contains all entries of the given map.
-     * 
-     * @param <T> type of values in map
-     * @param map map
-     * @return case insensitive version of given map
-     */
-    private static <T> Map<String, T> toCaseInsensitiveMap(Map<String, T> map) {
-        Map<String, T> caseInsensitiveMap = caseInsensitiveMap();
-        caseInsensitiveMap.putAll(map);
-        return caseInsensitiveMap;
-    }
-
 }

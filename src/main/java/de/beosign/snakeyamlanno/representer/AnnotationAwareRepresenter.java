@@ -14,7 +14,7 @@ import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
 
 /**
- * Representer that is aware of annotations.
+ * Representer that is aware of annotations. Implements the features "order properties" and "skip properties to dump".
  * 
  * @author florian
  */

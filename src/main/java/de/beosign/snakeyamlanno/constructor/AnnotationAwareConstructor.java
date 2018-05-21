@@ -26,7 +26,7 @@ import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
 /**
- * When parsing, this constructor must be used in order to honor annotations on the target bean class.
+ * Needed for implementing the auto type detection feature.
  * 
  * @author florian
  */
@@ -57,6 +57,9 @@ public class AnnotationAwareConstructor extends Constructor {
         yamlClassConstructors.put(NodeId.mapping, new AnnotationAwareMappingConstructor());
     }
 
+    /**
+     * Overridden to implmenent the "auto type detection" feature.
+     */
     @Override
     protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException {
         if (node instanceof MappingNode) {
@@ -121,7 +124,8 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Returns all <b>valid</b> substitution types from the list given by the {@link Type#substitutionTypes()} method.
+     * Returns all <b>valid</b> substitution types from the list given by the {@link Type#substitutionTypes()} method. This method
+     * helps implementing the "auto type detection" feature.
      * 
      * @param type type
      * @param typeAnnotation the {@link Type} annotation to use for the given class
@@ -179,7 +183,7 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * This constructor checks for converter information on annotated properties and calls the converter's methods.
+     * This constructor implements the features "automatic type detection" and "ignore error" feature.
      * 
      * @author florian
      */
