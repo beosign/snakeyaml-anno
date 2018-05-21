@@ -4,7 +4,10 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -12,6 +15,7 @@ import java.util.function.Function;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -37,6 +41,7 @@ public class AnnotationAwareConstructor extends Constructor {
 
     private Map<Class<?>, Type> typesMap = new HashMap<>();
     private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
+    private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
 
     /**
      * Creates constructor.
@@ -59,6 +64,17 @@ public class AnnotationAwareConstructor extends Constructor {
         setPropertyUtils(new AnnotationAwarePropertyUtils(caseInsensitive));
         yamlClassConstructors.put(NodeId.mapping, new AnnotationAwareMappingConstructor());
         yamlClassConstructors.put(NodeId.scalar, new AnnotationAwareScalarConstructor());
+    }
+
+    /**
+     * Can be modified to manually define types for a given type. This is the programmatic counterpart to the {@link Type} annotation.
+     * It can only be used to add additional types. If you want to override / disable a {@link Type} annotation that is already set on a class, override
+     * the {@link AnnotationAwareMappingConstructor#getTypeForClass(Class)} method and return a restricted map.
+     * 
+     * @return map from a type to its substitution types
+     */
+    public Map<Class<?>, Type> getTypesMap() {
+        return typesMap;
     }
 
     /**
@@ -127,6 +143,21 @@ public class AnnotationAwareConstructor extends Constructor {
         return typesMap.getOrDefault(clazz, typeAnnotation);
     }
 
+    protected List<?> constructNodeAsList(Node node, Function<Node, Object> defaultConstructor) {
+        Class<?> origType = node.getType();
+        Property propertyOfNode = nodeToPropertyMap.get(node);
+        if (propertyOfNode != null && propertyOfNode.getActualTypeArguments() != null && propertyOfNode.getActualTypeArguments().length > 0) {
+            node.setType(propertyOfNode.getActualTypeArguments()[0]);
+        }
+        Object singleObject = defaultConstructor.apply(node);
+        node.setType(origType);
+        if (singleObject == null) {
+            return null;
+        } else {
+            return Collections.singletonList(singleObject);
+        }
+    }
+
     /**
      * Returns all <b>valid</b> substitution types from the list given by the {@link Type#substitutionTypes()} method. This method
      * helps implementing the "auto type detection" feature.
@@ -182,11 +213,20 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * This constructor implements the features "automatic type detection", "ignore error" and "constructBy at property-level" feature.
+     * This constructor implements the features "automatic type detection", "ignore error", "constructBy at property-level" and "singleton list parsing" feature.
      * 
      * @author florian
      */
     protected class AnnotationAwareMappingConstructor extends ConstructMapping {
+
+        @Override
+        public Object construct(Node node) {
+            if (Collection.class.isAssignableFrom(node.getType())) {
+                return constructNodeAsList(node, super::construct);
+            } else {
+                return super.construct(node);
+            }
+        }
 
         @Override
         protected Object constructJavaBean2ndStep(MappingNode node, Object object) {
@@ -196,11 +236,16 @@ public class AnnotationAwareConstructor extends Constructor {
             List<NodeTuple> nodeValue = node.getValue();
             for (NodeTuple tuple : nodeValue) {
                 ScalarNode keyNode = getKeyNode(tuple);
-                Node valueNode = tuple.getValueNode();
 
                 keyNode.setType(String.class);
                 String key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
-                Property property = getProperty(beanType, key);
+
+                TypeDescription memberDescription = typeDefinitions.get(beanType);
+                Property property = memberDescription == null ? getProperty(beanType, key) : memberDescription.getProperty(key);
+                Node valueNode = tuple.getValueNode();
+
+                nodeToPropertyMap.put(valueNode, property);
+
 
                 if (property.getAnnotation(ConstructBy.class) != null) {
                     Object value = null;
@@ -245,7 +290,6 @@ public class AnnotationAwareConstructor extends Constructor {
 
             // Remove nodes that are unconstructable or already created
             nodeTuplesToBeRemoved.forEach(nt -> node.getValue().remove(nt));
-
             return super.constructJavaBean2ndStep(node, object);
         }
 
@@ -269,19 +313,21 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Can be modified to manually define types for a given type. This is the programmatic counterpart to the {@link Type} annotation.
-     * It can only be used to add additional types. If you want to override / disable a {@link Type} annotation that is already set on a class, override
-     * the {@link AnnotationAwareMappingConstructor#getTypeForClass(Class)} method and return a restricted map.
+     * Enables creating a complex object from a scalar. Useful if object to be created cannot be modified so
+     * adding a single argument constructor is not possible, e.g. enums
      * 
-     * @return map from a type to its substitution types
+     * @author florian
      */
-    public Map<Class<?>, Type> getTypesMap() {
-        return typesMap;
+    protected class AnnotationAwareScalarConstructor extends ConstructScalar {
+        @Override
+        public Object construct(Node nnode) {
+            if (Collection.class.isAssignableFrom(nnode.getType())) {
+                return constructNodeAsList(nnode, super::construct);
+            }
+            return constructObject(node, super::construct);
+        }
     }
 
-    /**
-     * Returns all programmatically registered class-to-constructBy associations. The map can be modified.
-     * 
      * @return all programmatically registered class-to-constructBy associations.
      */
     public Map<Class<?>, ConstructBy> getConstructByMap() {
