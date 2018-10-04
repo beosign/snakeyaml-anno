@@ -4,7 +4,7 @@
 
 
 # snakeyaml-anno
-Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.19** by Sergey Pariev, https://github.com/spariev/snakeyaml/.
+Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by Sergey Pariev, https://github.com/spariev/snakeyaml/.
 
 ## Compatibility
 
@@ -15,11 +15,17 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.19** by S
     <th class="tg-us36">1.18<br></th>
     <th class="tg-us36">1.19</th>
     <th class="tg-us36">1.20</th>
+    <th class="tg-us36">1.21</th>
+    <th class="tg-us36">1.22</th>
+    <th class="tg-us36">1.23</th>
   </tr>
   <tr>
     <td class="tg-us36">0.3.0<br></td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">NO</td>
     <td class="tg-us36">NO</td>
     <td class="tg-us36">NO</td>
   </tr>
@@ -29,11 +35,17 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.19** by S
     <td class="tg-us36">NO<br></td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
   </tr>
   <tr>
     <td class="tg-us36">0.5.0</td>
     <td class="tg-us36">NO<br></td>
     <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
   </tr>
