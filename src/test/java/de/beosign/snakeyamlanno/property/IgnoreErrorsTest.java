@@ -1,18 +1,22 @@
 package de.beosign.snakeyamlanno.property;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.property.Person.Gender;
@@ -26,8 +30,11 @@ import de.beosign.snakeyamlanno.type.Animal.Dog;
 public class IgnoreErrorsTest {
     private static final Logger log = LoggerFactory.getLogger(IgnoreErrorsTest.class);
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     /**
-     * Tests if errors are ignored if annotated accordnigly.
+     * Tests if errors are ignored if annotated accordingly.
      * 
      * @throws Exception on any exception
      */
@@ -75,36 +82,23 @@ public class IgnoreErrorsTest {
         }
     }
 
-    // private static class PartialPersonConstructor extends AnnotationAwareConstructor {
-    //
-    // public PartialPersonConstructor() {
-    // super(Person.class);
-    // yamlClassConstructors.put(NodeId.mapping, new PartialPersonMappingConstructor());
-    // }
-    //
-    // @Override
-    // protected Object constructObject(Node node) {
-    // // TODO Auto-generated method stub
-    // return super.constructObject(node);
-    // }
-    //
-    // protected class PartialPersonMappingConstructor extends AnnotationAwareMappingConstructor {
-    //
-    // @Override
-    // protected Property getProperty(Class<? extends Object> type, String name) throws IntrospectionException {
-    //
-    // return super.getProperty(type, name);
-    //
-    // }
-    //
-    // }
-    // }
+    /**
+     * Tests if everything works if ignoreErrors is set but there is no error.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void noIgnoreErrorsInvalid() throws Exception {
+        thrown.expect(YAMLException.class);
+        thrown.expectMessage("name2");
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("noIgnoreErrorsInvalid.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
 
-    // private static class AnimalConstructor extends AnnotationAwareConstructor {
-    //
-    // public AnimalConstructor() {
-    // super(Animal.class);
-    // }
-    // }
+            Yaml yaml = new Yaml(new AnnotationAwareConstructor(Person.class));
+
+            yaml.loadAs(yamlString, Person.class);
+        }
+    }
 
 }
