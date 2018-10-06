@@ -143,12 +143,7 @@ public class AnnotationAwareConstructor extends Constructor {
             for (NodeTuple tuple : nodeValue) {
                 String key = null;
                 try {
-                    ScalarNode keyNode;
-                    if (tuple.getKeyNode() instanceof ScalarNode) {
-                        keyNode = (ScalarNode) tuple.getKeyNode();
-                    } else {
-                        throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
-                    }
+                    ScalarNode keyNode = getKeyNode(tuple);
                     key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
                     final String propName = key;
 
@@ -196,36 +191,24 @@ public class AnnotationAwareConstructor extends Constructor {
             Class<? extends Object> beanType = node.getType();
             List<NodeTuple> nodeValue = node.getValue();
             for (NodeTuple tuple : nodeValue) {
-                ScalarNode keyNode;
-                if (tuple.getKeyNode() instanceof ScalarNode) {
-                    keyNode = (ScalarNode) tuple.getKeyNode();
-                } else {
-                    throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
-                }
+                ScalarNode keyNode = getKeyNode(tuple);
                 Node valueNode = tuple.getValueNode();
 
                 keyNode.setType(String.class);
                 String key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
-                try {
-                    Property property = getProperty(beanType, key);
-                    de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-                    if (propertyAnnotation != null && propertyAnnotation.ignoreExceptions()) {
-                        /* 
-                         * Let YAML set the value.
-                         */
-                        try {
-                            Construct constructor = getConstructor(valueNode);
-                            constructor.construct(valueNode);
-                        } catch (Exception e) {
-                            log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
-                            unconstructableNodeTuples.add(tuple);
-                        }
+                Property property = getProperty(beanType, key);
+                de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+                if (propertyAnnotation != null && propertyAnnotation.ignoreExceptions()) {
+                    /* 
+                     * Let YAML set the value.
+                     */
+                    try {
+                        Construct constructor = getConstructor(valueNode);
+                        constructor.construct(valueNode);
+                    } catch (Exception e) {
+                        log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
+                        unconstructableNodeTuples.add(tuple);
                     }
-                } catch (YAMLException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new YAMLException("Cannot create property=" + key
-                            + " for JavaBean=" + object, e);
                 }
             }
 
@@ -234,6 +217,7 @@ public class AnnotationAwareConstructor extends Constructor {
 
             return super.constructJavaBean2ndStep(node, object);
         }
+
     }
 
     /**
@@ -245,5 +229,13 @@ public class AnnotationAwareConstructor extends Constructor {
      */
     public Map<Class<?>, Type> getTypesMap() {
         return typesMap;
+    }
+
+    private static ScalarNode getKeyNode(NodeTuple tuple) {
+        if (tuple.getKeyNode() instanceof ScalarNode) {
+            return (ScalarNode) tuple.getKeyNode();
+        } else {
+            throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
+        }
     }
 }
