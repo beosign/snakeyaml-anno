@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
+import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
@@ -50,6 +51,35 @@ public class SkipPropsTest {
             Assert.assertThat(props.getSkipLoad(), Is.is("notLoaded"));
             Assert.assertThat(props.getSkipDump(), Is.is("mustNotBeOutput"));
             Assert.assertThat(props.getName(), Is.is("name1"));
+        }
+    }
+
+    /**
+     * Tests {@link Property#skipAtLoad()}.
+     * 
+     * @throws Exception on exception
+     */
+    @Test
+    public void checkPropertySkipLoadedAndDumped() throws Exception {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("skipDumpLoad.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(new AnnotationAwareConstructor(SkipDumpLoad.class));
+
+            SkipDumpLoad props = yaml.loadAs(yamlString, SkipDumpLoad.class);
+            Assert.assertThat(props.getLoadedAndDumped(), Is.is("loadedAndDumped"));
+            Assert.assertThat(props.getNotLoadedButDumped(), IsNull.nullValue());
+            Assert.assertThat(props.getNotDumpedButLoaded(), Is.is("notDumpedButLoaded"));
+
+            yaml = new Yaml(new AnnotationAwareRepresenter());
+            props.setNotLoadedButDumped("notLoadedButDumped");
+            String dumped = yaml.dumpAsMap(props);
+            System.out.println(yaml.dumpAsMap(props));
+
+            Assert.assertThat(dumped, StringContains.containsString("loadedAndDumped: loadedAndDumped"));
+            Assert.assertThat(dumped, StringContains.containsString("notLoadedButDumped: notLoadedButDumped"));
+            Assert.assertThat(dumped, IsNot.not(StringContains.containsString("notDumped")));
         }
     }
 
@@ -367,6 +397,38 @@ public class SkipPropsTest {
         @Override
         public boolean skip(Object javaBean, org.yaml.snakeyaml.introspector.Property property, Object propertyValue, Tag customTag) {
             return false;
+        }
+    }
+
+    public static class SkipDumpLoad {
+        private String notDumpedButLoaded;
+        private String notLoadedButDumped;
+        private String loadedAndDumped;
+
+        @Property(skipAtDump = true)
+        public String getNotDumpedButLoaded() {
+            return notDumpedButLoaded;
+        }
+
+        public void setNotDumpedButLoaded(String notDumpedButLoaded) {
+            this.notDumpedButLoaded = notDumpedButLoaded;
+        }
+
+        @Property(skipAtLoad = true)
+        public String getNotLoadedButDumped() {
+            return notLoadedButDumped;
+        }
+
+        public void setNotLoadedButDumped(String notLoadedButDumped) {
+            this.notLoadedButDumped = notLoadedButDumped;
+        }
+
+        public String getLoadedAndDumped() {
+            return loadedAndDumped;
+        }
+
+        public void setLoadedAndDumped(String loadedAndDumped) {
+            this.loadedAndDumped = loadedAndDumped;
         }
 
     }

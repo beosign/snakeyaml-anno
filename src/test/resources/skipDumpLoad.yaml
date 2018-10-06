@@ -1,0 +1,4 @@
+!!de.beosign.snakeyamlanno.property.SkipPropsTest.SkipProps2
+notDumpedButLoaded: notDumpedButLoaded
+notLoadedButDumped: notLoadedButDumped
+loadedAndDumped: loadedAndDumped
