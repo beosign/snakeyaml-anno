@@ -4,6 +4,11 @@ import java.util.List;
 
 import de.beosign.snakeyamlanno.type.WorkingPerson;
 
+/**
+ * Test pojo.
+ * 
+ * @author florian
+ */
 public class Company {
     private List<WorkingPerson> workingPersons;
 

@@ -2,6 +2,11 @@ package de.beosign.snakeyamlanno.convert;
 
 import de.beosign.snakeyamlanno.property.Person.Gender;
 
+/**
+ * Test converter.
+ * 
+ * @author florian
+ */
 public class GenderConverter implements Converter<Gender> {
 
     @Override

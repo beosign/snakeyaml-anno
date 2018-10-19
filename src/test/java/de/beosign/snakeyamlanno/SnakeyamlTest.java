@@ -16,6 +16,11 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import de.beosign.snakeyamlanno.property.Person;
 
+/**
+ * Basic test.
+ * 
+ * @author florian
+ */
 public class SnakeyamlTest {
     private static final Logger log = LoggerFactory.getLogger(SnakeyamlTest.class);
 

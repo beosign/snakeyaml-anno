@@ -1,5 +1,10 @@
 package de.beosign.snakeyamlanno.convert;
 
+/**
+ * Test converter.
+ * 
+ * @author florian
+ */
 public class LengthToCmConverter implements Converter<Integer> {
     @Override
     public String convertToYaml(Integer modelValue) {
