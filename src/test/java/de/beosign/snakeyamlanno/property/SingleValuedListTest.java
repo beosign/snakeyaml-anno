@@ -96,6 +96,11 @@ public class SingleValuedListTest {
         assertThat(parseResult.getChildren().get(1).getFavoriteNumbers().get(1), is(2));
     }
 
+    /**
+     * Test pojo.
+     * 
+     * @author florian
+     */
     public static class Person {
         private String name;
         private List<Integer> favoriteNumbers;
@@ -123,6 +128,11 @@ public class SingleValuedListTest {
 
     }
 
+    /**
+     * Test pojo.
+     * 
+     * @author florian
+     */
     public static class Family {
         private Person father;
         private List<Person> children;
