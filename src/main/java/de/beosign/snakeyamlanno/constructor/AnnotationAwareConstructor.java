@@ -7,7 +7,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.constructor.Construct;
@@ -34,6 +36,7 @@ public class AnnotationAwareConstructor extends Constructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
 
     private Map<Class<?>, Type> typesMap = new HashMap<>();
+    private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
 
     /**
      * Creates constructor.
@@ -55,10 +58,11 @@ public class AnnotationAwareConstructor extends Constructor {
         super(theRoot);
         setPropertyUtils(new AnnotationAwarePropertyUtils(caseInsensitive));
         yamlClassConstructors.put(NodeId.mapping, new AnnotationAwareMappingConstructor());
+        yamlClassConstructors.put(NodeId.scalar, new AnnotationAwareScalarConstructor());
     }
 
     /**
-     * Overridden to implmenent the "auto type detection" feature.
+     * Overridden to implement the "auto type detection" feature.
      */
     @Override
     protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException {
@@ -178,7 +182,7 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * This constructor implements the features "automatic type detection" and "ignore error" feature.
+     * This constructor implements the features "automatic type detection", "ignore error" and "constructBy at property-level" feature.
      * 
      * @author florian
      */
@@ -186,7 +190,7 @@ public class AnnotationAwareConstructor extends Constructor {
 
         @Override
         protected Object constructJavaBean2ndStep(MappingNode node, Object object) {
-            List<NodeTuple> unconstructableNodeTuples = new ArrayList<>();
+            List<NodeTuple> nodeTuplesToBeRemoved = new ArrayList<>();
 
             Class<? extends Object> beanType = node.getType();
             List<NodeTuple> nodeValue = node.getValue();
@@ -197,27 +201,71 @@ public class AnnotationAwareConstructor extends Constructor {
                 keyNode.setType(String.class);
                 String key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
                 Property property = getProperty(beanType, key);
-                de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
-                if (propertyAnnotation != null && propertyAnnotation.ignoreExceptions()) {
-                    /* 
-                     * Let YAML set the value.
-                     */
+
+                if (property.getAnnotation(ConstructBy.class) != null) {
+                    Object value = null;
                     try {
+                        @SuppressWarnings("unchecked")
+                        CustomConstructor<Object> cc = (CustomConstructor<Object>) property.getAnnotation(ConstructBy.class).value().newInstance();
                         Construct constructor = getConstructor(valueNode);
-                        constructor.construct(valueNode);
+                        value = cc.construct(valueNode, constructor::construct);
+                        property.set(object, value);
+                        nodeTuplesToBeRemoved.add(tuple);
+                    } catch (YAMLException e) {
+                        throw e;
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new YAMLException(
+                                "Custom constructor " + property.getAnnotation(ConstructBy.class).value() + //
+                                        " on property " + object.getClass().getTypeName() + "::" + property + " cannot be created",
+                                e);
                     } catch (Exception e) {
-                        log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
-                        unconstructableNodeTuples.add(tuple);
+                        throw new YAMLException(
+                                "Cannot set value of type " + (value != null ? value.getClass().getTypeName() : "null") + //
+                                        " into property " + object.getClass().getTypeName() + "::" + property,
+                                e);
+                    }
+                } else {
+                    de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+                    boolean ignoreExceptions = (propertyAnnotation != null && propertyAnnotation.ignoreExceptions());
+
+                    if (ignoreExceptions) {
+                        /* 
+                         * Let YAML set the value.
+                         */
+                        try {
+                            Construct constructor = getConstructor(valueNode);
+                            constructor.construct(valueNode);
+                        } catch (Exception e) {
+                            log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
+                            nodeTuplesToBeRemoved.add(tuple);
+                        }
                     }
                 }
             }
 
-            // Remove nodes that are unconstructable
-            unconstructableNodeTuples.forEach(nt -> node.getValue().remove(nt));
+            // Remove nodes that are unconstructable or already created
+            nodeTuplesToBeRemoved.forEach(nt -> node.getValue().remove(nt));
 
             return super.constructJavaBean2ndStep(node, object);
         }
 
+        @Override
+        public Object construct(Node node) {
+            return constructObject(node, super::construct);
+        }
+    }
+
+    /**
+     * Enables creating a complex object from a scalar. Useful if object to be created cannot be modified soa
+     * adding a single argument constructor is not possible, e.g. enums
+     * 
+     * @author florian
+     */
+    protected class AnnotationAwareScalarConstructor extends ConstructScalar {
+        @Override
+        public Object construct(Node node) {
+            return constructObject(node, super::construct);
+        }
     }
 
     /**
@@ -231,6 +279,73 @@ public class AnnotationAwareConstructor extends Constructor {
         return typesMap;
     }
 
+    /**
+     * Returns all programmatically registered class-to-constructBy associations. The map can be modified.
+     * 
+     * @return all programmatically registered class-to-constructBy associations.
+     */
+    public Map<Class<?>, ConstructBy> getConstructByMap() {
+        return constructByMap;
+    }
+
+    /**
+     * Constructs an object by using either the default constructor (usually the SnakeYaml way) or - if registered - the custom constructor if there is one
+     * defined for the given node type.
+     * 
+     * @param node node
+     * @param defaultConstructor default constructor
+     * @param <T> object type
+     * @return constructed object
+     */
+    private <T> T constructObject(Node node, Function<Node, T> defaultConstructor) {
+        ConstructBy constructBy = getConstructBy(node.getType());
+        if (constructBy != null) {
+            try {
+                @SuppressWarnings("unchecked")
+                CustomConstructor<T> constructor = (CustomConstructor<T>) constructBy.value().newInstance();
+                return constructor.construct(node, defaultConstructor);
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new YAMLException("Cannot create custom constructor " + constructBy.value().getName(), e);
+            }
+        }
+        return defaultConstructor.apply(node);
+    }
+
+    /**
+     * Returns a matching {@link ConstructBy} annotation by using the following rules, given the node is of type <code>T</code>:<br>
+     * Walk the superclass hierarchy of <code>T</code>, then all interfaces of <code>T</code>.<br>
+     * For each superclass/interface <code>S super T</code>, check first if there is an entry in the {@link #getConstructByMap()} for <code>S</code>
+     * and if so, return the ConstructBy from the map;
+     * if not, check if <code>S</code> is annotated with ConstructBy, and if so, return the ConstructBy from the annotation.<br>
+     * If there is no match for <code>S</code>, proceed with the next superclass/interface.
+     * if no match was found after walking the whole hierarchy, <code>null</code> is returned.
+     * 
+     * @param type type
+     * @return {@link ConstructBy} or <code>null</code> if no matching ConstructBy found
+     */
+    protected ConstructBy getConstructBy(Class<?> type) {
+        ConstructBy constructByFoundInMap = null;
+        ConstructBy constructByAnnotation = null;
+
+        List<Class<?>> typesInHierarchy = new ArrayList<>();
+        typesInHierarchy.add(type);
+        typesInHierarchy.addAll(ClassUtils.getAllSuperclasses(type));
+        typesInHierarchy.addAll(ClassUtils.getAllInterfaces(type));
+
+        for (Class<?> typeToFindInMap : typesInHierarchy) {
+            constructByFoundInMap = constructByMap.get(typeToFindInMap);
+            if (constructByFoundInMap != null) {
+                return constructByFoundInMap;
+            }
+            constructByAnnotation = typeToFindInMap.getDeclaredAnnotation(ConstructBy.class);
+            if (constructByAnnotation != null) {
+                return constructByAnnotation;
+            }
+        }
+
+        return null;
+    }
+
     private static ScalarNode getKeyNode(NodeTuple tuple) {
         if (tuple.getKeyNode() instanceof ScalarNode) {
             return (ScalarNode) tuple.getKeyNode();
@@ -238,4 +353,5 @@ public class AnnotationAwareConstructor extends Constructor {
             throw new YAMLException("Keys must be scalars but found: " + tuple.getKeyNode());
         }
     }
+
 }
