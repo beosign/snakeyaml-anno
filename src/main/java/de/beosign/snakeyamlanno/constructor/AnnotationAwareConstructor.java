@@ -143,13 +143,20 @@ public class AnnotationAwareConstructor extends Constructor {
         return typesMap.getOrDefault(clazz, typeAnnotation);
     }
 
+    /**
+     * Constructs a singleton list from the constructed object unless the constructed object is <code>null</code>, in which case <code>null</code> is returned.
+     * 
+     * @param node node - a {@link MappingNode} or a {@link ScalarNode} that is to assigned to a collection property
+     * @param defaultConstructor default constructor
+     * @return a singleton list or <code>null</code>
+     */
     protected List<?> constructNodeAsList(Node node, Function<Node, Object> defaultConstructor) {
         Class<?> origType = node.getType();
         Property propertyOfNode = nodeToPropertyMap.get(node);
         if (propertyOfNode != null && propertyOfNode.getActualTypeArguments() != null && propertyOfNode.getActualTypeArguments().length > 0) {
             node.setType(propertyOfNode.getActualTypeArguments()[0]);
         }
-        Object singleObject = defaultConstructor.apply(node);
+        Object singleObject = constructObject(node, defaultConstructor);
         node.setType(origType);
         if (singleObject == null) {
             return null;
@@ -213,18 +220,18 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * This constructor implements the features "automatic type detection", "ignore error", "constructBy at property-level" and "singleton list parsing" feature.
+     * This constructor implements the features "automatic type detection", "ignore error", "constructBy at property-level" and "singleton list parsing"
+     * feature.
      * 
      * @author florian
      */
     protected class AnnotationAwareMappingConstructor extends ConstructMapping {
-
         @Override
         public Object construct(Node node) {
             if (Collection.class.isAssignableFrom(node.getType())) {
                 return constructNodeAsList(node, super::construct);
             } else {
-                return super.construct(node);
+                return constructObject(node, super::construct);
             }
         }
 
@@ -245,7 +252,6 @@ public class AnnotationAwareConstructor extends Constructor {
                 Node valueNode = tuple.getValueNode();
 
                 nodeToPropertyMap.put(valueNode, property);
-
 
                 if (property.getAnnotation(ConstructBy.class) != null) {
                     Object value = null;
@@ -293,41 +299,26 @@ public class AnnotationAwareConstructor extends Constructor {
             return super.constructJavaBean2ndStep(node, object);
         }
 
-        @Override
-        public Object construct(Node node) {
-            return constructObject(node, super::construct);
-        }
-    }
-
-    /**
-     * Enables creating a complex object from a scalar. Useful if object to be created cannot be modified soa
-     * adding a single argument constructor is not possible, e.g. enums
-     * 
-     * @author florian
-     */
-    protected class AnnotationAwareScalarConstructor extends ConstructScalar {
-        @Override
-        public Object construct(Node node) {
-            return constructObject(node, super::construct);
-        }
     }
 
     /**
      * Enables creating a complex object from a scalar. Useful if object to be created cannot be modified so
-     * adding a single argument constructor is not possible, e.g. enums
+     * adding a single argument constructor is not possible, e.g. enums.
+     * Also checks if the node's type is a collection and in that case, converts it to a singleton list.
      * 
      * @author florian
      */
     protected class AnnotationAwareScalarConstructor extends ConstructScalar {
         @Override
-        public Object construct(Node nnode) {
-            if (Collection.class.isAssignableFrom(nnode.getType())) {
-                return constructNodeAsList(nnode, super::construct);
+        public Object construct(Node node) {
+            if (Collection.class.isAssignableFrom(node.getType())) {
+                return constructNodeAsList(node, super::construct);
             }
             return constructObject(node, super::construct);
         }
     }
 
+    /**
      * @return all programmatically registered class-to-constructBy associations.
      */
     public Map<Class<?>, ConstructBy> getConstructByMap() {
