@@ -1,0 +1,23 @@
+!!de.beosign.snakeyamlanno.util.Person
+name: Homer
+skill: 1
+favoriteColors: [bLuE,rEd]
+type: java.lang.String
+firstPet: !!de.beosign.snakeyamlanno.constructor.Person$Dog
+  name: dog1
+  dogYears: 42
+secondPet:
+  name: cat17
+  dogYears: 17
+pets:
+- !!de.beosign.snakeyamlanno.constructor.Person$Dog
+  name: dog2
+  years: 4
+- !!de.beosign.snakeyamlanno.constructor.Person$Cat
+  name: cat1
+  age: 3
+  nrMiceCaught: 100
+- !!de.beosign.snakeyamlanno.constructor.Person$Dog
+  name: dog4
+  age: 3
+  nrBarksPerDay: 20

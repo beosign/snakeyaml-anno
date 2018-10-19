@@ -1,0 +1,21 @@
+!!de.beosign.snakeyamlanno.util.Person
+name: Homer
+skill: PRO
+firstPet: &fp !!de.beosign.snakeyamlanno.util.Person$Dog
+  name: dog1
+  age: 42
+secondPet: !!de.beosign.snakeyamlanno.util.Person$Cat
+  name: cat17
+  age: 17
+pets:
+- !!de.beosign.snakeyamlanno.util.Person$Dog
+  name: dog2
+  age: 4
+- !!de.beosign.snakeyamlanno.util.Person$Cat
+  name: cat1
+  age: 3
+- !!de.beosign.snakeyamlanno.util.Person$Dog
+  name: dog4
+  age: 3
+  nrBarksPerDay: 20
+- *fp

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
+import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 
 /**
@@ -47,7 +48,8 @@ public class KeyMapTest {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
 
-            Yaml yaml = new Yaml(new AnnotationAwareConstructor(List.class));
+            AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(List.class);
+            Yaml yaml = new Yaml(constructor);
 
             @SuppressWarnings("unchecked")
             List<StellarObject> parseResult = (List<StellarObject>) yaml.load(yamlString);
@@ -58,6 +60,10 @@ public class KeyMapTest {
             assertThat(parseResult.get(0).getAbsoluteMag(), is(4.8));
             assertThat(parseResult.get(0).getName(), is("Sun"));
 
+            AnnotatedProperty annotatedProperty = (AnnotatedProperty) ((AnnotationAwarePropertyUtils) constructor.getPropertyUtils()).getProperty(StellarObject.class, "nameAlias");
+            assertThat(annotatedProperty.getTargetProperty().getName(), is("name"));
+            assertThat(annotatedProperty.getTargetProperty().getAnnotations().size(), is(1));
+            assertThat(annotatedProperty.getAnnotations().size(), is(1));
         }
     }
 
