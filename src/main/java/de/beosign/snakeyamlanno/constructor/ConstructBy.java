@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * modified, see {@link AnnotationAwareConstructor#getConstructByMap()}
  * </p>
  * <p>
- * If this annotation is found on a property, then a {@link de.beosign.snakeyaml.annotation.Property} annotation has <b>no effect</b>!
+ * If this annotation is found on a property, then a {@link de.beosign.snakeyamlanno.annotation.Property} annotation has <b>no effect</b>!
  * </p>
  * 
  * @author florian
