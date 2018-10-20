@@ -12,7 +12,6 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
-import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.convert.ConverterException;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
@@ -206,37 +205,6 @@ public class Person {
 
     }
 
-    public static class ReverseStringConverter implements Converter<String> {
-
-        @Override
-        public String convertToYaml(String modelValue) {
-            return StringUtils.reverse(modelValue);
-        }
-
-        @Override
-        public String convertToModel(String value) {
-            return StringUtils.reverse(value);
-        }
-
-    }
-
-    public static class CharCountIntegerConverter implements Converter<Integer> {
-
-        @Override
-        public String convertToYaml(Integer modelValue) {
-            return StringUtils.repeat("+", modelValue);
-        }
-
-        @Override
-        public Integer convertToModel(String value) {
-            if (value == null)
-                return 0;
-
-            return value.length();
-        }
-
-    }
-
     public static class WrongTypeCustomConstructor implements CustomConstructor<String> {
         @Override
         public String construct(Node node, Function<? super Node, ? extends String> defaultConstructor) throws YAMLException {
@@ -276,7 +244,6 @@ public class Person {
 
         @Override
         public Animal construct(Node node, Function<? super Node, ? extends Animal> defaultConstructor) throws YAMLException {
-            // TODO Auto-generated method stub
             return null;
         }
 
