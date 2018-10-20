@@ -138,7 +138,7 @@ public class CustomConstructorTest {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
 
-            annotationAwareConstructor.getConstructByMap().put(Dog.class, ConstructByFactory.of(PrivateCustomConverter.class));
+            annotationAwareConstructor.getConstructByMap().put(Dog.class, ConstructByFactory.of(PrivateCustomConstructor.class));
             Yaml yaml = new Yaml(annotationAwareConstructor);
             try {
                 yaml.loadAs(yamlString, Person.class);
@@ -235,7 +235,7 @@ public class CustomConstructorTest {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
 
-            annotationAwareConstructor.getConstructByMap().put(Skill.class, ConstructByFactory.of(WrongObjectConverter.class));
+            annotationAwareConstructor.getConstructByMap().put(Skill.class, ConstructByFactory.of(WrongObjectConstructor.class));
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             try {
@@ -249,17 +249,17 @@ public class CustomConstructorTest {
     }
 
     // CHECKSTYLE:OFF - test classes
-    protected static class WrongObjectConverter implements CustomConstructor<String> {
+    protected static class WrongObjectConstructor implements CustomConstructor<String> {
         @Override
         public String construct(Node node, Function<? super Node, ? extends String> defaultConstructor) throws YAMLException {
             return "Wrong object type";
         }
     }
 
-    protected abstract static class AbstractCustomConverter implements CustomConstructor<String> {
+    protected abstract static class AbstractCustomConstructor implements CustomConstructor<String> {
     }
 
-    private abstract static class PrivateCustomConverter implements CustomConstructor<String> {
+    private abstract static class PrivateCustomConstructor implements CustomConstructor<String> {
     }
 
 }
