@@ -187,7 +187,7 @@ public class Person {
 
     }
 
-    @ConstructBy(DefaultConstructor.class)
+    @ConstructBy(DefaultCustomConstructor.class)
     public static class Cat extends Animal {
         private int nrMiceCaught;
 

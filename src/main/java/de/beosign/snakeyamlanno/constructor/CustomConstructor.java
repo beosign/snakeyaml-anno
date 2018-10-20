@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.nodes.Node;
  * <code>@ConstructBy</code> annotation or dynamically via code, or it can be applied on a per-property basis using the <code>@ConstructBy</code> annotation
  * 
  * @author florian
- * @param <T> type of obejct to create
+ * @param <T> type of object to create
  */
 public interface CustomConstructor<T> {
 

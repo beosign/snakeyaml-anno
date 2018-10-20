@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.nodes.Node;
  * 
  * @author florian
  */
-public class DefaultConstructor implements CustomConstructor<Object> {
+public class DefaultCustomConstructor implements CustomConstructor<Object> {
 
     /**
      * Constructs an object by just calling <code>defaultConstructor.apply</code>.
