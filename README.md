@@ -86,6 +86,7 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 * Converting
 * Custom Constructor
 * Case insensitive parsing
+* Allow parsing of single value for Collection property
 * Ignore parsing errors in a subtree
 * Auto type detection
 * Skipping properties
@@ -295,6 +296,35 @@ So for example, all of the following variants can be parsed using the same Perso
 ```
 
 In the very unlikely case that a Java Bean class contains two properties that differ only in case, the result which property is used is undetermined.
+
+#### Allow parsing of single value for Collection property
+If you have a collection based property, you have to provide a list in SnakeYaml, otherwise the value cannot be parsed. Example:
+
+```java 
+ public class Person {     
+    private String name;
+   
+    private List<Integer> favoriteNumbers;
+    private List<Person> children;
+
+}
+```
+
+The corresponding parseable yaml could look like this:
+
+```javascript
+name: Homer
+favoriteNumbers: [42]
+children: [{name: bart}]
+```
+
+Even though there is only one favorite number, you have to provide the "42" as list item. With snakeyaml-anno, it is possible to provide the following yaml - the constructed nodes will be automatically put into a singleton list, letting the parse process succeed.
+
+```javascript
+name: Homer
+favoriteNumbers: 42
+children: {name: bart}
+```
 
 
 #### Ignore parsing errors
