@@ -84,6 +84,7 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 
 * Property name mapping
 * Converting
+* Custom Constructor
 * Case insensitive parsing
 * Ignore parsing errors in a subtree
 * Auto type detection
@@ -136,6 +137,7 @@ It is also possible to annotate the getter instead:
     public String getFirstName() {...}
 }
 ```
+
 
 #### Converting
 You can apply a converter to a field or getter. This feature is especially useful for converting enum values as Snakeyaml as of version 1.17 supports only basic converting, e.g. the string in the yaml file must match the enum constant definition in Java (uppercase).
@@ -197,6 +199,90 @@ public class GenderConverter implements Converter<Gender> {
 
 As of version 0.4.0, conversion is also implemented for dumping. The interface has changed; the `convertToModel` method now takes a `String` as parameter instead of `Node`.
 
+#### Custom Constructor
+The converter example above has shown how to apply a different logic to parse a node into a Java object.
+
+However, imagine that a property of type `Gender` would be more than once. When using a converter, you would have to annotate each property of type `Gender`.
+
+So it could make sense to tell the parser to apply a custom logic when it encounters a property of a certain type like `Gender`. This is where the concept of a _CustomConstructor_ comes in handy.
+
+##### Register Custom Constructor by class annotation 
+Given the same classes as in the converter example, instead of defining a `Converter` and annotating each property of type `Gender` with it, you can 
+annotate the enum `Gender` with the `ConstructBy` annotation:
+
+
+```java
+@ConstructBy(GenderCustomConverter.class)
+public enum Gender {
+    MALE("m"),
+    FEMALE("f");
+
+    private String abbr;
+
+    private Gender(String abbr) {
+        this.abbr = abbr;
+    }
+
+    public String getAbbr() {
+        return abbr;
+    }
+}
+```
+
+This instructs the parser to create a Java object from a node of type `Gender` using the given `GenderCustomConverter` class, which must implement the `CustomConverter<T>` interface and could be defined as follows:
+
+```java
+public class GenderCustomConverter implements CustomConverter<Gender> {
+    @Override
+    public Gender construct(Node node, Function<? super Node, ? extends Gender> defaultConstructor) throws ConstructorException {
+        String val = (String) NodeUtil.getValue(node); // contains 'm' or 'f'
+    
+        for (Gender g : Gender.values()) {
+           if (g.getAbbr().equals(value)) {
+              return g;
+           }
+        }
+        
+        // try default way of parsing the enum
+        return defaultConstructor.apply(node); // if string contains "MALE" or "FEMALE", this is also ok
+}
+
+```
+
+The custom constructor can make use of the default way of constructing the passed in node by using the passed in `defaultConstructor` instance.
+
+##### Register Custom Constructor by code
+It may be the case that you want to parse a yaml node into a Java object whose type is not defined by your application, but instead comes from a thrid party library or Java itself, so it is not possible to put an annotation on that class.
+
+In this case, you can register a custom constructor using `AnnotationAwareConstructor.registerCustomConstructor`:
+
+```java
+   annotationAwareConstructor.registerCustomConstructor(Gender.class, GenderCustomConstructor.class);
+   Yaml yaml = new Yaml(annotationAwareConstructor);
+```
+
+For more control over the registered constructors, you can also modify `AnnotationAwareConstructor.getConstructByMap`.
+
+##### Custom Constructor Inheritance
+If a custom constructor is registered for a type `S`, and a node is of type `T` with `T extends/implements S`, then the custom constructor will also be used. So a custom constructor on a type will also be used for any subtypes.
+
+For example, if a custom constructor is registered for type `Number`, then it will be called for properties of type `Number`, but also for properties of type `Integer` and `Double`. If for let's say `Integer` the custom converter should not be applied, then one has to register the `DefaultCustomConstructor`:  `annotationAwareConstructor.registerCustomConstructor(Integer.class, DefaultCustomConstructor.class)`.
+
+##### Custom Constructor Resolution
+Because a custom constructor can be registered via annotation or programmatically, it is possible that there are two definitions for a given (super-)type.
+
+The type hierarchy is relevant. Given a node of type `T`, the exact way for finding the `ConstructBy` instance (and thus the custom constructor class) is as follows:
+
+1. Start with `T`, then walk the superclass hierarchy of `T`, then all interfaces of `T`.
+1. For each class/interface `S super T`, check first if there is an entry in the `getConstructByMap()` for `S` and if so, return the `ConstructBy` from the map
+1. Check if `S` is annotated with `ConstructBy`, and if so, return the `ConstructBy` from the annotation.
+1. If there is no match for `S`, proceed with the next class/interface in the hierarchy
+1. If no match was found after walking the whole class hierarchy of `T`, no custom constructor is used.
+
+##### Register Custom Constructor on property
+
+It is also possible to register a custom constructor on a per-property-basis. Use this instead of a `Converter` if you need more than a simple  conversion mechanism. 
+
 #### Case insensitive parsing
 A flag can be passed so that parsing is possible even if the keys in the yaml file do not match the case of the java property where it sould be parsed into. To enable it, use `AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class, true)`.
 So for example, all of the following variants can be parsed using the same Person class (see above):
@@ -209,6 +295,7 @@ So for example, all of the following variants can be parsed using the same Perso
 ```
 
 In the very unlikely case that a Java Bean class contains two properties that differ only in case, the result which property is used is undetermined.
+
 
 #### Ignore parsing errors
 In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain `null`. To allow the parsing process to skip unparsable parts instead of aborting, you can use `ignoreExceptions = true` on a property or a getter:
