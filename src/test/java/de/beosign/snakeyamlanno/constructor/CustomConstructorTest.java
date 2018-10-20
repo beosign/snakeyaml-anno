@@ -161,7 +161,7 @@ public class CustomConstructorTest {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
 
-            annotationAwareConstructor.getConstructByMap().put(Dog.class, ConstructByFactory.of(AbstractCustomConverter.class));
+            annotationAwareConstructor.registerCustomConstructor(Dog.class, AbstractCustomConstructor.class);
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             try {

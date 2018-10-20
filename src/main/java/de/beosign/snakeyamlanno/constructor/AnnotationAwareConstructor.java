@@ -289,6 +289,17 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
+     * Programmatically registers a {@link CustomConstructor} for a given type. This is a convenience method for putting something into
+     * {@link #getConstructByMap()}.
+     * 
+     * @param forType type for which a CustomConverter is to be registered
+     * @param customConstructorClass {@link CustomConstructor} type
+     */
+    public void registerCustomConstructor(Class<?> forType, Class<? extends CustomConstructor<?>> customConstructorClass) {
+        constructByMap.put(forType, ConstructByFactory.of(customConstructorClass));
+    }
+
+    /**
      * Constructs an object by using either the default constructor (usually the SnakeYaml way) or - if registered - the custom constructor if there is one
      * defined for the given node type.
      * 
