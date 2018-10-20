@@ -153,7 +153,7 @@ public class AnnotationAwareConstructor extends Constructor {
     protected List<?> constructNodeAsList(Node node, Function<Node, Object> defaultConstructor) {
         Class<?> origType = node.getType();
         Property propertyOfNode = nodeToPropertyMap.get(node);
-        if (propertyOfNode != null && propertyOfNode.getActualTypeArguments() != null && propertyOfNode.getActualTypeArguments().length > 0) {
+        if (propertyOfNode.getActualTypeArguments() != null && propertyOfNode.getActualTypeArguments().length > 0) {
             node.setType(propertyOfNode.getActualTypeArguments()[0]);
         }
         Object singleObject = constructObject(node, defaultConstructor);
