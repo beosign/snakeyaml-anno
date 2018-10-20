@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +61,30 @@ public class CustomConstructorTest {
             assertThat(person.getFirstPet().getAge(), is(6));
             assertThat(person.getPets().size(), is(3));
 
+        }
+    }
+
+    /**
+     * Test enum converter.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void parseWithCustomConstructorOverriddenAtPropertyLevelAndPropertyAnnotation() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("person.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            yamlString += "\nthirdPet: dog33";
+
+            log.debug("YAML:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Person person = yaml.loadAs(yamlString, Person.class);
+            log.debug("Parsed YAML file:\n{}", person);
+
+            assertThat(person, notNullValue());
+            assertThat(person.getThirdPet().getName(), containsString("getName()=dog33"));
         }
     }
 

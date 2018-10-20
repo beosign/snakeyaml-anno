@@ -2,6 +2,7 @@ package de.beosign.snakeyamlanno.constructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,8 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
+import de.beosign.snakeyamlanno.annotation.Property;
+import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.convert.ConverterException;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
@@ -23,6 +26,7 @@ public class Person {
     private List<Animal> pets = new ArrayList<>();
     private Animal firstPet;
     private Animal secondPet;
+    private Animal thirdPet;
     private Class<?> type;
     private String notConstructable;
     private Integer notSettable;
@@ -88,6 +92,16 @@ public class Person {
 
     public void setSecondPet(Animal secondPet) {
         this.secondPet = secondPet;
+    }
+
+    @ConstructBy(DogByYearConstructor.class)
+    @Property(converter = DogConverter.class)
+    public Animal getThirdPet() {
+        return thirdPet;
+    }
+
+    public void setThirdPet(Animal thirdPet) {
+        this.thirdPet = thirdPet;
     }
 
     public List<Animal> getPets() {
@@ -160,7 +174,7 @@ public class Person {
         }
 
         public Dog(String str) {
-
+            setName(str);
         }
 
         public int getNrBarksPerDay() {
@@ -303,6 +317,8 @@ public class Person {
                     dog.setAge(age);
                 }
                 return dog;
+            } else if (node instanceof ScalarNode) {
+                return new Dog(Objects.toString(NodeUtil.getValue(node), null));
             } else {
                 return defaultConstructor.apply(node);
             }
@@ -324,6 +340,20 @@ public class Person {
             } else {
                 return defaultConstructor.apply(node);
             }
+        }
+
+    }
+
+    public static class DogConverter implements Converter<Dog> {
+
+        @Override
+        public String convertToYaml(Dog modelValue) {
+            return modelValue.toString();
+        }
+
+        @Override
+        public Dog convertToModel(String value) {
+            return new Dog(value);
         }
 
     }
