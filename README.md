@@ -213,7 +213,7 @@ annotate the enum `Gender` with the `ConstructBy` annotation:
 
 
 ```java
-@ConstructBy(GenderCustomConverter.class)
+@ConstructBy(GenderCustomConstructor.class)
 public enum Gender {
     MALE("m"),
     FEMALE("f");
@@ -230,10 +230,10 @@ public enum Gender {
 }
 ```
 
-This instructs the parser to create a Java object from a node of type `Gender` using the given `GenderCustomConverter` class, which must implement the `CustomConverter<T>` interface and could be defined as follows:
+This instructs the parser to create a Java object from a node of type `Gender` using the given `GenderCustomConverter` class, which must implement the `CustomConstructor<T>` interface and could be defined as follows:
 
 ```java
-public class GenderCustomConverter implements CustomConverter<Gender> {
+public class GenderCustomConstructor implements CustomConstructor<Gender> {
     @Override
     public Gender construct(Node node, Function<? super Node, ? extends Gender> defaultConstructor) throws ConstructorException {
         String val = (String) NodeUtil.getValue(node); // contains 'm' or 'f'
