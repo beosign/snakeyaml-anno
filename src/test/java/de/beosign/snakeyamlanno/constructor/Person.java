@@ -352,8 +352,11 @@ public class Person {
         }
 
         @Override
-        public Dog convertToModel(String value) {
-            return new Dog(value);
+        public Dog convertToModel(Object value) {
+            if (value instanceof Dog) {
+                return (Dog) value;
+            }
+            return new Dog(Objects.toString(value, null));
         }
 
     }

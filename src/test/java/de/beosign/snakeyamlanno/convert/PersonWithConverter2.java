@@ -32,7 +32,7 @@ public class PersonWithConverter2 {
         }
 
         @Override
-        public Integer convertToModel(String yamlValue) {
+        public Integer convertToModel(Object yamlValue) {
             throw new ConverterException("Cannot convert", new IllegalArgumentException("Cause"));
         }
     }

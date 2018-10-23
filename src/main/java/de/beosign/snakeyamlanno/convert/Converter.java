@@ -23,5 +23,5 @@ public interface Converter<T> {
      * @return converted value
      * @throws ConverterException if conversion failed
      */
-    T convertToModel(String value);
+    T convertToModel(Object value);
 }

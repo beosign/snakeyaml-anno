@@ -1,5 +1,7 @@
 package de.beosign.snakeyamlanno.convert;
 
+import java.util.Objects;
+
 /**
  * Test converter.
  * 
@@ -12,10 +14,10 @@ public class LengthToCmConverter implements Converter<Integer> {
     }
 
     @Override
-    public Integer convertToModel(String value) {
-        String[] parts = value.split("\\s");
+    public Integer convertToModel(Object value) {
+        String[] parts = Objects.toString(value, "").split("\\s");
         if (parts == null || parts.length == 1) {
-            return Integer.parseInt(value);
+            return Integer.parseInt(Objects.toString(value, "0"));
         }
         String unit = parts[1];
         String val = parts[0];

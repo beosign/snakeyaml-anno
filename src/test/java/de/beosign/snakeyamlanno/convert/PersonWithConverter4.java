@@ -35,7 +35,7 @@ public class PersonWithConverter4 {
         }
 
         @Override
-        public Integer convertToModel(String yamlValue) {
+        public Integer convertToModel(Object yamlValue) {
             return 0;
         }
     }

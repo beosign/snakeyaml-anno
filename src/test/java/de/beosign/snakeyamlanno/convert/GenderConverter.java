@@ -1,5 +1,7 @@
 package de.beosign.snakeyamlanno.convert;
 
+import java.util.Objects;
+
 import de.beosign.snakeyamlanno.property.Person.Gender;
 
 /**
@@ -15,9 +17,9 @@ public class GenderConverter implements Converter<Gender> {
     }
 
     @Override
-    public Gender convertToModel(String value) {
+    public Gender convertToModel(Object value) {
         for (Gender g : Gender.values()) {
-            if (g.getAbbr().equals(value)) {
+            if (g.getAbbr().equals(Objects.toString(value, null))) {
                 return g;
             }
         }
