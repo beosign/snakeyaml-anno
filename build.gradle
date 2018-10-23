@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'jacoco'
 
-version = '0.5.0'
+version = '0.6.0'
 
 check.dependsOn jacocoTestReport
 
@@ -61,7 +61,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-artifacts {
+artifacts { // invoke with 'gradle build'
     archives sourcesJar
     archives javadocJar
 }
