@@ -25,6 +25,7 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
@@ -50,7 +51,19 @@ public class AnnotationAwareConstructor extends Constructor {
      */
     public AnnotationAwareConstructor(Class<? extends Object> theRoot) {
         this(theRoot, false);
+    }
 
+    /**
+     * Creates constructor for a sequence, typing the sequence items with the given collectionType. This enables parsing of yaml files that
+     * contain a list as root and do not explicitly use a tag on each list item.
+     * 
+     * @param rootType collection root class like <code>List</code>
+     * @param collectionType type of list items
+     * @param caseInsensitive true if parsing should be independent of case of keys
+     */
+    public AnnotationAwareConstructor(@SuppressWarnings("rawtypes") Class<? extends Collection> rootType, Class<?> collectionType, boolean caseInsensitive) {
+        this(rootType, caseInsensitive);
+        addRootListType(collectionType);
     }
 
     /**
@@ -392,6 +405,21 @@ public class AnnotationAwareConstructor extends Constructor {
         }
 
         return null;
+    }
+
+    private void addRootListType(Class<?> rootListType) {
+        Class<?> rootType = typeTags.get(null);
+        // override existing root type definition
+        addTypeDescription(new TypeDescription(rootType) {
+            @Override
+            public Object newInstance(Node node) {
+                SequenceNode snode = (SequenceNode) node;
+                for (Node n : snode.getValue()) {
+                    n.setType(rootListType);
+                }
+                return super.newInstance(node);
+            }
+        });
     }
 
     private static ScalarNode getKeyNode(NodeTuple tuple) {

@@ -63,6 +63,16 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
   </tr>
+  <tr>
+    <td class="tg-us36">0.7.0</td>
+    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">YES</td>
+  </tr>
 </table>
 
 ## Usage
@@ -87,6 +97,7 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 * Custom Constructor
 * Case insensitive parsing
 * Allow parsing of single value for Collection property
+* Allow parsing of list at root without tags
 * Ignore parsing errors in a subtree
 * Auto type detection
 * Skipping properties
@@ -325,7 +336,34 @@ name: Homer
 favoriteNumbers: 42
 children: {name: bart}
 ```
+#### Allow parsing of list at root without tags
+Currently, there is no simple way to parse the following yaml, where the yaml consists of a root list and the type of a list item is **not** provided by adding a tag to each list item:
 
+```
+- id: 1
+  name: One
+- id: 2
+  name: Two
+```
+
+Instead, you need to use tags:
+
+```
+- !MyClass 
+  id: 1
+  name: One
+- !MyClass 
+  id: 2
+  name: Two
+```
+
+In order to be able to parse the first example, you can use the following:
+
+```
+// Parse a list where each list item is of type Person
+annotationAwareConstructor = new AnnotationAwareConstructor(List.class, Person.class, false);
+Yaml yaml = new Yaml(annotationAwareConstructor);
+```
 
 #### Ignore parsing errors
 In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain `null`. To allow the parsing process to skip unparsable parts instead of aborting, you can use `ignoreExceptions = true` on a property or a getter:
