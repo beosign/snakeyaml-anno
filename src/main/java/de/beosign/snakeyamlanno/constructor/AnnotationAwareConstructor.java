@@ -411,11 +411,16 @@ public class AnnotationAwareConstructor extends Constructor {
         Class<?> rootType = typeTags.get(null);
         // override existing root type definition
         addTypeDescription(new TypeDescription(rootType) {
+            private boolean firstCall = true;
+
             @Override
             public Object newInstance(Node node) {
-                SequenceNode snode = (SequenceNode) node;
-                for (Node n : snode.getValue()) {
-                    n.setType(rootListType);
+                if (firstCall) {
+                    SequenceNode snode = (SequenceNode) node;
+                    for (Node n : snode.getValue()) {
+                        n.setType(rootListType);
+                    }
+                    firstCall = false;
                 }
                 return super.newInstance(node);
             }

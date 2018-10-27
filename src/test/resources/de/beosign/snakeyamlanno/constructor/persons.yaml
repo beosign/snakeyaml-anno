@@ -1,2 +1,8 @@
 - name: Homer
+  pets:
+  - nrMiceCaught: 10
+  - nrBarksPerDay: 20
 - name: Marge
+  pets:
+  - nrMiceCaught: 5
+  - nrBarksPerDay: 25
