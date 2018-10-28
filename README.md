@@ -448,6 +448,20 @@ Yaml yaml = new Yaml(constructor);
 ```
 
 #### Skipping properties
+
+##### Skip dumping of empty properties globally
+By default, empty / null properties (see remarks for `SkipIfNull`and `SkipfIfEmpty` below) will be skipped during dumping. You can change that by
+
+```java
+Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false)); // supply "false" flag
+```
+
+When deactivating the global skipping of empty properties, one can determine on a per-property-basis if a property is to be dumped.
+
+**If global skipping of empty properties is activated (by default), then `skipAtDump` and `skipAtDumpIf` will have no effect**.
+
+##### Skip properties locally
+
 It is possible to skip properties during load or dump. In order to skip a property during load, thus preventing snakeyaml to override a model value with the value read from the yaml file that is being loaded, annotate the property with `skipAtLoad`:
 
 ```java 
@@ -479,9 +493,10 @@ public class Person {
 }
 ```
 
-**Be aware** that if `skipAtDump` is also supplied and set to true, it will take precedence over the ` skipAtDumpIf`!
+**Be aware** that if `skipAtDump` is also supplied and set to true, it will take precedence over the ` skipAtDumpIf`! `skipAtDump` and `skipAtDumpIf` will have **no effect** if empty properties are skipped globally (that's the default, see above).
 
 Predefined are two classes: `SkipIfNull` and `SkipIfEmpty`. The first one skips a property if it is `null`, the latter one skips a property if it is of type `Map`, `Collection` or `String` and the property is empty (empty map/collection or String of length 0).
+
 
 #### Ordering properties
 It is possible to order properties during the dump process by providing a value for the `order` property:

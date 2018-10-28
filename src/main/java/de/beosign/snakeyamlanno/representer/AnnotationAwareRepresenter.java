@@ -12,6 +12,8 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
+import de.beosign.snakeyamlanno.skip.SkipIfEmpty;
+import de.beosign.snakeyamlanno.skip.SkipIfNull;
 
 /**
  * Representer that is aware of annotations. Implements the features "order properties" and "skip properties to dump".
@@ -46,11 +48,24 @@ public class AnnotationAwareRepresenter extends Representer {
         }
     };
 
+    private boolean skipEmpty;
+
     /**
-     * Sets the {@link AnnotationAwarePropertyUtils} into this representer.
+     * Sets the {@link AnnotationAwarePropertyUtils} into this representer. Skips all empty properties.
      */
     public AnnotationAwareRepresenter() {
+        this(true);
+    }
+
+    /**
+     * Sets the {@link AnnotationAwarePropertyUtils} into this representer and skips all empty properties if flag is set.
+     * If flag is set, this overrides any "skipAtDumpIf" properties.
+     * 
+     * @param skipEmpty if true, empty properties are skipped.
+     */
+    public AnnotationAwareRepresenter(boolean skipEmpty) {
         setPropertyUtils(new AnnotationAwarePropertyUtils());
+        this.skipEmpty = skipEmpty;
     }
 
     @Override
@@ -66,6 +81,13 @@ public class AnnotationAwareRepresenter extends Representer {
 
     @Override
     protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
+        if (skipEmpty && new SkipIfEmpty().skip(javaBean, property, propertyValue, customTag)) {
+            return null;
+        }
+        if (skipEmpty && new SkipIfNull().skip(javaBean, property, propertyValue, customTag)) {
+            return null;
+        }
+
         de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
         if (propertyAnnotation != null) {
             if (propertyAnnotation.skipAtDump()) {
