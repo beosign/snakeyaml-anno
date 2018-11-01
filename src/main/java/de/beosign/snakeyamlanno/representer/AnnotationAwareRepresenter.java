@@ -81,10 +81,10 @@ public class AnnotationAwareRepresenter extends Representer {
 
     @Override
     protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
-        if (skipEmpty && new SkipIfEmpty().skip(javaBean, property, propertyValue, customTag)) {
+        if (skipEmpty && SkipIfEmpty.getInstance().skip(javaBean, property, propertyValue, customTag)) {
             return null;
         }
-        if (skipEmpty && new SkipIfNull().skip(javaBean, property, propertyValue, customTag)) {
+        if (skipEmpty && SkipIfNull.getInstance().skip(javaBean, property, propertyValue, customTag)) {
             return null;
         }
 
