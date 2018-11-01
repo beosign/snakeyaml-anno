@@ -365,8 +365,9 @@ public class AnnotationAwareConstructor extends Constructor {
      * 
      * @param forType type for which a CustomConverter is to be registered
      * @param customConstructorClass {@link CustomConstructor} type
+     * @param <T> type for which a {@link CustomConstructor} is registered
      */
-    public void registerCustomConstructor(Class<?> forType, Class<? extends CustomConstructor<?>> customConstructorClass) {
+    public <T> void registerCustomConstructor(Class<T> forType, Class<? extends CustomConstructor<? extends T>> customConstructorClass) {
         constructByMap.put(forType, ConstructByFactory.of(customConstructorClass));
     }
 

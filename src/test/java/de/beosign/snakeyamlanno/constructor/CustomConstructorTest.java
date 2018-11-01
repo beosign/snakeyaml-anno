@@ -281,7 +281,7 @@ public class CustomConstructorTest {
         }
     }
 
-    protected abstract static class AbstractCustomConstructor implements CustomConstructor<String> {
+    protected abstract static class AbstractCustomConstructor implements CustomConstructor<Dog> {
     }
 
     private abstract static class PrivateCustomConstructor implements CustomConstructor<String> {
