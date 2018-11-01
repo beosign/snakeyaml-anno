@@ -5,6 +5,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,9 +13,8 @@ import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -34,7 +34,7 @@ public class CustomConstructorTest {
 
     private AnnotationAwareConstructor annotationAwareConstructor;
 
-    @Before
+    @BeforeEach
     public void before() {
         annotationAwareConstructor = new AnnotationAwareConstructor(Person.class);
         annotationAwareConstructor.getConstructByMap().put(Enum.class, ConstructByFactory.of(EnumConstructor.class));
@@ -167,11 +167,11 @@ public class CustomConstructorTest {
             Yaml yaml = new Yaml(annotationAwareConstructor);
             try {
                 yaml.loadAs(yamlString, Person.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (Exception e) {
-                Assert.assertThat(e, instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause(), instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause().getCause(), instanceOf(IllegalAccessException.class));
+                assertThat(e, instanceOf(YAMLException.class));
+                assertThat(e.getCause(), instanceOf(YAMLException.class));
+                assertThat(e.getCause().getCause(), instanceOf(IllegalAccessException.class));
             }
         }
     }
@@ -191,11 +191,11 @@ public class CustomConstructorTest {
 
             try {
                 yaml.loadAs(yamlString, Person.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (Exception e) {
-                Assert.assertThat(e, instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause(), instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause().getCause(), instanceOf(InstantiationException.class));
+                assertThat(e, instanceOf(YAMLException.class));
+                assertThat(e.getCause(), instanceOf(YAMLException.class));
+                assertThat(e.getCause().getCause(), instanceOf(InstantiationException.class));
             }
         }
     }
@@ -213,14 +213,14 @@ public class CustomConstructorTest {
 
             try {
                 yaml.loadAs(yamlString, Person.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (Exception e) {
-                Assert.assertThat(e, instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause(), instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause().getMessage(), StringContains.containsString("Custom constructor"));
-                Assert.assertThat(e.getCause().getMessage(), StringContains.containsString("Person::notConstructable"));
-                Assert.assertThat(e.getCause().getMessage(), StringContains.containsString("cannot be created"));
-                Assert.assertThat(e.getCause().getCause(), instanceOf(InstantiationException.class));
+                assertThat(e, instanceOf(YAMLException.class));
+                assertThat(e.getCause(), instanceOf(YAMLException.class));
+                assertThat(e.getCause().getMessage(), StringContains.containsString("Custom constructor"));
+                assertThat(e.getCause().getMessage(), StringContains.containsString("Person::notConstructable"));
+                assertThat(e.getCause().getMessage(), StringContains.containsString("cannot be created"));
+                assertThat(e.getCause().getCause(), instanceOf(InstantiationException.class));
             }
         }
     }
@@ -239,13 +239,13 @@ public class CustomConstructorTest {
 
             try {
                 yaml.loadAs(yamlString, Person.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (Exception e) {
-                Assert.assertThat(e, instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause(), instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause().getMessage(), StringContains.containsString("Cannot set value of type java.lang.String"));
-                Assert.assertThat(e.getCause().getMessage(), StringContains.containsString("Person::notSettable"));
-                Assert.assertThat(e.getCause().getMessage(), StringContains.containsString("of class java.lang.Integer"));
+                assertThat(e, instanceOf(YAMLException.class));
+                assertThat(e.getCause(), instanceOf(YAMLException.class));
+                assertThat(e.getCause().getMessage(), StringContains.containsString("Cannot set value of type java.lang.String"));
+                assertThat(e.getCause().getMessage(), StringContains.containsString("Person::notSettable"));
+                assertThat(e.getCause().getMessage(), StringContains.containsString("of class java.lang.Integer"));
             }
         }
     }
@@ -265,10 +265,10 @@ public class CustomConstructorTest {
 
             try {
                 yaml.loadAs(yamlString, Person.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (Exception e) {
-                Assert.assertThat(e, instanceOf(YAMLException.class));
-                Assert.assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
+                assertThat(e, instanceOf(YAMLException.class));
+                assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
             }
         }
     }

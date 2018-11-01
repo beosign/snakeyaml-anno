@@ -1,8 +1,10 @@
 package de.beosign.snakeyamlanno.util;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,9 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.AnchorNode;
@@ -33,7 +34,7 @@ import de.beosign.snakeyamlanno.util.Person.Skill;
 public class NodeUtilUnitTest {
     private TestConstructor testConstructor;
 
-    @Before
+    @BeforeEach
     public void before() {
         testConstructor = new TestConstructor(Person.class);
     }
@@ -46,25 +47,25 @@ public class NodeUtilUnitTest {
             Yaml yaml = new Yaml(testConstructor);
             yaml.load(yamlString);
 
-            Assert.assertThat(testConstructor.personMap, notNullValue());
-            Assert.assertThat(testConstructor.personMap.size(), is(5));
-            Assert.assertThat(testConstructor.personMap.get("name").toString(), is("Homer"));
-            Assert.assertThat(testConstructor.personMap.get("skill").toString(), is(Skill.PRO.name()));
+            assertThat(testConstructor.personMap, notNullValue());
+            assertThat(testConstructor.personMap.size(), is(5));
+            assertThat(testConstructor.personMap.get("name").toString(), is("Homer"));
+            assertThat(testConstructor.personMap.get("skill").toString(), is(Skill.PRO.name()));
 
             @SuppressWarnings("unchecked")
             Map<String, Object> firstPet = (Map<String, Object>) testConstructor.personMap.get("firstPet");
-            Assert.assertThat(firstPet.get("name"), is("dog1"));
-            Assert.assertThat(firstPet.get("age"), is("42"));
+            assertThat(firstPet.get("name"), is("dog1"));
+            assertThat(firstPet.get("age"), is("42"));
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> pets = (List<Map<String, Object>>) testConstructor.personMap.get("pets");
 
-            Assert.assertThat(pets.size(), is(4));
-            Assert.assertThat(pets.get(0).get("name"), is("dog2"));
-            Assert.assertThat(pets.get(1).get("name"), is("cat1"));
-            Assert.assertThat(pets.get(2).get("name"), is("dog4"));
-            Assert.assertThat(pets.get(3).get("name"), is("dog1"));
-            Assert.assertThat(pets.get(3).get("age"), is("42")); // it is the firstPet
+            assertThat(pets.size(), is(4));
+            assertThat(pets.get(0).get("name"), is("dog2"));
+            assertThat(pets.get(1).get("name"), is("cat1"));
+            assertThat(pets.get(2).get("name"), is("dog4"));
+            assertThat(pets.get(3).get("name"), is("dog1"));
+            assertThat(pets.get(3).get("age"), is("42")); // it is the firstPet
 
         }
     }
@@ -77,20 +78,20 @@ public class NodeUtilUnitTest {
             Yaml yaml = new Yaml(testConstructor);
             yaml.load(yamlString);
 
-            Assert.assertThat(testConstructor.personKeyToNodeMap, notNullValue());
-            Assert.assertThat(testConstructor.personKeyToNodeMap.get("firstPet"), instanceOf(MappingNode.class));
-            Assert.assertThat(testConstructor.personKeyToNodeMap.get("pets"), instanceOf(SequenceNode.class));
-            Assert.assertThat(testConstructor.personKeyToNodeMap.get("name"), instanceOf(ScalarNode.class));
+            assertThat(testConstructor.personKeyToNodeMap, notNullValue());
+            assertThat(testConstructor.personKeyToNodeMap.get("firstPet"), instanceOf(MappingNode.class));
+            assertThat(testConstructor.personKeyToNodeMap.get("pets"), instanceOf(SequenceNode.class));
+            assertThat(testConstructor.personKeyToNodeMap.get("name"), instanceOf(ScalarNode.class));
 
             MappingNode firstPetNode = (MappingNode) testConstructor.personKeyToNodeMap.get("firstPet");
-            Assert.assertThat(NodeUtil.getValue(firstPetNode), instanceOf(Map.class));
+            assertThat(NodeUtil.getValue(firstPetNode), instanceOf(Map.class));
 
             @SuppressWarnings("unchecked")
             Map<String, Object> firstPet = (Map<String, Object>) NodeUtil.getValue(firstPetNode);
-            Assert.assertThat(firstPet.get("name"), is("dog1"));
-            Assert.assertThat(firstPet.get("age"), is("42"));
+            assertThat(firstPet.get("name"), is("dog1"));
+            assertThat(firstPet.get("age"), is("42"));
 
-            Assert.assertThat(NodeUtil.getValue(testConstructor.personKeyToNodeMap.get("name")), is("Homer"));
+            assertThat(NodeUtil.getValue(testConstructor.personKeyToNodeMap.get("name")), is("Homer"));
 
         }
     }
@@ -103,36 +104,38 @@ public class NodeUtilUnitTest {
             Yaml yaml = new Yaml(testConstructor);
             yaml.load(yamlString);
 
-            Assert.assertThat(testConstructor.personNodeValue, notNullValue());
-            Assert.assertThat(testConstructor.personNodeValue.get("name"), is("Homer"));
-            Assert.assertThat(testConstructor.personNodeValue.get("firstPet"), instanceOf(Map.class));
-            Assert.assertThat(testConstructor.personNodeValue.get("pets"), instanceOf(List.class));
+            assertThat(testConstructor.personNodeValue, notNullValue());
+            assertThat(testConstructor.personNodeValue.get("name"), is("Homer"));
+            assertThat(testConstructor.personNodeValue.get("firstPet"), instanceOf(Map.class));
+            assertThat(testConstructor.personNodeValue.get("pets"), instanceOf(List.class));
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> pets = (List<Map<String, Object>>) testConstructor.personNodeValue.get("pets");
-            Assert.assertThat(pets.size(), is(4));
-            Assert.assertThat(pets.get(0).get("name"), is("dog2"));
-            Assert.assertThat(pets.get(1).get("name"), is("cat1"));
-            Assert.assertThat(pets.get(2).get("name"), is("dog4"));
-            Assert.assertThat(pets.get(3).get("name"), is("dog1"));
-            Assert.assertThat(pets.get(3).get("age"), is("42"));
+            assertThat(pets.size(), is(4));
+            assertThat(pets.get(0).get("name"), is("dog2"));
+            assertThat(pets.get(1).get("name"), is("cat1"));
+            assertThat(pets.get(2).get("name"), is("dog4"));
+            assertThat(pets.get(3).get("name"), is("dog1"));
+            assertThat(pets.get(3).get("age"), is("42"));
 
             @SuppressWarnings("unchecked")
             Map<String, Object> firstPet = (Map<String, Object>) testConstructor.personNodeValue.get("firstPet");
-            Assert.assertThat(firstPet.get("name"), is("dog1"));
-            Assert.assertThat(firstPet.get("age"), is("42"));
+            assertThat(firstPet.get("name"), is("dog1"));
+            assertThat(firstPet.get("age"), is("42"));
 
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnknownNodeType() throws IOException {
         try (InputStream is = getClass().getResourceAsStream("person.yaml")) {
-            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
-            Yaml yaml = new Yaml(testConstructor);
-            yaml.load(yamlString);
+            assertThrows(IllegalArgumentException.class, () -> {
+                String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+                Yaml yaml = new Yaml(testConstructor);
+                yaml.load(yamlString);
 
-            NodeUtil.getValue(new AnchorNode(testConstructor.personKeyToNodeMap.get("name")));
+                NodeUtil.getValue(new AnchorNode(testConstructor.personKeyToNodeMap.get("name")));
+            });
         }
     }
 

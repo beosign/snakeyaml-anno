@@ -3,6 +3,8 @@ package de.beosign.snakeyamlanno.type;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -10,10 +12,8 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.hamcrest.core.StringContains;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -37,9 +37,6 @@ import de.beosign.snakeyamlanno.type.WorkingPerson.Employer;
 public class TypeDetectionTest {
     private static final Logger log = LoggerFactory.getLogger(TypeDetectionTest.class);
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     /**
      * Tests that the type detection works if there is only a single possibility.
      * 
@@ -60,7 +57,7 @@ public class TypeDetectionTest {
             assertThat(parseResult, notNullValue());
             assertThat(parseResult.getName(), is("Homer"));
             assertThat(parseResult.getGender(), is(Gender.MALE));
-            Assert.assertTrue(parseResult.getAnimal() instanceof Dog);
+            assertTrue(parseResult.getAnimal() instanceof Dog);
             assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(5));
 
             assertThat(new TypeImpl(null).annotationType().getTypeName(), Is.is(Type.class.getName()));
@@ -87,7 +84,7 @@ public class TypeDetectionTest {
             assertThat(parseResult, notNullValue());
             assertThat(parseResult.getName(), is("Homer"));
             assertThat(parseResult.getGender(), is(Gender.MALE));
-            Assert.assertTrue(parseResult.getAnimal() instanceof Dog);
+            assertTrue(parseResult.getAnimal() instanceof Dog);
             assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(5));
             assertThat(((Dog) parseResult.getAnimal()).getAliasedProperty(), is("aliased"));
         }
@@ -111,7 +108,7 @@ public class TypeDetectionTest {
             log.debug("Parsed YAML file:\n{}", parseResult);
 
             assertThat(parseResult, notNullValue());
-            Assert.assertTrue(parseResult.getClass().equals(Employee.class));
+            assertTrue(parseResult.getClass().equals(Employee.class));
             assertThat(parseResult.getName(), is("Homer"));
             assertThat(parseResult.getGender(), is(Gender.MALE));
 
@@ -136,7 +133,7 @@ public class TypeDetectionTest {
             log.debug("Parsed YAML file:\n{}", parseResult);
 
             assertThat(parseResult, notNullValue());
-            Assert.assertTrue(parseResult.getClass().equals(WorkingPerson2.Employer.class));
+            assertTrue(parseResult.getClass().equals(WorkingPerson2.Employer.class));
             assertThat(parseResult.getName(), is("Homer"));
             assertThat(parseResult.getGender(), is(Gender.MALE));
 
@@ -196,7 +193,7 @@ public class TypeDetectionTest {
             log.debug("Parsed YAML file:\n{}", parseResult);
 
             assertThat(parseResult, notNullValue());
-            Assert.assertTrue(parseResult.getClass().equals(WorkingPerson3.Employee.class));
+            assertTrue(parseResult.getClass().equals(WorkingPerson3.Employee.class));
             assertThat(parseResult.getName(), is("Homer"));
             assertThat(parseResult.getGender(), is(Gender.MALE));
 
@@ -217,8 +214,9 @@ public class TypeDetectionTest {
             AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(WorkingPerson4.class);
             Yaml yaml = new Yaml(constructor);
 
-            thrown.expect(ConstructorException.class);
-            yaml.loadAs(yamlString, WorkingPerson4.class);
+            assertThrows(ConstructorException.class, () -> {
+                yaml.loadAs(yamlString, WorkingPerson4.class);
+            });
 
         }
     }
@@ -237,9 +235,11 @@ public class TypeDetectionTest {
             AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(WorkingPerson5.class);
             Yaml yaml = new Yaml(constructor);
 
-            thrown.expect(ConstructorException.class);
-            thrown.expectMessage("Cannot instantiate substitutionTypeSelector of type");
-            yaml.loadAs(yamlString, WorkingPerson5.class);
+            ConstructorException e = assertThrows(ConstructorException.class, () -> {
+                yaml.loadAs(yamlString, WorkingPerson5.class);
+            });
+
+            assertThat(e.getMessage(), StringContains.containsString("Cannot instantiate substitutionTypeSelector of type"));
 
         }
     }

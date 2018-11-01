@@ -1,13 +1,11 @@
 package de.beosign.snakeyamlanno.caseinsensitive;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Objects;
 
 import org.hamcrest.core.Is;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -23,9 +21,6 @@ import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
  */
 public class ParseCaseInsensitiveTest {
     private static final Logger log = LoggerFactory.getLogger(ParseCaseInsensitiveTest.class);
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     /**
      * Tests that the the yaml to parse can contain properties in any case.

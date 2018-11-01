@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -26,7 +26,7 @@ public class RootListTest {
 
     private AnnotationAwareConstructor annotationAwareConstructor;
 
-    @Before
+    @BeforeEach
     public void before() {
         annotationAwareConstructor = new AnnotationAwareConstructor(Person.class);
         annotationAwareConstructor.getConstructByMap().put(Enum.class, ConstructByFactory.of(EnumConstructor.class));

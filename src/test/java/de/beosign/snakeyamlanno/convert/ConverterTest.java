@@ -3,6 +3,8 @@ package de.beosign.snakeyamlanno.convert;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -10,8 +12,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -95,10 +96,10 @@ public class ConverterTest {
 
             try {
                 yaml.loadAs(yamlString, PersonWithConverter.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (YAMLException e) {
                 ConverterException cause = (ConverterException) e.getCause();
-                Assert.assertNotNull(cause);
+                assertNotNull(cause);
             }
         }
     }
@@ -114,10 +115,10 @@ public class ConverterTest {
 
             try {
                 yaml.loadAs(yamlString, PersonWithConverter2.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (YAMLException e) {
                 ConverterException cause = (ConverterException) e.getCause();
-                Assert.assertNotNull(cause);
+                assertNotNull(cause);
             }
         }
     }
@@ -133,10 +134,10 @@ public class ConverterTest {
 
             try {
                 yaml.loadAs(yamlString, PersonWithConverter3.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (ConstructorException e) {
                 InstantiationException causeCause = (InstantiationException) e.getCause().getCause();
-                Assert.assertNotNull(causeCause);
+                assertNotNull(causeCause);
             }
         }
     }
@@ -152,10 +153,10 @@ public class ConverterTest {
 
             try {
                 yaml.loadAs(yamlString, PersonWithConverter4.class);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (ConstructorException e) {
                 IllegalAccessException causeCause = (IllegalAccessException) e.getCause().getCause();
-                Assert.assertNotNull(causeCause);
+                assertNotNull(causeCause);
             }
         }
     }
@@ -172,9 +173,9 @@ public class ConverterTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, dumped, StringContains.containsString("name: Homer"));
-        Assert.assertThat(dumped, dumped, StringContains.containsString("height: 185cm"));
-        Assert.assertThat(dumped, dumped, StringContains.containsString("gender: m"));
+        assertThat(dumped, dumped, StringContains.containsString("name: Homer"));
+        assertThat(dumped, dumped, StringContains.containsString("height: 185cm"));
+        assertThat(dumped, dumped, StringContains.containsString("gender: m"));
 
     }
 }

@@ -3,12 +3,12 @@ package de.beosign.snakeyamlanno.type;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -56,7 +56,7 @@ public class ProgrammaticTypesTest {
 
         assertThat(parseResult, notNullValue());
         assertThat(parseResult.getName(), is("Homer"));
-        Assert.assertTrue(parseResult.getAnimal() instanceof Dog);
+        assertTrue(parseResult.getAnimal() instanceof Dog);
         assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(5));
     }
 
@@ -85,7 +85,7 @@ public class ProgrammaticTypesTest {
 
         assertThat(parseResult, notNullValue());
         assertThat(parseResult.getName(), is("Homer"));
-        Assert.assertTrue(parseResult.getAnimal() instanceof Dog);
+        assertTrue(parseResult.getAnimal() instanceof Dog);
         assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(5));
         assertThat(((Dog) parseResult.getAnimal()).getAliasedProperty(), is("aliased"));
     }
@@ -114,7 +114,7 @@ public class ProgrammaticTypesTest {
         log.debug("Parsed YAML file:\n{}", parseResult);
 
         assertThat(parseResult, notNullValue());
-        Assert.assertTrue(parseResult.getClass().equals(Employee.class));
+        assertTrue(parseResult.getClass().equals(Employee.class));
         assertThat(parseResult.getName(), is("Homer"));
     }
 
@@ -141,7 +141,7 @@ public class ProgrammaticTypesTest {
         log.debug("Parsed YAML file:\n{}", parseResult);
 
         assertThat(parseResult, notNullValue());
-        Assert.assertTrue(parseResult.getClass().equals(WorkingPerson2.Employer.class));
+        assertTrue(parseResult.getClass().equals(WorkingPerson2.Employer.class));
         assertThat(parseResult.getName(), is("Homer"));
 
     }

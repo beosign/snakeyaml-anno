@@ -5,6 +5,7 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,10 +14,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -32,9 +30,6 @@ import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
  */
 public class KeyMapTest {
     private static final Logger log = LoggerFactory.getLogger(KeyMapTest.class);
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     /**
      * Parses a YAML that consists of a single custom object. The custom object defines
@@ -83,7 +78,7 @@ public class KeyMapTest {
 
             try {
                 yaml.load(yamlString);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (YAMLException e) {
                 log.debug("Caught expected exception {}", e.getClass().getName());
                 assertThat(e.getMessage(), StringContains.containsString("name"));
@@ -108,7 +103,7 @@ public class KeyMapTest {
 
             try {
                 yaml.load(yamlString);
-                Assert.fail("Expected exception");
+                fail("Expected exception");
             } catch (YAMLException e) {
                 log.debug("Caught expected exception {}", e.getClass().getName());
                 assertThat(e.getMessage(), StringContains.containsString("absoluteMag"));

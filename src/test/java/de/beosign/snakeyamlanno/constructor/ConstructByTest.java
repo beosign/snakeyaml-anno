@@ -1,12 +1,14 @@
 package de.beosign.snakeyamlanno.constructor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Node;
 
@@ -19,7 +21,7 @@ public class ConstructByTest {
 
     private AnnotationAwareConstructor annotationAwareConstructor;
 
-    @Before
+    @BeforeEach
     public void before() {
         annotationAwareConstructor = new AnnotationAwareConstructor(TestAnnotationAwareConstructor.class);
     }
@@ -27,15 +29,15 @@ public class ConstructByTest {
     @Test
     public void testAnnotationOnly() {
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(TestConstructByClass.class);
-        Assert.assertEquals(TestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(TestConstructByClassConstructor.class, constructBy.value());
 
         // test annotation inheritance
         constructBy = annotationAwareConstructor.getConstructBy(ATestConstructByClass.class);
-        Assert.assertEquals(TestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(TestConstructByClassConstructor.class, constructBy.value());
 
         // test annotation inheritance, but annotation on subclass overrides annotation from superclass
         constructBy = annotationAwareConstructor.getConstructBy(BTestConstructByClass.class);
-        Assert.assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     @Test
@@ -44,19 +46,19 @@ public class ConstructByTest {
         annotationAwareConstructor.getConstructByMap().put(BigInteger.class, ConstructByFactory.of(BigIntegerCustomConstructor.class));
 
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(Number.class);
-        Assert.assertEquals(NumberCustomConstructor.class, constructBy.value());
+        assertEquals(NumberCustomConstructor.class, constructBy.value());
 
         constructBy = annotationAwareConstructor.getConstructBy(BigInteger.class);
-        Assert.assertEquals(BigIntegerCustomConstructor.class, constructBy.value());
+        assertEquals(BigIntegerCustomConstructor.class, constructBy.value());
 
         constructBy = annotationAwareConstructor.getConstructBy(MyBigInteger.class);
-        Assert.assertEquals(BigIntegerCustomConstructor.class, constructBy.value());
+        assertEquals(BigIntegerCustomConstructor.class, constructBy.value());
 
         constructBy = annotationAwareConstructor.getConstructBy(Double.class);
-        Assert.assertEquals(NumberCustomConstructor.class, constructBy.value());
+        assertEquals(NumberCustomConstructor.class, constructBy.value());
 
         constructBy = annotationAwareConstructor.getConstructBy(Object.class);
-        Assert.assertNull(constructBy);
+        assertNull(constructBy);
     }
 
     @Test
@@ -65,7 +67,7 @@ public class ConstructByTest {
 
         // Map wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(TestConstructByClass.class);
-        Assert.assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     @Test
@@ -74,7 +76,7 @@ public class ConstructByTest {
 
         // Map and annotation have a match for same supertype, maps wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(ATestConstructByClass.class);
-        Assert.assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     @Test
@@ -83,7 +85,7 @@ public class ConstructByTest {
 
         // Map and annotation have a match for a supertype, but maps' is more specific => map wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(AATestConstructByClass.class);
-        Assert.assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     @Test
@@ -92,7 +94,7 @@ public class ConstructByTest {
 
         // Map and annotation have a match for a supertype, but annotations' is more specific => annotation wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(BBTestConstructByClass.class);
-        Assert.assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     // CHECKSTYLE:OFF

@@ -1,5 +1,8 @@
 package de.beosign.snakeyamlanno.skip;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -14,8 +17,7 @@ import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -48,9 +50,9 @@ public class SkipPropsTest {
             Yaml yaml = new Yaml(new AnnotationAwareConstructor(SkipProps.class));
 
             SkipProps props = yaml.loadAs(yamlString, SkipProps.class);
-            Assert.assertThat(props.getSkipLoad(), Is.is("notLoaded"));
-            Assert.assertThat(props.getSkipDump(), Is.is("mustNotBeOutput"));
-            Assert.assertThat(props.getName(), Is.is("name1"));
+            assertThat(props.getSkipLoad(), Is.is("notLoaded"));
+            assertThat(props.getSkipDump(), Is.is("mustNotBeOutput"));
+            assertThat(props.getName(), Is.is("name1"));
         }
     }
 
@@ -68,18 +70,18 @@ public class SkipPropsTest {
             Yaml yaml = new Yaml(new AnnotationAwareConstructor(SkipDumpLoad.class));
 
             SkipDumpLoad props = yaml.loadAs(yamlString, SkipDumpLoad.class);
-            Assert.assertThat(props.getLoadedAndDumped(), Is.is("loadedAndDumped"));
-            Assert.assertThat(props.getNotLoadedButDumped(), IsNull.nullValue());
-            Assert.assertThat(props.getNotDumpedButLoaded(), Is.is("notDumpedButLoaded"));
+            assertThat(props.getLoadedAndDumped(), Is.is("loadedAndDumped"));
+            assertThat(props.getNotLoadedButDumped(), IsNull.nullValue());
+            assertThat(props.getNotDumpedButLoaded(), Is.is("notDumpedButLoaded"));
 
             yaml = new Yaml(new AnnotationAwareRepresenter());
             props.setNotLoadedButDumped("notLoadedButDumped");
             String dumped = yaml.dumpAsMap(props);
             System.out.println(yaml.dumpAsMap(props));
 
-            Assert.assertThat(dumped, StringContains.containsString("loadedAndDumped: loadedAndDumped"));
-            Assert.assertThat(dumped, StringContains.containsString("notLoadedButDumped: notLoadedButDumped"));
-            Assert.assertThat(dumped, IsNot.not(StringContains.containsString("notDumped")));
+            assertThat(dumped, StringContains.containsString("loadedAndDumped: loadedAndDumped"));
+            assertThat(dumped, StringContains.containsString("notLoadedButDumped: notLoadedButDumped"));
+            assertThat(dumped, IsNot.not(StringContains.containsString("notDumped")));
         }
     }
 
@@ -101,9 +103,9 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, IsNot.not(StringContains.containsString(notDumped)));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
-        Assert.assertThat(dumped, StringContains.containsString("skipLoad1"));
+        assertThat(dumped, IsNot.not(StringContains.containsString(notDumped)));
+        assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, StringContains.containsString("skipLoad1"));
 
     }
 
@@ -125,8 +127,8 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, IsNot.not(StringContains.containsString(notDumped)));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, IsNot.not(StringContains.containsString(notDumped)));
+        assertThat(dumped, StringContains.containsString("name1"));
 
     }
 
@@ -147,14 +149,14 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfNull")));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfNull")));
+        assertThat(dumped, StringContains.containsString("name1"));
 
         skipProps.setSkipDumpIfNull("MUSTBEDUMPED");
         dumped = yaml.dumpAsMap(skipProps);
 
-        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
+        assertThat(dumped, StringContains.containsString("name1"));
     }
 
     /**
@@ -173,16 +175,16 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmpty")));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmpty")));
+        assertThat(dumped, StringContains.containsString("name1"));
 
         skipProps.setSkipDumpIfEmpty("MUSTBEDUMPED");
         dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
+        assertThat(dumped, StringContains.containsString("name1"));
     }
 
     /**
@@ -202,16 +204,16 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmptyCollection")));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmptyCollection")));
+        assertThat(dumped, StringContains.containsString("name1"));
 
         skipProps.setSkipDumpIfEmptyCollection(Arrays.asList("MUSTBEDUMPED"));
         dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
+        assertThat(dumped, StringContains.containsString("name1"));
     }
 
     /**
@@ -231,8 +233,8 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmptyMap")));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, IsNot.not(StringContains.containsString("skipDumpIfEmptyMap")));
+        assertThat(dumped, StringContains.containsString("name1"));
 
         Map<String, Object> map = new HashMap<>();
         map.put("1", "MUSTBEDUMPED");
@@ -241,9 +243,9 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
-        Assert.assertThat(dumped, StringContains.containsString("1"));
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, StringContains.containsString("MUSTBEDUMPED"));
+        assertThat(dumped, StringContains.containsString("1"));
+        assertThat(dumped, StringContains.containsString("name1"));
     }
 
     /**
@@ -263,8 +265,8 @@ public class SkipPropsTest {
 
         System.out.println(dumped);
 
-        Assert.assertThat(dumped, StringContains.containsString("name1"));
-        Assert.assertThat(dumped, StringContains.containsString("skipDumpOtherType"));
+        assertThat(dumped, StringContains.containsString("name1"));
+        assertThat(dumped, StringContains.containsString("skipDumpOtherType"));
     }
 
     /**
@@ -272,12 +274,13 @@ public class SkipPropsTest {
      * 
      * @throws Exception yaml exception
      */
-    @Test(expected = YAMLException.class)
+    @Test
     public void checkPropertyDumpedIfBadClass() throws Exception {
         SkipPropsBadClass skipProps = new SkipPropsBadClass();
 
         Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
-        yaml.dumpAsMap(skipProps);
+
+        assertThrows(YAMLException.class, () -> yaml.dumpAsMap(skipProps));
     }
 
     // CHECKSTYLE:OFF
