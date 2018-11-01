@@ -63,6 +63,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param rootType collection root class like <code>List</code>
      * @param collectionItemType type of list items
      * @param caseInsensitive true if parsing should be independent of case of keys
+     * @since 0.7.0
      */
     public AnnotationAwareConstructor(@SuppressWarnings("rawtypes") Class<? extends Collection> rootType, Class<?> collectionItemType, boolean caseInsensitive) {
         this(rootType, caseInsensitive);
