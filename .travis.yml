@@ -2,7 +2,7 @@ language: java
 jdk:
   - oraclejdk8
   
-before_script:
+before_install:
     - wget http://services.gradle.org/distributions/gradle-4.10-bin.zip
     - unzip gradle-4.10-bin.zip
     - export GRADLE_HOME=$PWD/gradle-4.10
