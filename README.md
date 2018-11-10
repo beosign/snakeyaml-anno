@@ -10,7 +10,7 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
 
 <table class="tg">
   <tr>
-    <th class="tg-us36">snakeyaml-anno</th>
+    <th class="tg-us36">SnakeyamlAnno</th>
     <th class="tg-us36" colspan="7">SnakeYaml</th>
   </tr>
   <tr>
@@ -72,6 +72,16 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
+  </tr>
+  <tr>
+    <td class="tg-us36">0.8.0</td>
+    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
   </tr>
 </table>
 
