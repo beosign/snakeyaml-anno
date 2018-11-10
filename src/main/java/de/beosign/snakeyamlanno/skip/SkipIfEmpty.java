@@ -17,6 +17,17 @@ import org.yaml.snakeyaml.nodes.Tag;
  * @author florian
  */
 public class SkipIfEmpty implements SkipAtDumpPredicate {
+    private static final SkipIfEmpty instance = new SkipIfEmpty();
+
+    /**
+     * Returns the singleton instance.
+     * 
+     * @return singleton
+     */
+    public static SkipIfEmpty getInstance() {
+        return instance;
+    }
+
     @Override
     public boolean skip(Object javaBean, Property property, Object propertyValue, Tag customTag) {
         if (propertyValue instanceof Map) {

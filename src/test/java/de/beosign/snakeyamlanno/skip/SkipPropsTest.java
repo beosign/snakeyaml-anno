@@ -98,7 +98,7 @@ public class SkipPropsTest {
         skipProps.setName("name1");
         skipProps.setSkipLoad("skipLoad1");
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
         String dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
@@ -122,7 +122,7 @@ public class SkipPropsTest {
         skipProps.setName("name1");
         skipProps.setSkipDumpOverridingIf(notDumped);
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
         String dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
@@ -144,7 +144,7 @@ public class SkipPropsTest {
         skipProps.setSkipDump(notDumped);
         skipProps.setName("name1");
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
         String dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
@@ -170,7 +170,7 @@ public class SkipPropsTest {
         skipProps.setSkipDumpIfEmpty("");
         skipProps.setName("name1");
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
         String dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
@@ -199,7 +199,7 @@ public class SkipPropsTest {
         skipProps.setSkipDump(notDumped);
         skipProps.setName("name1");
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
         String dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
@@ -228,7 +228,7 @@ public class SkipPropsTest {
         skipProps.setSkipDump(notDumped);
         skipProps.setName("name1");
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
         String dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
@@ -260,7 +260,7 @@ public class SkipPropsTest {
         skipProps.setSkipDump(notDumped);
         skipProps.setName("name1");
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
         String dumped = yaml.dumpAsMap(skipProps);
 
         System.out.println(dumped);
@@ -278,7 +278,7 @@ public class SkipPropsTest {
     public void checkPropertyDumpedIfBadClass() throws Exception {
         SkipPropsBadClass skipProps = new SkipPropsBadClass();
 
-        Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
+        Yaml yaml = new Yaml(new AnnotationAwareRepresenter(false));
 
         assertThrows(YAMLException.class, () -> yaml.dumpAsMap(skipProps));
     }
