@@ -45,7 +45,6 @@ test {
 }
 
 jar {
-    baseName = 'snakeyaml-anno'
     into ('META-INF') {
         from ('.') {
             include 'README.md','LICENCE.txt','LICENCE-3RD-PARTY.txt'
