@@ -347,7 +347,8 @@ favoriteNumbers: 42
 children: {name: bart}
 ```
 #### Allow parsing of list at root without tags
-Currently, there is no simple way to parse the following yaml, where the yaml consists of a root list and the type of a list item is **not** provided by adding a tag to each list item:
+Usually, use can supply an explicit tag at the root of a yaml document to declare the root type to use. As an alternative, you can supply the root type to a yaml constructor object.
+If dealing with lists at the root, the only type information you can supply is `List`, but not `List<MyClass>` for example. Therefore, the following yaml is parsed as `List<Map<String,Object>>`:
 
 ```
 - id: 1
@@ -356,8 +357,8 @@ Currently, there is no simple way to parse the following yaml, where the yaml co
   name: Two
 ```
 
-Instead, you need to use tags:
-
+If you would like to parse it as a `List<MyClass>` instead, you have to define the type on each list item:
+ 
 ```
 - !MyClass 
   id: 1
@@ -367,13 +368,18 @@ Instead, you need to use tags:
   name: Two
 ```
 
-In order to be able to parse the first example, you can use the following:
+Because this leads to a yaml that is cluttered with type explicit information, SnakeyamlAnno comes with a special `Constructor` for these cases: The `AnnotationAwareListConstructor` enables to omit the explicit types while still parsing the list items as items of the type that is given to it:
+
 
 ```
-// Parse a list where each list item is of type Person
-annotationAwareConstructor = new AnnotationAwareConstructor(List.class, Person.class, false);
-Yaml yaml = new Yaml(annotationAwareConstructor);
+// Parse a list where each list item is of type MyClass instead of Map<String, Object>
+annotationAwareListConstructor = new AnnotationAwareListConstructor(MyClass.class);
+Yaml yaml = new Yaml(annotationAwareListConstructor);
+
+List<MyClass> = yaml.load(...);
 ```
+
+Now the list items are of type `MyClass` instead of just `Map<String, Object>`.
 
 #### Ignore parsing errors
 In a complex hierarchy it may be desirable to ignore parse errors in a given subtree and still return the parsed objects higher up the tree. In case of an exception, the unparsable object will simply remain `null`. To allow the parsing process to skip unparsable parts instead of aborting, you can use `ignoreExceptions = true` on a property or a getter:
