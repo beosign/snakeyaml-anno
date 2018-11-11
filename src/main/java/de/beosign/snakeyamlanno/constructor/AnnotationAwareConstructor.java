@@ -25,8 +25,6 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.SequenceNode;
-import org.yaml.snakeyaml.nodes.Tag;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
@@ -45,29 +43,13 @@ public class AnnotationAwareConstructor extends Constructor {
     private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
 
-    private Class<?> collectionItemType;
-
     /**
      * Creates constructor.
      * 
      * @param theRoot root class - you can cast the result of the parsing process to this class
      */
-    public AnnotationAwareConstructor(Class<? extends Object> theRoot) {
+    public AnnotationAwareConstructor(Class<?> theRoot) {
         this(theRoot, false);
-    }
-
-    /**
-     * Creates constructor for a sequence, typing the sequence items with the given collectionItemType. This enables parsing of yaml files that
-     * contain a list as root and do not explicitly use a tag on each list item.
-     * 
-     * @param rootType collection root class like <code>List</code>
-     * @param collectionItemType type of list items
-     * @param caseInsensitive true if parsing should be independent of case of keys
-     * @since 0.7.0
-     */
-    public AnnotationAwareConstructor(@SuppressWarnings("rawtypes") Class<? extends Collection> rootType, Class<?> collectionItemType, boolean caseInsensitive) {
-        this(rootType, caseInsensitive);
-        this.collectionItemType = collectionItemType;
     }
 
     /**
@@ -144,24 +126,6 @@ public class AnnotationAwareConstructor extends Constructor {
             }
         }
         return super.newInstance(ancestor, node, tryDefault);
-    }
-
-    /**
-     * Called at the beginning of the parsing process. Overridden to implement "Allow parsing of list at root without tags" feature.
-     * 
-     * @since 0.7.0
-     */
-    @Override
-    public Object getSingleData(Class<?> type) {
-        if (Collection.class.isAssignableFrom(type) && collectionItemType != null) {
-            SequenceNode node = (SequenceNode) composer.getSingleNode();
-            node.setTag(new Tag(type));
-            for (Node n : node.getValue()) {
-                n.setType(collectionItemType);
-            }
-            return constructDocument(node);
-        }
-        return super.getSingleData(type);
     }
 
     /**

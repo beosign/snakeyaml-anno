@@ -8,6 +8,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +34,7 @@ public class RootListTest {
     }
 
     /**
-     * Test enum converter.
+     * Tests loading of a list at the root using a certain item type.
      * 
      * @throws Exception on any exception
      */
@@ -43,7 +44,7 @@ public class RootListTest {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
 
-            annotationAwareConstructor = new AnnotationAwareConstructor(List.class, Person.class, false);
+            annotationAwareConstructor = new AnnotationAwareListConstructor(Person.class, false);
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             @SuppressWarnings("unchecked")
@@ -58,6 +59,71 @@ public class RootListTest {
             assertThat(persons.get(0).getName(), is("Homer"));
             assertThat(persons.get(1).getName(), is("Marge"));
         }
+    }
+
+    /**
+     * Tests loading of a list at the root using default mechanisms leads to HashMaps instead of a typed object.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testMultipleUntypedByDefault() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("persons.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            annotationAwareConstructor = new AnnotationAwareConstructor(List.class, false);
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> persons = yaml.loadAs(yamlString, List.class);
+            log.debug("Parsed YAML file:\n{}", persons);
+
+            assertThat(persons, notNullValue());
+            assertThat(persons.size(), is(2));
+            assertThat(persons.get(0), isA(Map.class));
+            assertThat(persons.get(1), isA(Map.class));
+        }
+    }
+
+    /**
+     * Tests loading of a list at the root works by default if items are implicitly typed.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testMultipleWithDefaultConstructorWithImplicitType() throws Exception {
+        String yamlString = "- 3\n- 4"; // list of ints
+        log.debug("Loaded YAML file:\n{}", yamlString);
+
+        annotationAwareConstructor = new AnnotationAwareConstructor(Integer.class);
+        Yaml yaml = new Yaml(annotationAwareConstructor);
+
+        @SuppressWarnings("unchecked")
+        List<Integer> ints = yaml.loadAs(yamlString, List.class);
+        assertThat(ints.size(), is(2));
+        assertThat(ints.get(0), is(3));
+        assertThat(ints.get(1), is(4));
+    }
+
+    /**
+     * Tests loading of a list at the root works by default if items are implicitly typed.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testMultipleWithDefaultConstructorWithExplicitType() throws Exception {
+        String yamlString = "- 3\n- 4"; // list of ints
+        log.debug("Loaded YAML file:\n{}", yamlString);
+
+        annotationAwareConstructor = new AnnotationAwareListConstructor(Integer.class);
+        Yaml yaml = new Yaml(annotationAwareConstructor);
+
+        @SuppressWarnings("unchecked")
+        List<Integer> ints = yaml.loadAs(yamlString, List.class);
+        assertThat(ints.size(), is(2));
+        assertThat(ints.get(0), is(3));
+        assertThat(ints.get(1), is(4));
     }
 
 }
