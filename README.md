@@ -35,8 +35,8 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
   </tr>
   <tr>
     <td class="tg-us36">0.4.0</td>
-    <td class="tg-us36">NO<br></td>
-    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">NO</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
@@ -45,8 +45,8 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
   </tr>
   <tr>
     <td class="tg-us36">0.5.0</td>
-    <td class="tg-us36">NO<br></td>
-    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">NO</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
@@ -55,8 +55,8 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
   </tr>
   <tr>
     <td class="tg-us36">0.6.0</td>
-    <td class="tg-us36">NO<br></td>
-    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">NO</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
@@ -65,8 +65,8 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
   </tr>
   <tr>
     <td class="tg-us36">0.7.0</td>
-    <td class="tg-us36">NO<br></td>
-    <td class="tg-us36">NO<br></td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">NO</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
@@ -75,13 +75,13 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.23** by S
   </tr>
   <tr>
     <td class="tg-us36">0.8.0</td>
-    <td class="tg-us36">NO<br></td>
-    <td class="tg-us36">NO<br></td>
-    <td class="tg-us36">?</td>
-    <td class="tg-us36">?</td>
-    <td class="tg-us36">?</td>
-    <td class="tg-us36">?</td>
-    <td class="tg-us36">?</td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">NO</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
   </tr>
 </table>
 
