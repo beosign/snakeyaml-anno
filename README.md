@@ -219,7 +219,7 @@ public class GenderConverter implements Converter<Gender> {
 }
 ```
 
-As of version 0.4.0, conversion is also implemented for dumping. The interface has changed; the `convertToModel` method now takes a `String` as parameter instead of `Node`.
+As of version 0.4.0, conversion is also implemented for dumping. The interface has changed; the `convertToModel` method now takes an `Object` as parameter instead of `String` or `Node`.
 
 #### Custom Constructor
 The converter example above has shown how to apply a different logic to parse a node into a Java object.

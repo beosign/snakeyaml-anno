@@ -1,7 +1,5 @@
 package de.beosign.snakeyamlanno.property;
 
-import java.util.Objects;
-
 import org.yaml.snakeyaml.introspector.Property;
 
 import de.beosign.snakeyamlanno.convert.Converter;
@@ -31,13 +29,21 @@ public class ConvertedProperty extends AnnotatedProperty {
     }
 
     /**
-     * Setter does nothing.
+     * Converts the given value and sets it into this property.
+     * 
+     * @param object object where the property belongs to
+     * @param value value to convert
      */
     @Override
     public void set(Object object, Object value) throws Exception {
-        super.set(object,  converter.convertToModel(Objects.toString(value)));
+        super.set(object, converter.convertToModel(value));
     }
 
+    /**
+     * Returns the converted value.
+     * 
+     * @param object object where the property belongs to
+     */
     @Override
     public Object get(Object object) {
         return converter.convertToYaml(super.get(object));

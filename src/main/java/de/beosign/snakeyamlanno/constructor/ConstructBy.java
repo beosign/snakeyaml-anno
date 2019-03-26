@@ -21,10 +21,7 @@ import java.lang.annotation.Target;
  * </p>
  * <p>
  * Additionally, one can register CustomConstructors for any class using a programmatic approach. This is useful if an already existing class cannot be
- * modified, see {@link AnnotationAwareConstructor#getConstructByMap()}
- * </p>
- * <p>
- * If this annotation is found on a property, then a {@link de.beosign.snakeyamlanno.annotation.Property} annotation has <b>no effect</b>!
+ * modified, see {@link AnnotationAwareConstructor#getConstructByMap()}.
  * </p>
  * 
  * @author florian

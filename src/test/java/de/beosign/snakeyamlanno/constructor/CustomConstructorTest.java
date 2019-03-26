@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
@@ -41,7 +40,7 @@ public class CustomConstructorTest {
     }
 
     /**
-     * Test enum converter.
+     * Tests that the constructor is taken from the annotation at property level instead of the annotation at class level.
      * 
      * @throws Exception on any exception
      */
@@ -65,7 +64,8 @@ public class CustomConstructorTest {
     }
 
     /**
-     * Test enum converter.
+     * Tests converter in combination with a custom constructor on property level. First, the custom constructor is used to create the object,
+     * then a converter is applied on the created object.
      * 
      * @throws Exception on any exception
      */
@@ -84,10 +84,15 @@ public class CustomConstructorTest {
             log.debug("Parsed YAML file:\n{}", person);
 
             assertThat(person, notNullValue());
-            assertThat(person.getThirdPet().getName(), containsString("getName()=dog33"));
+            assertThat(person.getThirdPet().getName(), is("dog33"));
         }
     }
 
+    /**
+     * Test case insensitive enum constructor that is programmatically applied for the Java <code>Enum</code> type.
+     * 
+     * @throws Exception on any exception
+     */
     @Test
     public void parseWithCaseInsensitiveEnum() throws Exception {
         try (InputStream is = getClass().getResourceAsStream("person.yaml")) {
@@ -108,7 +113,8 @@ public class CustomConstructorTest {
     }
 
     /**
-     * Test enum converter.
+     * Test that a custom constructor applied on a concrete enum (a subclass of Java's <code>Enum</code>) overrides the custom constructor for
+     * <code>Enum</code>.
      * 
      * @throws Exception on any exception
      */
