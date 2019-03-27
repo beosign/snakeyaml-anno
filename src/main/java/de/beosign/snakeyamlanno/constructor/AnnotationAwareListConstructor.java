@@ -27,7 +27,7 @@ public class AnnotationAwareListConstructor extends AnnotationAwareConstructor {
      * @param collectionItemType type of list items
      */
     public AnnotationAwareListConstructor(Class<?> collectionItemType) {
-        super(collectionItemType);
+        super(List.class);
         this.collectionItemType = collectionItemType;
     }
 
