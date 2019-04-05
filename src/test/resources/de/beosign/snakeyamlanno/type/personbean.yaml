@@ -1,0 +1,16 @@
+name: Homer
+age: 43
+pet: mydog
+car:
+  brand: dodge
+children:
+- Bart
+- name: Lisa
+  age: 8
+  pet:
+     name: lisas cat
+  children:
+  - lisa1
+  - name: lisa2
+    age: 2
+    children: lisa2.1
