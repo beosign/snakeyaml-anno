@@ -60,7 +60,7 @@ public class TypeDetectionTest {
             assertTrue(parseResult.getAnimal() instanceof Dog);
             assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(5));
 
-            assertThat(new TypeImpl(null).annotationType().getTypeName(), Is.is(Type.class.getName()));
+            assertThat(new TypeImpl((Class<?>[]) null).annotationType().getTypeName(), Is.is(Type.class.getName()));
         }
     }
 
