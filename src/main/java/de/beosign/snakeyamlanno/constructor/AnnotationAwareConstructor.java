@@ -28,6 +28,7 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
+import de.beosign.snakeyamlanno.type.Instantiator;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
@@ -42,6 +43,7 @@ public class AnnotationAwareConstructor extends Constructor {
     private Map<Class<?>, Type> typesMap = new HashMap<>();
     private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
+    private Instantiator instantiator;
 
     /**
      * Creates constructor.
@@ -66,6 +68,17 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
+     * Sets a <i>global</i> instantiator that can be used to create instance for all types that the instantiator wishes to consider. If the instantiator wants
+     * to apply the default instantiation logic of SnakeYaml, it can return <code>null</code>.
+     * 
+     * @param instantiator instantiator instance
+     * @since 0.9.0
+     */
+    public void setInstantiator(Instantiator instantiator) {
+        this.instantiator = instantiator;
+    }
+
+    /**
      * Can be modified to manually define types for a given type. This is the programmatic counterpart to the {@link Type} annotation.
      * It can only be used to add additional types. If you want to override / disable a {@link Type} annotation that is already set on a class, override
      * the {@link AnnotationAwareMappingConstructor#getTypeForClass(Class)} method and return a restricted map.
@@ -77,14 +90,15 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Overridden to implement the "auto type detection" feature.
+     * Overridden to implement the "auto type detection" feature and the "instantiator" feature.
      */
     @Override
     protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException {
+        Type typeAnnotation = getTypeForClass(node.getType());
+
         if (node instanceof MappingNode) {
             MappingNode mappingNode = (MappingNode) node;
             Class<?> type = mappingNode.getType();
-            Type typeAnnotation = getTypeForClass(type);
 
             if (typeAnnotation != null && typeAnnotation.substitutionTypes().length > 0) {
                 // One or more substitution types have been defined
@@ -125,13 +139,37 @@ public class AnnotationAwareConstructor extends Constructor {
 
             }
         }
-        return super.newInstance(ancestor, node, tryDefault);
+
+        /*
+         *  Create an instance using the following order:
+         *  1. check type annotation for an Instantiator and create one if present
+         *  2. call instantiator; if return value is null, check global instantiator within this constructor if present
+         *  3. call global instantiator; if return value is null, call super (default instantiation logic)
+         */
+        Instantiator defaultInstantiator = (nodeType, n, tryDef, anc, def) -> super.newInstance(anc, n, tryDef);
+        Object instance = null;
+        if (typeAnnotation != null && !typeAnnotation.instantiator().equals(Instantiator.class)) {
+            try {
+                instance = typeAnnotation.instantiator().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
+            } catch (IllegalAccessException e) {
+                throw new InstantiationException(
+                        "Cannot access constructor of " + typeAnnotation.instantiator() + " defined on annotation on  " + node.getType() + ": " + e.getMessage());
+            }
+        }
+
+        if (instance == null && instantiator != null) {
+            instance = instantiator.createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
+        }
+
+        if (instance == null) {
+            instance = super.newInstance(ancestor, node, tryDefault);
+        }
+        return instance;
     }
 
     /**
      * Returns the {@link Type} that is registered for the given class. If a type has been manually registered, this is returned. Otherwise, the
-     * {@link Type}
-     * annotation on the given class is returned.
+     * {@link Type} annotation on the given class is returned.
      * 
      * @param clazz class
      * @return {@link Type} for given type
