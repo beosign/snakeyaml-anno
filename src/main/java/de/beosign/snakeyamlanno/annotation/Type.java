@@ -3,6 +3,7 @@ package de.beosign.snakeyamlanno.annotation;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -70,4 +71,54 @@ public @interface Type {
      * @since 0.9.0
      */
     Class<? extends Instantiator> instantiator() default Instantiator.class;
+
+    final class Factory {
+        private Factory() {
+        }
+
+        public static Type of(Class<? extends Instantiator> instantiator, Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
+            return new TypeImpl(instantiator, substitutionTypeSelectorType, substitutionTypes);
+        }
+
+        @SuppressWarnings({ "all" })
+        private static final class TypeImpl implements Type {
+            private Class<?>[] substitutionTypes = new Class<?>[0];
+            private Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType = NoSubstitutionTypeSelector.class;
+            private Class<? extends Instantiator> instantiatorType = Instantiator.class;
+
+            private TypeImpl(Class<? extends Instantiator> instantiatorType, Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
+                if (substitutionTypes != null) {
+                    this.substitutionTypes = substitutionTypes;
+                }
+                if (substitutionTypeSelectorType != null) {
+                    this.substitutionTypeSelectorType = substitutionTypeSelectorType;
+                }
+                if (instantiatorType != null) {
+                    this.instantiatorType = instantiatorType;
+                }
+            }
+
+            @Override
+            public Class<?>[] substitutionTypes() {
+                return substitutionTypes;
+            }
+
+            @Override
+            public Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() {
+                return substitutionTypeSelectorType;
+            }
+
+            @Override
+            public Class<? extends Instantiator> instantiator() {
+                return instantiatorType;
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return Type.class;
+            }
+        }
+
+    }
+
 }

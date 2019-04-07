@@ -30,7 +30,7 @@ public class RootListTest {
     @BeforeEach
     public void before() {
         annotationAwareConstructor = new AnnotationAwareConstructor(Person.class);
-        annotationAwareConstructor.getConstructByMap().put(Enum.class, ConstructByFactory.of(EnumConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(Enum.class, ConstructBy.Factory.of(EnumConstructor.class));
     }
 
     /**

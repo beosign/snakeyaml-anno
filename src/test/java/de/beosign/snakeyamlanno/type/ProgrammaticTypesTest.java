@@ -16,7 +16,6 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 
 import de.beosign.snakeyamlanno.annotation.Property;
 import de.beosign.snakeyamlanno.annotation.Type;
-import de.beosign.snakeyamlanno.annotation.TypeImpl;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.type.Animal.Cat;
 import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.Animal.Dog;
@@ -48,7 +47,7 @@ public class ProgrammaticTypesTest {
         log.debug("YAML:\n{}", yamlString);
 
         AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class);
-        constructor.getTypesMap().put(Animal.class, new TypeImpl(new Class<?>[] { Dog.class, Cat.class }));
+        constructor.registerSubstitutionTypes(Animal.class, Dog.class, Cat.class);
         Yaml yaml = new Yaml(constructor);
 
         Person parseResult = yaml.loadAs(yamlString, Person.class);
@@ -77,8 +76,8 @@ public class ProgrammaticTypesTest {
 
         AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class);
         Yaml yaml = new Yaml(constructor);
-        constructor.getTypesMap().put(Animal.class, new TypeImpl(new Class<?>[] { Dog.class, Cat.class }));
-        constructor.getTypesMap().put(WorkingPerson.class, new TypeImpl(new Class<?>[] { WorkingPerson.Employee.class, WorkingPerson.Employer.class }));
+        constructor.registerSubstitutionTypes(Animal.class, Dog.class, Cat.class);
+        constructor.registerSubstitutionTypes(WorkingPerson.class, WorkingPerson.Employee.class, WorkingPerson.Employer.class);
 
         Person parseResult = yaml.loadAs(yamlString, Person.class);
         log.debug("Parsed YAML file:\n{}", parseResult);
@@ -106,8 +105,8 @@ public class ProgrammaticTypesTest {
         log.debug("Loaded YAML file:\n{}", yamlString);
 
         AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(WorkingPerson.class);
-        constructor.getTypesMap().put(Animal.class, new TypeImpl(new Class<?>[] { Dog.class, Cat.class }));
-        constructor.getTypesMap().put(WorkingPerson.class, new TypeImpl(new Class<?>[] { WorkingPerson.Employee.class, WorkingPerson.Employer.class }));
+        constructor.registerSubstitutionTypes(Animal.class, Dog.class, Cat.class);
+        constructor.registerSubstitutionTypes(WorkingPerson.class, WorkingPerson.Employee.class, WorkingPerson.Employer.class);
         Yaml yaml = new Yaml(constructor);
 
         Person parseResult = yaml.loadAs(yamlString, WorkingPerson.class);
@@ -133,9 +132,9 @@ public class ProgrammaticTypesTest {
 
         AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(WorkingPerson2.class);
         Yaml yaml = new Yaml(constructor);
-        constructor.getTypesMap().put(Animal.class, new TypeImpl(new Class<?>[] { Dog.class, Cat.class }));
-        constructor.getTypesMap().put(WorkingPerson2.class,
-                new TypeImpl(new Class<?>[] { WorkingPerson2.Employee.class, WorkingPerson2.Employer.class }, WorkingPerson2.WorkingPerson2TypeSelector.class));
+        constructor.registerSubstitutionTypes(Animal.class, Dog.class, Cat.class);
+        constructor.registerType(WorkingPerson2.class,
+                Type.Factory.of(null, WorkingPerson2.WorkingPerson2TypeSelector.class, WorkingPerson2.Employee.class, WorkingPerson2.Employer.class));
 
         Person parseResult = yaml.loadAs(yamlString, WorkingPerson2.class);
         log.debug("Parsed YAML file:\n{}", parseResult);
@@ -163,7 +162,7 @@ public class ProgrammaticTypesTest {
 
         AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Company.class);
         Yaml yaml = new Yaml(constructor);
-        constructor.getTypesMap().put(WorkingPerson.class, new TypeImpl(new Class<?>[] { WorkingPerson.Employee.class, WorkingPerson.Employer.class }));
+        constructor.registerSubstitutionTypes(WorkingPerson.class, WorkingPerson.Employee.class, WorkingPerson.Employer.class);
 
         Company parseResult = yaml.loadAs(yamlString, Company.class);
         log.debug("Parsed YAML file:\n{}", parseResult);
@@ -201,8 +200,8 @@ public class ProgrammaticTypesTest {
         AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(AnnotatedAnimal.class);
 
         // override given annotation
-        constructor.getTypesMap().clear();
-        constructor.getTypesMap().put(AnnotatedAnimal.class, new TypeImpl(new Class<?>[] { AnnotatedDog.class, AnnotatedCat.class }));
+        constructor.unregisterTypes();
+        constructor.registerSubstitutionTypes(AnnotatedAnimal.class, AnnotatedDog.class, AnnotatedCat.class);
 
         Yaml yaml = new Yaml(constructor);
 

@@ -5,6 +5,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -31,4 +32,45 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface ConstructBy {
     Class<? extends CustomConstructor<?>> value();
+
+    final class Factory {
+        private Factory() {
+        }
+
+        /**
+         * Creates a {@link ConstructBy}.
+         * 
+         * @param customConstructorClass constructor type
+         * @return {@link ConstructBy}.
+         */
+        public static ConstructBy of(Class<? extends CustomConstructor<?>> customConstructorClass) {
+            return new ConstructByImpl(customConstructorClass);
+        }
+
+        /**
+         * Implementation class.
+         * 
+         * @author florian
+         */
+        @SuppressWarnings({ "all" })
+        private static final class ConstructByImpl implements ConstructBy {
+            private Class<? extends CustomConstructor<?>> value;
+
+            private ConstructByImpl(Class<? extends CustomConstructor<?>> value) {
+                this.value = value;
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return ConstructBy.class;
+            }
+
+            @Override
+            public Class<? extends CustomConstructor<?>> value() {
+                return value;
+            }
+
+        }
+
+    }
 }

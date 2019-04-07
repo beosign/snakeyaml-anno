@@ -42,8 +42,8 @@ public class ConstructByTest {
 
     @Test
     public void testMapOnly() {
-        annotationAwareConstructor.getConstructByMap().put(Number.class, ConstructByFactory.of(NumberCustomConstructor.class));
-        annotationAwareConstructor.getConstructByMap().put(BigInteger.class, ConstructByFactory.of(BigIntegerCustomConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(Number.class, ConstructBy.Factory.of(NumberCustomConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(BigInteger.class, ConstructBy.Factory.of(BigIntegerCustomConstructor.class));
 
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(Number.class);
         assertEquals(NumberCustomConstructor.class, constructBy.value());
@@ -63,16 +63,17 @@ public class ConstructByTest {
 
     @Test
     public void testMapAndAnnotationExactType() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructByFactory.of(BTestConstructByClassConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(BTestConstructByClassConstructor.class));
 
         // Map wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(TestConstructByClass.class);
         assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
+        assertEquals(ConstructBy.class, constructBy.annotationType());
     }
 
     @Test
     public void testMapAndAnnotationRelatedTypesSameSupertype() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructByFactory.of(BTestConstructByClassConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(BTestConstructByClassConstructor.class));
 
         // Map and annotation have a match for same supertype, maps wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(ATestConstructByClass.class);
@@ -81,7 +82,7 @@ public class ConstructByTest {
 
     @Test
     public void testMapAndAnnotationRelatedTypesMapMoreSpecificSupertype() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructByFactory.of(BTestConstructByClassConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(BTestConstructByClassConstructor.class));
 
         // Map and annotation have a match for a supertype, but maps' is more specific => map wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(AATestConstructByClass.class);
@@ -90,7 +91,7 @@ public class ConstructByTest {
 
     @Test
     public void testMapAndAnnotationRelatedTypesAnnotationMoreSpecificSupertype() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructByFactory.of(NumberCustomConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(NumberCustomConstructor.class));
 
         // Map and annotation have a match for a supertype, but annotations' is more specific => annotation wins
         ConstructBy constructBy = annotationAwareConstructor.getConstructBy(BBTestConstructByClass.class);

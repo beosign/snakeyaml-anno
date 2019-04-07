@@ -43,7 +43,7 @@ public class AnnotationAwareConstructor extends Constructor {
     private Map<Class<?>, Type> typesMap = new HashMap<>();
     private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
-    private Instantiator instantiator;
+    private Instantiator globalInstantiator;
 
     /**
      * Creates constructor.
@@ -68,25 +68,16 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Sets a <i>global</i> instantiator that can be used to create instance for all types that the instantiator wishes to consider. If the instantiator wants
-     * to apply the default instantiation logic of SnakeYaml, it can return <code>null</code>.
+     * Sets a <i>global</i> instantiator that can be used to create instance for all types that the given instantiator wishes to consider. If the instantiator
+     * wants to apply the default instantiation logic of SnakeYaml, it can return <code>null</code>.<br>
+     * In order to apply an {@link Instantiator} for a given type only, or if you want to override the behaviour for a particular type, use the {@link Type}
+     * annotation or use the programmatic way (e.g. {@link #registerInstantiator(Class, Class)}.
      * 
-     * @param instantiator instantiator instance
+     * @param globalInstantiator instantiator instance that is global to this Constructor.
      * @since 0.9.0
      */
-    public void setInstantiator(Instantiator instantiator) {
-        this.instantiator = instantiator;
-    }
-
-    /**
-     * Can be modified to manually define types for a given type. This is the programmatic counterpart to the {@link Type} annotation.
-     * It can only be used to add additional types. If you want to override / disable a {@link Type} annotation that is already set on a class, override
-     * the {@link AnnotationAwareMappingConstructor#getTypeForClass(Class)} method and return a restricted map.
-     * 
-     * @return map from a type to its substitution types
-     */
-    public Map<Class<?>, Type> getTypesMap() {
-        return typesMap;
+    public void setGlobalInstantiator(Instantiator globalInstantiator) {
+        this.globalInstantiator = globalInstantiator;
     }
 
     /**
@@ -157,8 +148,8 @@ public class AnnotationAwareConstructor extends Constructor {
             }
         }
 
-        if (instance == null && instantiator != null) {
-            instance = instantiator.createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
+        if (instance == null && globalInstantiator != null) {
+            instance = globalInstantiator.createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
         }
 
         if (instance == null) {
@@ -371,7 +362,46 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param <T> type for which a {@link CustomConstructor} is registered
      */
     public <T> void registerCustomConstructor(Class<T> forType, Class<? extends CustomConstructor<? extends T>> customConstructorClass) {
-        constructByMap.put(forType, ConstructByFactory.of(customConstructorClass));
+        constructByMap.put(forType, ConstructBy.Factory.of(customConstructorClass));
+    }
+
+    /**
+     * Programmatically registers an {@link Instantiator} for a given type.
+     * 
+     * @param forType type for which an {@link Instantiator} is to be registered
+     * @param instantiator {@link Instantiator} type
+     */
+    public void registerInstantiator(Class<?> forType, Class<? extends Instantiator> instantiator) {
+        registerType(forType, Type.Factory.of(instantiator, null, (Class<?>[]) null));
+    }
+
+    /**
+     * Programmatically registers an array of <i>substitution types</i> for a given type.
+     * 
+     * @param forType type for which an {@link Instantiator} is to be registered
+     * @param substitutionTypes substitution types
+     */
+    public void registerSubstitutionTypes(Class<?> forType, Class<?>... substitutionTypes) {
+        registerType(forType, Type.Factory.of(null, null, substitutionTypes));
+    }
+
+    /**
+     * Programmatically registers a {@link Type} for a given type.
+     * 
+     * @param forType type for which an {@link Instantiator} is to be registered
+     * @param type type; you can get an instance by the factory methods in {@link Type.Factory}
+     */
+    public void registerType(Class<?> forType, Type type) {
+        typesMap.put(forType, type);
+    }
+
+    /**
+     * Removes all manually added {@link Type} registrations.<br>
+     * {@link Type} annotations on classes are uneffected by calling this method. In order to modify the behaviour induced by annotations, override
+     * {@link #getTypeForClass(Class)}.
+     */
+    public void unregisterTypes() {
+        typesMap.clear();
     }
 
     /**

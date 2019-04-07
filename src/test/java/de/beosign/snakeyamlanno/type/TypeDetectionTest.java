@@ -20,7 +20,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import de.beosign.snakeyamlanno.annotation.Type;
-import de.beosign.snakeyamlanno.annotation.TypeImpl;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.property.Company;
 import de.beosign.snakeyamlanno.property.Person;
@@ -60,7 +59,7 @@ public class TypeDetectionTest {
             assertTrue(parseResult.getAnimal() instanceof Dog);
             assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(5));
 
-            assertThat(new TypeImpl((Class<?>[]) null).annotationType().getTypeName(), Is.is(Type.class.getName()));
+            assertThat(Type.Factory.of(null, null, (Class<?>) null).annotationType().getTypeName(), Is.is(Type.class.getName()));
         }
     }
 

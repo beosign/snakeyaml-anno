@@ -25,7 +25,6 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.annotation.Type;
-import de.beosign.snakeyamlanno.annotation.TypeImpl;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.constructor.Person;
 import de.beosign.snakeyamlanno.util.NodeUtil;
@@ -43,7 +42,7 @@ public class InstantiatorTest {
     @BeforeEach
     public void before() {
         annotationAwareConstructor = new AnnotationAwareConstructor(Person.class);
-        annotationAwareConstructor.setInstantiator(new PersonBeanInstantiator() {
+        annotationAwareConstructor.setGlobalInstantiator(new PersonBeanInstantiator() {
             @Override
             protected int getAge() {
                 return 66;
@@ -84,8 +83,8 @@ public class InstantiatorTest {
             log.debug("Loaded YAML file:\n{}", yamlString);
 
             // manually register instantiator
-            annotationAwareConstructor.setInstantiator(null);
-            annotationAwareConstructor.getTypesMap().put(PersonBean.class, new TypeImpl(PersonBeanInstantiator.class));
+            annotationAwareConstructor.setGlobalInstantiator(null);
+            annotationAwareConstructor.registerInstantiator(PersonBean.class, PersonBeanInstantiator.class);
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             PersonBean homerPersonBean = yaml.loadAs(yamlString, PersonBean.class);
@@ -112,8 +111,8 @@ public class InstantiatorTest {
             log.debug("Loaded YAML file:\n{}", yamlString);
 
             // manually register instantiator
-            annotationAwareConstructor.setInstantiator(new AnimalInstantiator());
-            annotationAwareConstructor.getTypesMap().put(Animal.class, new TypeImpl(DefaultInstantiator.class));
+            annotationAwareConstructor.setGlobalInstantiator(new AnimalInstantiator());
+            annotationAwareConstructor.registerInstantiator(Animal.class, DefaultInstantiator.class);
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             Person1 person1 = yaml.loadAs(yamlString, Person1.class);
@@ -147,8 +146,8 @@ public class InstantiatorTest {
             log.debug("Loaded YAML file:\n{}", yamlString);
 
             // manually register instantiator
-            annotationAwareConstructor.setInstantiator(new AnimalInstantiator());
-            annotationAwareConstructor.getTypesMap().put(Animal.class, new TypeImpl(Person1CatInstantiator.class));
+            annotationAwareConstructor.setGlobalInstantiator(new AnimalInstantiator());
+            annotationAwareConstructor.registerInstantiator(Animal.class, Person1CatInstantiator.class);
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             Person1 person1 = yaml.loadAs(yamlString, Person1.class);
