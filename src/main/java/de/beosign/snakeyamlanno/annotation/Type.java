@@ -8,7 +8,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import de.beosign.snakeyamlanno.instantiator.Instantiator;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
@@ -16,10 +15,6 @@ import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
  * <p>
  * Can be defined on an (abstract) class or interface to define which possible (sub)types yaml should try to use when parsing a
  * property of the given type. This eliminates the need to specify a tag for that property in the YAML file.
- * </p>
- * <p>
- * Additionally, one can register a {@link Instantiator} class that determines how new instances are created. Usually, they are created using the
- * default constructor. An instantiator can however use a different approach.
  * </p>
  * 
  * @author florian
@@ -54,47 +49,25 @@ public @interface Type {
      */
     Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() default NoSubstitutionTypeSelector.class;
 
-    /**
-     * <p>
-     * Can optionally be set to define an {@link Instantiator} that will be used to create new instances.
-     * </p>
-     * <p>
-     * A common use case might be to use a static factory method for objects or a dependency injection framework that should create instances, like CDI.
-     * </p>
-     * <p>
-     * Please consider that Snakeyaml already provides some mechanisms to create instances with no default (no-arg) constructor, see
-     * <a href="https://bitbucket.org/asomov/snakeyaml/wiki/CompactObjectNotation">Compact Object Notation</a> and
-     * <a href="https://bitbucket.org/asomov/snakeyaml/wiki/Documentation#markdown-header-immutable-instances">Immutable Instances</a>.
-     * </p>
-     * 
-     * @return instantiator class
-     * @since 0.9.0
-     */
-    Class<? extends Instantiator> instantiator() default Instantiator.class;
-
     final class Factory {
         private Factory() {
         }
 
-        public static Type of(Class<? extends Instantiator> instantiator, Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
-            return new TypeImpl(instantiator, substitutionTypeSelectorType, substitutionTypes);
+        public static Type of(Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
+            return new TypeImpl(substitutionTypeSelectorType, substitutionTypes);
         }
 
         @SuppressWarnings({ "all" })
         private static final class TypeImpl implements Type {
             private Class<?>[] substitutionTypes = new Class<?>[0];
             private Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType = NoSubstitutionTypeSelector.class;
-            private Class<? extends Instantiator> instantiatorType = Instantiator.class;
 
-            private TypeImpl(Class<? extends Instantiator> instantiatorType, Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
+            private TypeImpl(Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
                 if (substitutionTypes != null) {
                     this.substitutionTypes = substitutionTypes;
                 }
                 if (substitutionTypeSelectorType != null) {
                     this.substitutionTypeSelectorType = substitutionTypeSelectorType;
-                }
-                if (instantiatorType != null) {
-                    this.instantiatorType = instantiatorType;
                 }
             }
 
@@ -106,11 +79,6 @@ public @interface Type {
             @Override
             public Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() {
                 return substitutionTypeSelectorType;
-            }
-
-            @Override
-            public Class<? extends Instantiator> instantiator() {
-                return instantiatorType;
             }
 
             @Override

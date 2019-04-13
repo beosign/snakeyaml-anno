@@ -28,6 +28,7 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.annotation.Type;
+import de.beosign.snakeyamlanno.instantiator.InstantiateBy;
 import de.beosign.snakeyamlanno.instantiator.Instantiator;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
@@ -42,6 +43,7 @@ public class AnnotationAwareConstructor extends Constructor {
 
     private Map<Class<?>, Type> typesMap = new HashMap<>();
     private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
+    private Map<Class<?>, InstantiateBy> instantiateByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
     private Instantiator globalInstantiator;
 
@@ -85,9 +87,9 @@ public class AnnotationAwareConstructor extends Constructor {
      */
     @Override
     protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException {
-        Type typeAnnotation = getTypeForClass(node.getType());
 
         if (node instanceof MappingNode) {
+            Type typeAnnotation = getTypeForClass(node.getType());
             MappingNode mappingNode = (MappingNode) node;
             Class<?> type = mappingNode.getType();
 
@@ -139,12 +141,13 @@ public class AnnotationAwareConstructor extends Constructor {
          */
         Instantiator defaultInstantiator = (nodeType, n, tryDef, anc, def) -> super.newInstance(anc, n, tryDef);
         Object instance = null;
-        if (typeAnnotation != null && !typeAnnotation.instantiator().equals(Instantiator.class)) {
+        InstantiateBy instantiateBy = getInstantiateBy(node.getType());
+        if (instantiateBy != null && !instantiateBy.value().equals(Instantiator.class)) {
             try {
-                instance = typeAnnotation.instantiator().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
+                instance = instantiateBy.value().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
             } catch (IllegalAccessException e) {
                 throw new InstantiationException(
-                        "Cannot access constructor of " + typeAnnotation.instantiator() + " defined on annotation on  " + node.getType() + ": " + e.getMessage());
+                        "Cannot access constructor of " + instantiateBy.value() + ": " + e.getMessage());
             }
         }
 
@@ -372,7 +375,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param instantiator {@link Instantiator} type
      */
     public void registerInstantiator(Class<?> forType, Class<? extends Instantiator> instantiator) {
-        registerType(forType, Type.Factory.of(instantiator, null, (Class<?>[]) null));
+        instantiateByMap.put(forType, InstantiateBy.Factory.of(instantiator));
     }
 
     /**
@@ -382,7 +385,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param substitutionTypes substitution types
      */
     public void registerSubstitutionTypes(Class<?> forType, Class<?>... substitutionTypes) {
-        registerType(forType, Type.Factory.of(null, null, substitutionTypes));
+        registerType(forType, Type.Factory.of(null, substitutionTypes));
     }
 
     /**
@@ -456,6 +459,42 @@ public class AnnotationAwareConstructor extends Constructor {
             constructByAnnotation = typeToFindInMap.getDeclaredAnnotation(ConstructBy.class);
             if (constructByAnnotation != null) {
                 return constructByAnnotation;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a matching {@link InstantiateBy} annotation by using the following rules, given the node is of type <code>T</code>:<br>
+     * Check <code>T</code>, then walk the superclass hierarchy of <code>T</code>, then all interfaces of <code>T</code>.<br>
+     * For each superclass/interface <code>S super T</code> (including T at first), check:
+     * <ol>
+     * <li> If there is an entry in the {@link #instantiateByMap} for <code>S</code> return the {@link InstantiateBy} from the map</li>
+     * <li> If <code>S</code> is annotated with {@link InstantiateBy}, return the annotation.</li>
+     * <li> If there is no match for <code>S</code>, proceed with the next superclass/interface.
+     * </ol>
+     * If no match was found after walking the whole hierarchy, <code>null</code> is returned.
+     * 
+     * @param type type
+     * @return {@link InstantiateBy} or <code>null</code> if no matching {@link InstantiateBy} found
+     */
+    protected InstantiateBy getInstantiateBy(Class<?> type) {
+        InstantiateBy instantiateBy = null;
+
+        List<Class<?>> typesInHierarchy = new ArrayList<>();
+        typesInHierarchy.add(type);
+        typesInHierarchy.addAll(ClassUtils.getAllSuperclasses(type));
+        typesInHierarchy.addAll(ClassUtils.getAllInterfaces(type));
+
+        for (Class<?> currentType : typesInHierarchy) {
+            instantiateBy = instantiateByMap.get(currentType);
+            if (instantiateBy != null) {
+                return instantiateBy;
+            }
+            instantiateBy = currentType.getDeclaredAnnotation(InstantiateBy.class);
+            if (instantiateBy != null) {
+                return instantiateBy;
             }
         }
 

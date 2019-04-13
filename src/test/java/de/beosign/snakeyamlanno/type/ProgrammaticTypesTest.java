@@ -134,13 +134,13 @@ public class ProgrammaticTypesTest {
         Yaml yaml = new Yaml(constructor);
         constructor.registerSubstitutionTypes(Animal.class, Dog.class, Cat.class);
         constructor.registerType(WorkingPerson2.class,
-                Type.Factory.of(null, WorkingPerson2.WorkingPerson2TypeSelector.class, WorkingPerson2.Employee.class, WorkingPerson2.Employer.class));
+                Type.Factory.of(WorkingPerson2.WorkingPerson2TypeSelector.class, WorkingPerson2.Employee.class, WorkingPerson2.Employer.class));
 
         Person parseResult = yaml.loadAs(yamlString, WorkingPerson2.class);
         log.debug("Parsed YAML file:\n{}", parseResult);
 
         assertThat(parseResult, notNullValue());
-        assertTrue(parseResult.getClass().equals(WorkingPerson2.Employer.class));
+        assertThat(parseResult.getClass().getName(), is(WorkingPerson2.Employer.class.getName()));
         assertThat(parseResult.getName(), is("Homer"));
 
     }

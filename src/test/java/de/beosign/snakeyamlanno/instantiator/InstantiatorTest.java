@@ -27,8 +27,6 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.constructor.Person;
-import de.beosign.snakeyamlanno.instantiator.DefaultInstantiator;
-import de.beosign.snakeyamlanno.instantiator.Instantiator;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
 /**
@@ -291,7 +289,7 @@ public class InstantiatorTest {
     }
 
     /** Test class where an {@link AnimalInstantiator} is applied to. */
-    @Type(instantiator = AnimalInstantiator.class)
+    @InstantiateBy(AnimalInstantiator.class)
     public static class Animal {
         private String name;
 
@@ -353,7 +351,7 @@ public class InstantiatorTest {
     }
 
     /** Test class. */
-    @Type(instantiator = InvalidInstantiator.class)
+    @InstantiateBy(InvalidInstantiator.class)
     public static class Invalid {
         private String brand;
 
