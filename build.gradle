@@ -14,6 +14,13 @@ jacocoTestReport {
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+compileJava {
+    doFirst {
+        println "Using Java Version for compilation: " + JavaVersion.current()
+    }
 }
 
 repositories {
