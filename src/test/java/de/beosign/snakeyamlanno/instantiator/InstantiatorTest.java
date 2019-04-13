@@ -127,6 +127,51 @@ public class InstantiatorTest {
         }
     }
 
+    @Test
+    public void testValidInstantiatorInheritedBySuperclass() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("person1c.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            // manually register instantiator
+            annotationAwareConstructor.setGlobalInstantiator(null);
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Person2 person2 = yaml.loadAs(yamlString, Person2.class);
+
+            assertThat(person2.getName(), is("Homer"));
+
+            // although there is no instantiator for "Dog", the instantiator for "Animal" is used
+            assertThat(person2.getDog().getClass().getName(), is(Dog.class.getName()));
+            assertThat(person2.getDog().getName(), is("mydog"));
+
+        }
+    }
+
+    @Test
+    public void testValidInstantiatorOverriddenWithInstantiator() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("person1c.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            // manually register instantiator
+            annotationAwareConstructor.setGlobalInstantiator(null);
+            annotationAwareConstructor.registerInstantiator(Dog.class, DogInstantiator.class);
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Person2 person2 = yaml.loadAs(yamlString, Person2.class);
+
+            assertThat(person2.getName(), is("Homer"));
+
+            // although there is a instantiator for "Animal" (superclass of Dog), the instantiator for "Dog" is used
+            assertThat(person2.getDog().getClass().getName(), is(Dog.class.getName()));
+            assertThat(person2.getDog().getName(), is("MY LITTLE DOG"));
+
+        }
+    }
+
     /**
      * Tests the following setup.
      * <ul>
@@ -220,6 +265,7 @@ public class InstantiatorTest {
         private Car car;
         private List<PersonBean> children;
         private Animal pet;
+        private Dog dog;
         private Invalid invalid;
 
         public PersonBean() {
@@ -265,9 +311,17 @@ public class InstantiatorTest {
             this.pet = pet;
         }
 
+        public Dog getDog() {
+            return dog;
+        }
+
+        public void setDog(Dog dog) {
+            this.dog = dog;
+        }
+
         @Override
         public String toString() {
-            return "PersonBean [name=" + name + ", age=" + age + ", car=" + car + ", pet=" + pet + ", children=" + children + "]";
+            return "PersonBean [name=" + name + ", age=" + age + ", car=" + car + ", pet=" + pet + ", dog=" + dog + ", invalid=" + invalid + ", children=" + children + "]";
         }
 
         public Car getCar() {
@@ -415,6 +469,37 @@ public class InstantiatorTest {
         }
     }
 
+    /** Creates Dog instances. */
+    public static class DogInstantiator extends AnimalInstantiator {
+
+        @Override
+        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+
+            if (Dog.class.isAssignableFrom(nodeType)) {
+                if (Objects.toString(NodeUtil.getValue(node), "").equals("mydog")) {
+                    return new Dog("MY LITTLE DOG");
+                }
+                if (node instanceof MappingNode) {
+                    MappingNode mappingNode = (MappingNode) node;
+                    Dog dog = mappingNode.getValue().stream()//
+                            .filter(nt -> NodeUtil.getValue(nt.getKeyNode()).equals("name"))//
+                            .findFirst()//
+                            .map(nt -> Objects.toString(NodeUtil.getValue(nt.getValueNode()), ""))//
+                            .map(name -> name.equals("mydog") ? "MY LITTLE DOG" : name)//
+                            .map(name -> new Dog(name))//
+                            .orElse(null);
+                    if (dog != null) {
+                        // remove 'name', otherwise it will be overwritten when filling the object
+                        NodeUtil.removeNode(mappingNode, "name");
+                    }
+                    return dog;
+
+                }
+            }
+            return super.createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator);
+        }
+    }
+
     /** Private constructor, so causes errors when used. */
     public static final class InvalidInstantiator implements Instantiator {
         private InvalidInstantiator() {
@@ -451,11 +536,37 @@ public class InstantiatorTest {
         public String toString() {
             return "Person1 [name=" + name + ", animal=" + animal + "]";
         }
-
     }
 
-    /** Instantiator that uses a special login to create a Cat. */
-    public static class Person1CatInstantiator implements Instantiator {
+    /** Test class. */
+    public static class Person2 {
+        private String name;
+        private Dog dog;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Dog getDog() {
+            return dog;
+        }
+
+        public void setDog(Dog dog) {
+            this.dog = dog;
+        }
+
+        @Override
+        public String toString() {
+            return "Person2 [name=" + name + ", dog=" + dog + "]";
+        }
+    }
+
+    /** Instantiator that uses a special logic to create a Cat. */
+    public static class Person1CatInstantiator extends AnimalInstantiator {
 
         @Override
         public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
@@ -464,7 +575,7 @@ public class InstantiatorTest {
             } else if (node instanceof MappingNode) {
                 return new Cat((String) NodeUtil.getPropertyToValueMap((MappingNode) node).get("name"));
             } else {
-                return new Animal();
+                return super.createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator);
             }
         }
     }

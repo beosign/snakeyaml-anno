@@ -85,4 +85,15 @@ public final class NodeUtil {
         }
     }
 
+    /**
+     * Removes the node with the given key from the given mapping node.
+     * 
+     * @param mappingNode mapping node from which a node is to be removed
+     * @param key the key of the node that is to be removed
+     * @return <code>true</code> if something has been removed
+     */
+    public static boolean removeNode(MappingNode mappingNode, String key) {
+        return mappingNode.getValue().removeIf(nt -> NodeUtil.getValue(nt.getKeyNode()).equals(key));
+    }
+
 }

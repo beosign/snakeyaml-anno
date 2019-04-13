@@ -49,6 +49,9 @@ public @interface Type {
      */
     Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() default NoSubstitutionTypeSelector.class;
 
+    /**
+     * Factory for Type instances.
+     */
     final class Factory {
         private Factory() {
         }

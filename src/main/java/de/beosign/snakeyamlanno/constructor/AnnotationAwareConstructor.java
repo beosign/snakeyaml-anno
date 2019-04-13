@@ -135,7 +135,7 @@ public class AnnotationAwareConstructor extends Constructor {
 
         /*
          *  Create an instance using the following order:
-         *  1. check type annotation for an Instantiator and create one if present
+         *  1. check node type for an Instantiator registration and create one if present
          *  2. call instantiator; if return value is null, check global instantiator within this constructor if present
          *  3. call global instantiator; if return value is null, call super (default instantiation logic)
          */
@@ -146,8 +146,7 @@ public class AnnotationAwareConstructor extends Constructor {
             try {
                 instance = instantiateBy.value().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
             } catch (IllegalAccessException e) {
-                throw new InstantiationException(
-                        "Cannot access constructor of " + instantiateBy.value() + ": " + e.getMessage());
+                throw new InstantiationException("Cannot access constructor of " + instantiateBy.value() + ": " + e.getMessage());
             }
         }
 
@@ -470,9 +469,9 @@ public class AnnotationAwareConstructor extends Constructor {
      * Check <code>T</code>, then walk the superclass hierarchy of <code>T</code>, then all interfaces of <code>T</code>.<br>
      * For each superclass/interface <code>S super T</code> (including T at first), check:
      * <ol>
-     * <li> If there is an entry in the {@link #instantiateByMap} for <code>S</code> return the {@link InstantiateBy} from the map</li>
-     * <li> If <code>S</code> is annotated with {@link InstantiateBy}, return the annotation.</li>
-     * <li> If there is no match for <code>S</code>, proceed with the next superclass/interface.
+     * <li>If there is an entry in the {@link #instantiateByMap} for <code>S</code> return the {@link InstantiateBy} from the map</li>
+     * <li>If <code>S</code> is annotated with {@link InstantiateBy}, return the annotation.</li>
+     * <li>If there is no match for <code>S</code>, proceed with the next superclass/interface.
      * </ol>
      * If no match was found after walking the whole hierarchy, <code>null</code> is returned.
      * 
