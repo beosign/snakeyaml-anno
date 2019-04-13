@@ -33,6 +33,9 @@ import java.lang.annotation.Target;
 public @interface ConstructBy {
     Class<? extends CustomConstructor<?>> value();
 
+    /**
+     * Factory that creates instances of {@link ConstructBy}.
+     */
     final class Factory {
         private Factory() {
         }
