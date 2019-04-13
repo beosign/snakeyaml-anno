@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno.type;
+package de.beosign.snakeyamlanno.instantiator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -27,6 +27,8 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.constructor.Person;
+import de.beosign.snakeyamlanno.instantiator.DefaultInstantiator;
+import de.beosign.snakeyamlanno.instantiator.Instantiator;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
 /**

@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno.type;
+package de.beosign.snakeyamlanno.instantiator;
 
 import org.yaml.snakeyaml.nodes.Node;
 
