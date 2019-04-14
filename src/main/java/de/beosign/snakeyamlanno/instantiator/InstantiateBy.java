@@ -36,7 +36,7 @@ public @interface InstantiateBy {
      * @return instantiator class
      * @since 0.9.0
      */
-    Class<? extends Instantiator> value() default Instantiator.class;
+    Class<? extends Instantiator> value();
 
     /** Factory for InstantiateBy instances. */
     final class Factory {
