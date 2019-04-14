@@ -45,7 +45,7 @@ public @interface Type {
      * 
      * @return SubstitutionTypeSelector implementation class
      */
-    Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() default NoSubstitutionTypeSelector.class;
+    Class<? extends SubstitutionTypeSelector> substitutionTypeSelector() default SubstitutionTypeSelector.class;
 
     /**
      * Factory for Type instances.
@@ -62,7 +62,7 @@ public @interface Type {
         @SuppressWarnings({ "all" })
         private static final class TypeImpl implements Type {
             private Class<?>[] substitutionTypes;
-            private Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType = NoSubstitutionTypeSelector.class;
+            private Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType = SubstitutionTypeSelector.class;
 
             private TypeImpl(Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
                 Objects.requireNonNull(substitutionTypes, "Substitution types must not be null");

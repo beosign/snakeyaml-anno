@@ -29,7 +29,6 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.instantiator.InstantiateBy;
 import de.beosign.snakeyamlanno.instantiator.Instantiator;
-import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.Type;
 
@@ -98,7 +97,7 @@ public class AnnotationAwareConstructor extends Constructor {
                 List<Class<?>> validSubstitutionTypes = new ArrayList<>();
                 SubstitutionTypeSelector substitutionTypeSelector = null;
 
-                if (typeAnnotation.substitutionTypeSelector() != NoSubstitutionTypeSelector.class) {
+                if (typeAnnotation.substitutionTypeSelector() != SubstitutionTypeSelector.class) {
                     try {
                         // check if default detection algorithm is to be applied
                         substitutionTypeSelector = typeAnnotation.substitutionTypeSelector().newInstance();
