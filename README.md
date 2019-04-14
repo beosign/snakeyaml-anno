@@ -123,6 +123,7 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 * Property name mapping
 * Converting
 * Custom Constructor
+* Instantiator
 * Case insensitive parsing
 * Allow parsing of single value for Collection property
 * Allow parsing of list at root without tags
@@ -322,6 +323,88 @@ The type hierarchy is relevant. Given a node of type `T`, the exact way for find
 ##### Register Custom Constructor on property
 
 It is also possible to register a custom constructor on a per-property-basis. Use this instead of a `Converter` if you need more than a simple  conversion mechanism. 
+
+#### Instantiator
+
+Snakeyaml (as of version 1.23 or earlier) allows in some ways to customize the instantiaton process of Java objects from (mapping) nodes. For example, an object does not need to have a no-arg constructor, because in the yaml file, you can provide parameters to existing constructors, see [Immutable Instances](https://bitbucket.org/asomov/snakeyaml/wiki/Documentation#markdown-header-immutable-instances):
+
+```
+!!org.yaml.snakeyaml.immutable.Point [1.17, 3.14]  
+```
+
+Another built-in possibility is to crete objects using the [Compact Object Notation](https://bitbucket.org/asomov/snakeyaml/wiki/CompactObjectNotation.md) feature. Example for a class with 1 parameter, and setting two properties:
+
+```
+package.Name(argument1, property1=value1, property2=value2)
+```
+
+However, there is no way to use a **static method** to construct an object, or to make use of an dependency injection framework like **CDI** (exception: [Spring](https://bitbucket.org/asomov/snakeyaml/wiki/Documentation#markdown-header-spring)).
+
+##### Interface
+
+The central interface is `de.beosign.snakeyamlanno.instantiator.Instantiator` that defines a single method `createInstance`.
+
+
+##### Registering a Global Instantiator
+You can register a *Global Instantiator* on the `AnnotationAwareConstructor` by using the corresponding setter right after constructor creation. The effect is that each time an object has to be created for a node, the `Instantiator`'s `createInstance` method is called. Example:
+
+```
+public class CdiInstantiator implements Instantiator {
+
+    @Override
+    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+       if (isValidBean(nodeType)) {
+          // a CDI bean has been detected, so provide an instance via CDI
+          return getBean(nodeType);
+       }
+       // node type does not correspond to a CDI bean, so use the default instantiation logic
+       return defaultInstantiator.createInstance(nodeType, node, tryDefault, ancestor, null);
+    }
+    
+    private <T> T getBean(Class<T> type) {
+        return CDI.current.select(type).get();
+    }
+
+    private boolean isValidBean(Class<?> type) {
+        return !CDI.current.select(type).isUnsatisfied() && !CDI.current.select(type).isAmbiguous();
+    }
+    
+
+}
+```
+
+The passed in `defaultInstantiator` can be used to apply the normal instantiation logic. This means, `org.yaml.snakeyaml.constructor.BaseConstructor.newInstance(Class<?>, Node, boolean)` is called. You can also return `null` to let the default mechanism apply. For a Global Instantiator, there is no difference between calling the default instantiator or returning `null`.
+
+##### Registering an Instantiator for a Type
+You can (independent of a Global Instantiator) also register an Instantiator on a per-type basis. This can either be done using an Annotation or using a programmatic API. If there is both an annotation and a programmatic registration present, the programmatic registration takes precedence.
+
+###### Annotation
+You can use the `@InstantiatedBy` annotation to define an Instantiator:
+
+```
+@InstantiatedBy(PersonInstantiator.class)
+public class Person { ... }
+```
+
+###### Programmatic
+The programmatic counterpart is:
+
+```
+annotationAwareConstructor.registerInstantiator(Person.class, PersonInstantiator.class);
+```
+
+In order to "remove" an instantiator for a given type, register with the `Instantiator` interface.
+
+```
+annotationAwareConstructor.registerInstantiator(Person.class, Instantiator.class);
+```
+
+This overrides an annotation, but prevents any custom instantiation logic for this type unless there is a Global Instantiator registered. If you also want to ignore the Global Instantiator logic, register a `DefaultInstantiator`:
+
+```
+annotationAwareConstructor.registerInstantiator(Person.class, DefaultInstantiator.class);
+```
+
 
 #### Case insensitive parsing
 A flag can be passed so that parsing is possible even if the keys in the yaml file do not match the case of the java property where it sould be parsed into. To enable it, use `AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class, true)`.
