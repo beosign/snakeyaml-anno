@@ -14,6 +14,7 @@ import java.util.Objects;
  * default no-arg constructor. An instantiator can however use a different approach.
  * 
  * @author florian
+ * @since 0.9.0
  */
 @Target({ TYPE })
 @Retention(RUNTIME)
@@ -34,7 +35,6 @@ public @interface InstantiateBy {
      * </p>
      * 
      * @return instantiator class
-     * @since 0.9.0
      */
     Class<? extends Instantiator> value();
 
