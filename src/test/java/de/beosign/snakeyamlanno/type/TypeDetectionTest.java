@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.ConstructorException;
 
-import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.property.Company;
 import de.beosign.snakeyamlanno.property.Person;

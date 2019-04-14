@@ -1,7 +1,6 @@
 package de.beosign.snakeyamlanno.type;
 
 import de.beosign.snakeyamlanno.annotation.Property;
-import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.type.Animal.Cat;
 import de.beosign.snakeyamlanno.type.Animal.Dog;
 

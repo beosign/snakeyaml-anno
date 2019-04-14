@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.yaml.snakeyaml.nodes.MappingNode;
 
-import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.property.Person;
 
 //CHECKSTYLE:OFF

@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno.annotation;
+package de.beosign.snakeyamlanno.type;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -8,9 +8,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Objects;
-
-import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
-import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 
 /**
  * <p>

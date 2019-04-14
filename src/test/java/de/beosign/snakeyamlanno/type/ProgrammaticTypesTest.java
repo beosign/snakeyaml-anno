@@ -15,7 +15,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.MappingNode;
 
 import de.beosign.snakeyamlanno.annotation.Property;
-import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.type.Animal.Cat;
 import de.beosign.snakeyamlanno.type.ProgrammaticTypesTest.Animal.Dog;

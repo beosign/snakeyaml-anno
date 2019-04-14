@@ -1,6 +1,5 @@
 package de.beosign.snakeyamlanno.type;
 
-import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.property.Person;
 
 //CHECKSTYLE:OFF

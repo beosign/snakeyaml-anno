@@ -27,11 +27,11 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
-import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.instantiator.InstantiateBy;
 import de.beosign.snakeyamlanno.instantiator.Instantiator;
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
+import de.beosign.snakeyamlanno.type.Type;
 
 /**
  * Needed for implementing the auto type detection feature.
