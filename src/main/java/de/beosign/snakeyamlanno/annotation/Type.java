@@ -7,6 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.Objects;
 
 import de.beosign.snakeyamlanno.type.NoSubstitutionTypeSelector;
 import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
@@ -25,7 +26,7 @@ import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
 public @interface Type {
     /**
      * <p>
-     * Can optionally be set to define one or more concrete types that can be used when creating an instance of the type where this annotation is placed onto.
+     * Sets one or more concrete types that can be used when creating an instance of the type where this annotation is placed onto.
      * </p>
      * <p>
      * A common use case is where you have a property of a type that is an interface or abstract class, and there are one or (usually) more concrete
@@ -34,7 +35,7 @@ public @interface Type {
      * 
      * @return List of possible substitution classes.
      */
-    Class<?>[] substitutionTypes() default {};
+    Class<?>[] substitutionTypes();
 
     /**
      * <p>
@@ -60,15 +61,16 @@ public @interface Type {
             return new TypeImpl(substitutionTypeSelectorType, substitutionTypes);
         }
 
+        /** Internal implementation class. */
         @SuppressWarnings({ "all" })
         private static final class TypeImpl implements Type {
-            private Class<?>[] substitutionTypes = new Class<?>[0];
+            private Class<?>[] substitutionTypes;
             private Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType = NoSubstitutionTypeSelector.class;
 
             private TypeImpl(Class<? extends SubstitutionTypeSelector> substitutionTypeSelectorType, Class<?>... substitutionTypes) {
-                if (substitutionTypes != null) {
-                    this.substitutionTypes = substitutionTypes;
-                }
+                Objects.requireNonNull(substitutionTypes, "Substitution types must not be null");
+
+                this.substitutionTypes = substitutionTypes;
                 if (substitutionTypeSelectorType != null) {
                     this.substitutionTypeSelectorType = substitutionTypeSelectorType;
                 }
