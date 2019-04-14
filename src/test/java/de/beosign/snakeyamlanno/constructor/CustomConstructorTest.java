@@ -1,6 +1,7 @@
 package de.beosign.snakeyamlanno.constructor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -8,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
@@ -18,10 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 
 import de.beosign.snakeyamlanno.constructor.Person.Dog;
 import de.beosign.snakeyamlanno.constructor.Person.Skill;
+import de.beosign.snakeyamlanno.type.Type;
+import de.beosign.snakeyamlanno.util.NodeUtil;
 
 /**
  * Tests the constructor functionality.
@@ -108,6 +114,46 @@ public class CustomConstructorTest {
             assertThat(person.getFavoriteColors().size(), is(2));
             assertThat(person.getFavoriteColors().get(0), is(Person.Color.BLUE));
             assertThat(person.getFavoriteColors().get(1), is(Person.Color.RED));
+
+        }
+    }
+
+    /**
+     * Test a constructor that behaves like a {@link Type} annotation with types to substitute. This means, the constructor creates the correctly typed instance
+     * by looking at the property names of the mapping node.
+     * So instead of the auto type detection feature that tries one substitution type after the other and checks what does not fail, the idea here is to
+     * preselect the correct type.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void parseWithTypeSubstitutingConstructor() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("order.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Order order = yaml.loadAs(yamlString, Order.class);
+            log.debug("Parsed YAML file:\n{}", order);
+
+            assertThat(order, notNullValue());
+            assertThat(order.getItems().size(), is(2));
+            assertThat(order.getItems().get(0), instanceOf(PeriodicItem.class));
+            assertThat(order.getItems().get(1), instanceOf(Item.class));
+            assertThat(order.getItems().get(1), not(instanceOf(PeriodicItem.class)));
+
+            assertThat(order.getName(), is("Order1"));
+            assertThat(order.getId(), is(1));
+
+            PeriodicItem periodicItem = (PeriodicItem) order.getItems().get(0);
+            assertThat(periodicItem.getInterval(), is(2));
+            assertThat(periodicItem.getQuantity(), is(3));
+            assertThat(periodicItem.getName(), is("Soap"));
+
+            Item item = (Item) order.getItems().get(1);
+            assertThat(item.getQuantity(), is(1));
+            assertThat(item.getName(), is("Laptop"));
 
         }
     }
@@ -293,4 +339,113 @@ public class CustomConstructorTest {
     private abstract static class PrivateCustomConstructor implements CustomConstructor<String> {
     }
 
+    public static class Order {
+        private int id;
+        private String name;
+        private List<AbstractItem> items;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public List<AbstractItem> getItems() {
+            return items;
+        }
+
+        public void setItems(List<AbstractItem> items) {
+            this.items = items;
+        }
+
+        @Override
+        public String toString() {
+            return "Order [id=" + id + ", name=" + name + ", items=" + items + "]";
+        }
+    }
+
+    @ConstructBy(AbstractItemConstructor.class)
+    public abstract static class AbstractItem {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return "AbstractItem [name=" + name + "]";
+        }
+    }
+
+    public static class Item extends AbstractItem {
+        private int quantity;
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        @Override
+        public String toString() {
+            return "Item [quantity=" + quantity + ", getName()=" + getName() + "]";
+        }
+    }
+
+    public static class PeriodicItem extends Item {
+        private int interval;
+
+        public int getInterval() {
+            return interval;
+        }
+
+        public void setInterval(int interval) {
+            this.interval = interval;
+        }
+
+        @Override
+        public String toString() {
+            return "PeriodicItem [interval=" + interval + ", getName()=" + getName() + ", getQuantity()=" + getQuantity() + "]";
+        }
+    }
+
+    public static class AbstractItemConstructor implements CustomConstructor<AbstractItem> {
+
+        @Override
+        public AbstractItem construct(Node node, Function<? super Node, ? extends AbstractItem> defaultConstructor) throws YAMLException {
+            if (node instanceof SequenceNode) {
+                return defaultConstructor.apply(node);
+            }
+
+            if (!(node instanceof MappingNode)) {
+                return defaultConstructor.apply(node);
+            }
+
+            MappingNode mappingNode = (MappingNode) node;
+            if (NodeUtil.getPropertyToValueMap(mappingNode).containsKey("interval")) {
+                mappingNode.setType(PeriodicItem.class);
+            } else {
+                mappingNode.setType(Item.class);
+            }
+            return defaultConstructor.apply(node);
+        }
+
+    }
 }
