@@ -72,8 +72,8 @@ public class AnnotationAwareConstructor extends Constructor {
     /**
      * Sets a <i>global</i> instantiator that can be used to create instance for all types that the given instantiator wishes to consider. If the instantiator
      * wants to apply the default instantiation logic of SnakeYaml, it can return <code>null</code>.<br>
-     * In order to apply an {@link Instantiator} for a given type only, or if you want to override the behaviour for a particular type, use the {@link Type}
-     * annotation or use the programmatic way (e.g. {@link #registerInstantiator(Class, Class)}.
+     * In order to apply an {@link Instantiator} for a given type only, or if you want to override the behaviour for a particular type, use the
+     * {@link InstantiateBy} annotation or use the programmatic way (e.g. {@link #registerInstantiator(Class, Class)}.
      * 
      * @param globalInstantiator instantiator instance that is global to this Constructor.
      * @since 0.9.0

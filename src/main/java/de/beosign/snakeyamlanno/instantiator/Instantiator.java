@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.nodes.Node;
  * </p>
  * 
  * @author florian
+ * @since 0.9.0
  */
 public interface Instantiator {
     /**

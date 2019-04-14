@@ -7,6 +7,7 @@ import org.yaml.snakeyaml.nodes.Node;
  * <i>global</i> instantiator that is set at the Constructor level for a particular type and to apply the normal instantiation logic instead.
  * 
  * @author florian
+ * @since 0.9.0
  */
 public class DefaultInstantiator implements Instantiator {
 
