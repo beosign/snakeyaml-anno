@@ -24,7 +24,6 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
-import de.beosign.snakeyamlanno.annotation.Type;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.constructor.Person;
 import de.beosign.snakeyamlanno.util.NodeUtil;
@@ -122,53 +121,8 @@ public class InstantiatorTest {
             // although the name is "mydog", which should usually let the AnimalConstructor create a Dog instance, an "Animal" is created
             assertThat(person1.getAnimal().getClass().getName(), is(Animal.class.getName()));
             assertThat(person1.getAnimal().getName(), is("mydog"));
-            System.out.println(person1);
 
-        }
-    }
-
-    @Test
-    public void testValidInstantiatorInheritedBySuperclass() throws Exception {
-        try (InputStream is = getClass().getResourceAsStream("person1c.yaml")) {
-
-            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
-            log.debug("Loaded YAML file:\n{}", yamlString);
-
-            // manually register instantiator
-            annotationAwareConstructor.setGlobalInstantiator(null);
-            Yaml yaml = new Yaml(annotationAwareConstructor);
-
-            Person2 person2 = yaml.loadAs(yamlString, Person2.class);
-
-            assertThat(person2.getName(), is("Homer"));
-
-            // although there is no instantiator for "Dog", the instantiator for "Animal" is used
-            assertThat(person2.getDog().getClass().getName(), is(Dog.class.getName()));
-            assertThat(person2.getDog().getName(), is("mydog"));
-
-        }
-    }
-
-    @Test
-    public void testValidInstantiatorOverriddenWithInstantiator() throws Exception {
-        try (InputStream is = getClass().getResourceAsStream("person1c.yaml")) {
-
-            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
-            log.debug("Loaded YAML file:\n{}", yamlString);
-
-            // manually register instantiator
-            annotationAwareConstructor.setGlobalInstantiator(null);
-            annotationAwareConstructor.registerInstantiator(Dog.class, DogInstantiator.class);
-            Yaml yaml = new Yaml(annotationAwareConstructor);
-
-            Person2 person2 = yaml.loadAs(yamlString, Person2.class);
-
-            assertThat(person2.getName(), is("Homer"));
-
-            // although there is a instantiator for "Animal" (superclass of Dog), the instantiator for "Dog" is used
-            assertThat(person2.getDog().getClass().getName(), is(Dog.class.getName()));
-            assertThat(person2.getDog().getName(), is("MY LITTLE DOG"));
-
+            assertThat(InstantiateBy.Factory.of(Instantiator.class).annotationType().getName(), is(InstantiateBy.class.getName()));
         }
     }
 
@@ -386,7 +340,6 @@ public class InstantiatorTest {
     }
 
     /** Test class with an empty Type annotation (makes no sense, but does not cause any errors). */
-    @Type
     public static class Car {
         private String brand;
 

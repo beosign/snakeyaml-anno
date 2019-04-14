@@ -135,7 +135,7 @@ public class AnnotationAwareConstructor extends Constructor {
 
         /*
          *  Create an instance using the following order:
-         *  1. check node type for an Instantiator registration and create one if present
+         *  1. check node type for an instantiator registration and create one if present
          *  2. call instantiator; if return value is null, check global instantiator within this constructor if present
          *  3. call global instantiator; if return value is null, call super (default instantiation logic)
          */
@@ -465,39 +465,18 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Returns a matching {@link InstantiateBy} annotation by using the following rules, given the node is of type <code>T</code>:<br>
-     * Check <code>T</code>, then walk the superclass hierarchy of <code>T</code>, then all interfaces of <code>T</code>.<br>
-     * For each superclass/interface <code>S super T</code> (including T at first), check:
+     * Returns a matching {@link InstantiateBy} annotation by using the following rule:
      * <ol>
-     * <li>If there is an entry in the {@link #instantiateByMap} for <code>S</code> return the {@link InstantiateBy} from the map</li>
-     * <li>If <code>S</code> is annotated with {@link InstantiateBy}, return the annotation.</li>
-     * <li>If there is no match for <code>S</code>, proceed with the next superclass/interface.
+     * <li>If there is an entry in the {@link #instantiateByMap} for <code>type</code> return the {@link InstantiateBy} from the map</li>
+     * <li>If <code>type</code> is annotated with {@link InstantiateBy}, return the annotation.</li>
      * </ol>
-     * If no match was found after walking the whole hierarchy, <code>null</code> is returned.
+     * If no match was found, <code>null</code> is returned.
      * 
      * @param type type
      * @return {@link InstantiateBy} or <code>null</code> if no matching {@link InstantiateBy} found
      */
     protected InstantiateBy getInstantiateBy(Class<?> type) {
-        InstantiateBy instantiateBy = null;
-
-        List<Class<?>> typesInHierarchy = new ArrayList<>();
-        typesInHierarchy.add(type);
-        typesInHierarchy.addAll(ClassUtils.getAllSuperclasses(type));
-        typesInHierarchy.addAll(ClassUtils.getAllInterfaces(type));
-
-        for (Class<?> currentType : typesInHierarchy) {
-            instantiateBy = instantiateByMap.get(currentType);
-            if (instantiateBy != null) {
-                return instantiateBy;
-            }
-            instantiateBy = currentType.getDeclaredAnnotation(InstantiateBy.class);
-            if (instantiateBy != null) {
-                return instantiateBy;
-            }
-        }
-
-        return null;
+        return instantiateByMap.getOrDefault(type, type.getAnnotation(InstantiateBy.class));
     }
 
     private static ScalarNode getKeyNode(NodeTuple tuple) {
