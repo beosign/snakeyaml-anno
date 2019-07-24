@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  * </p>
  * <p>
  * Additionally, one can register CustomConstructors for any class using a programmatic approach. This is useful if an already existing class cannot be
- * modified, see {@link AnnotationAwareConstructor#registerCustomConstructor()}.
+ * modified, see {@link AnnotationAwareConstructor#registerCustomConstructor(Class, Class)}.
  * </p>
  * 
  * @author florian
