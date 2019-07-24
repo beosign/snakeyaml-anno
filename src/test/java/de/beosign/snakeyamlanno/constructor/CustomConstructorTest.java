@@ -25,7 +25,6 @@ import org.yaml.snakeyaml.nodes.Node;
 
 import de.beosign.snakeyamlanno.constructor.Person.Dog;
 import de.beosign.snakeyamlanno.constructor.Person.Skill;
-import de.beosign.snakeyamlanno.type.Type;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
 /**
@@ -118,9 +117,8 @@ public class CustomConstructorTest {
     }
 
     /**
-     * Test a constructor that behaves like a {@link Type} annotation with types to substitute. This means, the constructor creates the correctly typed instance
-     * by looking at the property names of the mapping node.
-     * So instead of the auto type detection feature that tries one substitution type after the other and checks what does not fail, the idea here is to
+     * Test a constructor that creates the correctly typed instance by looking at the property names of the mapping node.
+     * So instead of the former auto type detection feature that tries one substitution type after the other and checks what does not fail, the idea here is to
      * preselect the correct type.
      * 
      * @throws Exception on any exception

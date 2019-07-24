@@ -1,9 +1,6 @@
 package de.beosign.snakeyamlanno.constructor;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,18 +26,15 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.instantiator.InstantiateBy;
 import de.beosign.snakeyamlanno.instantiator.Instantiator;
-import de.beosign.snakeyamlanno.type.SubstitutionTypeSelector;
-import de.beosign.snakeyamlanno.type.Type;
 
 /**
- * Needed for implementing the auto type detection feature.
+ * Constructor that takes care of annotations.
  * 
  * @author florian
  */
 public class AnnotationAwareConstructor extends Constructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
 
-    private Map<Class<?>, Type> typesMap = new HashMap<>();
     private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
     private Map<Class<?>, InstantiateBy> instantiateByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
@@ -82,56 +76,10 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Overridden to implement the "auto type detection" feature and the "instantiator" feature.
+     * Overridden to implement the "instantiator" feature.
      */
     @Override
     protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException {
-
-        if (node instanceof MappingNode) {
-            Type typeAnnotation = getTypeForClass(node.getType());
-            MappingNode mappingNode = (MappingNode) node;
-            Class<?> type = mappingNode.getType();
-
-            if (typeAnnotation != null && typeAnnotation.substitutionTypes().length > 0) {
-                // One or more substitution types have been defined
-                List<Class<?>> validSubstitutionTypes = new ArrayList<>();
-                SubstitutionTypeSelector substitutionTypeSelector = null;
-
-                if (typeAnnotation.substitutionTypeSelector() != SubstitutionTypeSelector.class) {
-                    try {
-                        // check if default detection algorithm is to be applied
-                        substitutionTypeSelector = typeAnnotation.substitutionTypeSelector().newInstance();
-                        if (!substitutionTypeSelector.disableDefaultAlgorithm()) {
-                            validSubstitutionTypes = getValidSubstitutionTypes(type, typeAnnotation, mappingNode.getValue());
-                        }
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new YAMLException("Cannot instantiate substitutionTypeSelector of type " + typeAnnotation.substitutionTypeSelector().getName(),
-                                e);
-                    }
-                } else {
-                    validSubstitutionTypes = getValidSubstitutionTypes(type, typeAnnotation, mappingNode.getValue());
-                }
-
-                if (substitutionTypeSelector != null) {
-                    node.setType(substitutionTypeSelector.getSelectedType(mappingNode, validSubstitutionTypes));
-                    log.debug("Type = {}, using substitution type {} calculated by SubstitutionTypeSelector {}", type, node.getType(),
-                            typeAnnotation.substitutionTypeSelector().getName());
-                } else {
-                    if (validSubstitutionTypes.size() == 0) {
-                        log.warn("Type = {}, NO possible substitution types found, using default YAML algorithm", type);
-                    } else {
-                        if (validSubstitutionTypes.size() > 1) {
-                            log.debug("Type = {}, using substitution types = {}, choosing first", type, validSubstitutionTypes);
-                        } else {
-                            log.trace("Type = {}, using substitution type = {}", type, validSubstitutionTypes.get(0));
-                        }
-                        node.setType(validSubstitutionTypes.get(0));
-                    }
-                }
-
-            }
-        }
-
         /*
          *  Create an instance using the following order:
          *  1. check node type for an instantiator registration and create one if present
@@ -160,19 +108,6 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Returns the {@link Type} that is registered for the given class. If a type has been manually registered, this is returned. Otherwise, the
-     * {@link Type} annotation on the given class is returned.
-     * 
-     * @param clazz class
-     * @return {@link Type} for given type
-     */
-    protected Type getTypeForClass(Class<?> clazz) {
-        Type typeAnnotation = clazz.getAnnotation(Type.class);
-
-        return typesMap.getOrDefault(clazz, typeAnnotation);
-    }
-
-    /**
      * Constructs a singleton list from the constructed object unless the constructed object is <code>null</code>, in which case <code>null</code> is returned.
      * 
      * @param node node - a {@link MappingNode} or a {@link ScalarNode} that is to assigned to a collection property
@@ -195,61 +130,7 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Returns all <b>valid</b> substitution types from the list given by the {@link Type#substitutionTypes()} method. This method
-     * helps implementing the "auto type detection" feature.
-     * 
-     * @param type type
-     * @param typeAnnotation the {@link Type} annotation to use for the given class
-     * @param nodeValue node values
-     */
-    private List<Class<?>> getValidSubstitutionTypes(Class<?> type, Type typeAnnotation, List<NodeTuple> nodeValue) {
-        List<Class<?>> validSubstitutionTypes = new ArrayList<>();
-        List<? extends Class<?>> substitutionTypeList = Arrays.asList(typeAnnotation.substitutionTypes());
-        /*
-         *  For each possible substitution type, check if all YAML properties match a Bean property.
-         *  If this is the case, this subtype is a valid substitution
-         */
-        for (Class<?> substitutionType : substitutionTypeList) {
-            boolean isValidType = true;
-            for (NodeTuple tuple : nodeValue) {
-                String key = null;
-                try {
-                    ScalarNode keyNode = getKeyNode(tuple);
-                    key = (String) AnnotationAwareConstructor.this.constructObject(keyNode);
-                    final String propName = key;
-
-                    boolean found = Arrays.stream(Introspector.getBeanInfo(substitutionType).getPropertyDescriptors())
-                            .anyMatch(pd -> pd.getName().equals(propName));
-                    if (!found) { // search in aliases
-                        found = getPropertyUtils().getProperties(substitutionType).stream()
-                                .map(p -> p.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class))
-                                .filter(anno -> anno != null)
-                                .anyMatch(anno -> propName.equals(anno.key()));
-
-                    }
-                    if (!found) {
-                        throw new YAMLException("Cannot find a property named " + propName + " in type " + substitutionType.getTypeName());
-                    }
-
-                } catch (YAMLException | IntrospectionException e) {
-                    log.debug("Evaluating subsitution of type {}: Could not construct property {}.{}: {}", type, substitutionType.getName(), key,
-                            e.getMessage());
-                    isValidType = false;
-                    break;
-                }
-            }
-            if (isValidType) {
-                validSubstitutionTypes.add(substitutionType);
-            }
-
-        }
-
-        log.trace("Type = {}, found valid substitution types: {}", type, validSubstitutionTypes);
-        return validSubstitutionTypes;
-    }
-
-    /**
-     * This constructor implements the features "automatic type detection", "ignore error", "constructBy at property-level" and "singleton list parsing"
+     * This constructor implements the features "ignore error", "constructBy at property-level" and "singleton list parsing"
      * feature.
      * 
      * @author florian
@@ -374,35 +255,6 @@ public class AnnotationAwareConstructor extends Constructor {
      */
     public void registerInstantiator(Class<?> forType, Class<? extends Instantiator> instantiator) {
         instantiateByMap.put(forType, InstantiateBy.Factory.of(instantiator));
-    }
-
-    /**
-     * Programmatically registers an array of <i>substitution types</i> for a given type.
-     * 
-     * @param forType type for which an {@link Instantiator} is to be registered
-     * @param substitutionTypes substitution types
-     */
-    public void registerSubstitutionTypes(Class<?> forType, Class<?>... substitutionTypes) {
-        registerType(forType, Type.Factory.of(null, substitutionTypes));
-    }
-
-    /**
-     * Programmatically registers a {@link Type} for a given type.
-     * 
-     * @param forType type for which an {@link Instantiator} is to be registered
-     * @param type type; you can get an instance by the factory methods in {@link Type.Factory}
-     */
-    public void registerType(Class<?> forType, Type type) {
-        typesMap.put(forType, type);
-    }
-
-    /**
-     * Removes all manually added {@link Type} registrations.<br>
-     * {@link Type} annotations on classes are uneffected by calling this method. In order to modify the behaviour induced by annotations, override
-     * {@link #getTypeForClass(Class)}.
-     */
-    public void unregisterTypes() {
-        typesMap.clear();
     }
 
     /**

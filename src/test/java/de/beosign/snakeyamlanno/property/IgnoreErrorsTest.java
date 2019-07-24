@@ -1,11 +1,11 @@
 package de.beosign.snakeyamlanno.property;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,8 +19,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
+import de.beosign.snakeyamlanno.property.Animal.Dog;
 import de.beosign.snakeyamlanno.property.Person.Gender;
-import de.beosign.snakeyamlanno.type.Animal.Dog;
 
 /**
  * Tests the ignore errors functionality.
@@ -74,7 +74,7 @@ public class IgnoreErrorsTest {
             assertThat(parseResult.getName(), is("Homer"));
             assertThat(parseResult.getHeight(), is(185));
             assertThat(parseResult.getGender(), is(Gender.MALE));
-            assertTrue(parseResult.getAnimal() instanceof Dog);
+            assertThat(parseResult.getAnimal(), instanceOf(Dog.class));
             assertThat(((Dog) parseResult.getAnimal()).getLoudness(), is(3));
         }
     }

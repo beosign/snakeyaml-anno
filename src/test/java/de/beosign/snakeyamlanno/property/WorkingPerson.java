@@ -1,9 +1,6 @@
-package de.beosign.snakeyamlanno.type;
-
-import de.beosign.snakeyamlanno.property.Person;
+package de.beosign.snakeyamlanno.property;
 
 //CHECKSTYLE:OFF
-@Type(substitutionTypes = { WorkingPerson.Employee.class, WorkingPerson.Employer.class })
 public class WorkingPerson extends Person {
 
     public static class Employee extends WorkingPerson {

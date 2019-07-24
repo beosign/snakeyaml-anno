@@ -1,12 +1,8 @@
-package de.beosign.snakeyamlanno.type;
+package de.beosign.snakeyamlanno.property;
 
 import de.beosign.snakeyamlanno.annotation.Property;
-import de.beosign.snakeyamlanno.type.Animal.Cat;
-import de.beosign.snakeyamlanno.type.Animal.Dog;
 
 // CHECKSTYLE:OFF
-
-@Type(substitutionTypes = { Dog.class, Cat.class })
 public abstract class Animal {
     private String name;
 

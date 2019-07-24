@@ -1,5 +1,5 @@
 name: Homer
 gender: m
 height: 1.85 m
-animal: !!de.beosign.snakeyamlanno.type.Animal$Dog
+animal: !!de.beosign.snakeyamlanno.property.Animal$Dog
    loudness: 3

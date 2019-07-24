@@ -16,7 +16,6 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.annotation.Property;
 import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.convert.ConverterException;
-import de.beosign.snakeyamlanno.type.Type;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
 // CHECKSTYLE:OFF - test classes
@@ -146,7 +145,6 @@ public class Person {
     }
 
     @ConstructBy(AnimalConstructor.class)
-    @Type(substitutionTypes = { Dog.class, de.beosign.snakeyamlanno.type.Animal.Cat.class })
     public abstract static class Animal {
         private String name;
         private int age;

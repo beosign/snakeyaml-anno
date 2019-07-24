@@ -3,7 +3,6 @@ package de.beosign.snakeyamlanno.property;
 import de.beosign.snakeyamlanno.annotation.Property;
 import de.beosign.snakeyamlanno.convert.GenderConverter;
 import de.beosign.snakeyamlanno.convert.LengthToCmConverter;
-import de.beosign.snakeyamlanno.type.Animal;
 
 //CHECKSTYLE:OFF
 
