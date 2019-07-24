@@ -332,7 +332,7 @@ Snakeyaml (as of version 1.23 or earlier) allows in some ways to customize the i
 !!org.yaml.snakeyaml.immutable.Point [1.17, 3.14]  
 ```
 
-Another built-in possibility is to crete objects using the [Compact Object Notation](https://bitbucket.org/asomov/snakeyaml/wiki/CompactObjectNotation.md) feature. Example for a class with 1 parameter, and setting two properties:
+Another built-in possibility is to create objects using the [Compact Object Notation](https://bitbucket.org/asomov/snakeyaml/wiki/CompactObjectNotation.md) feature. Example for a class with 1 parameter, and setting two (String-only!)  properties:
 
 ```
 package.Name(argument1, property1=value1, property2=value2)
@@ -348,7 +348,7 @@ The central interface is `de.beosign.snakeyamlanno.instantiator.Instantiator` th
 ##### Registering a Global Instantiator
 You can register a *Global Instantiator* on the `AnnotationAwareConstructor` by using the corresponding setter right after constructor creation. The effect is that each time an object has to be created for a node, the `Instantiator`'s `createInstance` method is called. Example:
 
-```
+```java
 public class CdiInstantiator implements Instantiator {
 
     @Override
@@ -381,7 +381,7 @@ You can (independent of a Global Instantiator) also register an Instantiator on 
 ###### Annotation
 You can use the `@InstantiatedBy` annotation to define an Instantiator:
 
-```
+```java
 @InstantiatedBy(PersonInstantiator.class)
 public class Person { ... }
 ```
@@ -389,19 +389,19 @@ public class Person { ... }
 ###### Programmatic
 The programmatic counterpart is:
 
-```
+```java
 annotationAwareConstructor.registerInstantiator(Person.class, PersonInstantiator.class);
 ```
 
 In order to "remove" an instantiator for a given type, register with the `Instantiator` interface.
 
-```
+```java
 annotationAwareConstructor.registerInstantiator(Person.class, Instantiator.class);
 ```
 
 This overrides an annotation, but prevents any custom instantiation logic for this type unless there is a Global Instantiator registered. If you also want to ignore the Global Instantiator logic, register a `DefaultInstantiator`:
 
-```
+```java
 annotationAwareConstructor.registerInstantiator(Person.class, DefaultInstantiator.class);
 ```
 
@@ -451,16 +451,18 @@ children: {name: bart}
 Usually, use can supply an explicit tag at the root of a yaml document to declare the root type to use. As an alternative, you can supply the root type to a yaml constructor object.
 If dealing with lists at the root, the only type information you can supply is `List`, but not `List<MyClass>` for example. Therefore, the following yaml is parsed as `List<Map<String,Object>>`:
 
-```
+```javascript
 - id: 1
   name: One
 - id: 2
   name: Two
 ```
 
+There is a [Snakeyaml ticket](https://bitbucket.org/asomov/snakeyaml/issues/387/support-for-generic-types-when-serializing) that should address this problem, however, there is no solution yet.
+
 If you would like to parse it as a `List<MyClass>` instead, you have to define the type on each list item:
  
-```
+```javascript
 - !MyClass 
   id: 1
   name: One
@@ -472,7 +474,7 @@ If you would like to parse it as a `List<MyClass>` instead, you have to define t
 Because this leads to a yaml that is cluttered with type explicit information, SnakeyamlAnno comes with a special `Constructor` for these cases: The `AnnotationAwareListConstructor` enables to omit the explicit types while still parsing the list items as items of the type that is given to it:
 
 
-```
+```java
 // Parse a list where each list item is of type MyClass instead of Map<String, Object>
 annotationAwareListConstructor = new AnnotationAwareListConstructor(MyClass.class);
 Yaml yaml = new Yaml(annotationAwareListConstructor);
