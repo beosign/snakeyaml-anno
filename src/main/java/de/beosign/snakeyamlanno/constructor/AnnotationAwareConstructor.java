@@ -24,7 +24,7 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
-import de.beosign.snakeyamlanno.instantiator.InstantiateBy;
+import de.beosign.snakeyamlanno.instantiator.YamlInstantiateBy;
 import de.beosign.snakeyamlanno.instantiator.Instantiator;
 import de.beosign.snakeyamlanno.property.YamlProperty;
 
@@ -37,7 +37,7 @@ public class AnnotationAwareConstructor extends Constructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
 
     private Map<Class<?>, YamlConstructBy> constructByMap = new HashMap<>();
-    private Map<Class<?>, InstantiateBy> instantiateByMap = new HashMap<>();
+    private Map<Class<?>, YamlInstantiateBy> instantiateByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
     private Instantiator globalInstantiator;
 
@@ -67,7 +67,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * Sets a <i>global</i> instantiator that can be used to create instance for all types that the given instantiator wishes to consider. If the instantiator
      * wants to apply the default instantiation logic of SnakeYaml, it can return <code>null</code>.<br>
      * In order to apply an {@link Instantiator} for a given type only, or if you want to override the behaviour for a particular type, use the
-     * {@link InstantiateBy} annotation or use the programmatic way (e.g. {@link #registerInstantiator(Class, Class)}.
+     * {@link YamlInstantiateBy} annotation or use the programmatic way (e.g. {@link #registerInstantiator(Class, Class)}.
      * 
      * @param globalInstantiator instantiator instance that is global to this Constructor.
      * @since 0.9.0
@@ -89,7 +89,7 @@ public class AnnotationAwareConstructor extends Constructor {
          */
         Instantiator defaultInstantiator = (nodeType, n, tryDef, anc, def) -> super.newInstance(anc, n, tryDef);
         Object instance = null;
-        InstantiateBy instantiateBy = getInstantiateBy(node.getType());
+        YamlInstantiateBy instantiateBy = getInstantiateBy(node.getType());
         if (instantiateBy != null && !instantiateBy.value().equals(Instantiator.class)) {
             try {
                 instance = instantiateBy.value().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
@@ -255,7 +255,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param instantiator {@link Instantiator} type
      */
     public void registerInstantiator(Class<?> forType, Class<? extends Instantiator> instantiator) {
-        instantiateByMap.put(forType, InstantiateBy.Factory.of(instantiator));
+        instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(instantiator));
     }
 
     /**
@@ -317,18 +317,18 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Returns a matching {@link InstantiateBy} annotation by using the following rule:
+     * Returns a matching {@link YamlInstantiateBy} annotation by using the following rule:
      * <ol>
-     * <li>If there is an entry in the {@link #instantiateByMap} for <code>type</code> return the {@link InstantiateBy} from the map</li>
-     * <li>If <code>type</code> is annotated with {@link InstantiateBy}, return the annotation.</li>
+     * <li>If there is an entry in the {@link #instantiateByMap} for <code>type</code> return the {@link YamlInstantiateBy} from the map</li>
+     * <li>If <code>type</code> is annotated with {@link YamlInstantiateBy}, return the annotation.</li>
      * </ol>
      * If no match was found, <code>null</code> is returned.
      * 
      * @param type type
-     * @return {@link InstantiateBy} or <code>null</code> if no matching {@link InstantiateBy} found
+     * @return {@link YamlInstantiateBy} or <code>null</code> if no matching {@link YamlInstantiateBy} found
      */
-    protected InstantiateBy getInstantiateBy(Class<?> type) {
-        return instantiateByMap.getOrDefault(type, type.getAnnotation(InstantiateBy.class));
+    protected YamlInstantiateBy getInstantiateBy(Class<?> type) {
+        return instantiateByMap.getOrDefault(type, type.getAnnotation(YamlInstantiateBy.class));
     }
 
     private static ScalarNode getKeyNode(NodeTuple tuple) {

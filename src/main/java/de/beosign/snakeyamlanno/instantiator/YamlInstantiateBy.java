@@ -19,7 +19,7 @@ import java.util.Objects;
 @Target({ TYPE })
 @Retention(RUNTIME)
 @Documented
-public @interface InstantiateBy {
+public @interface YamlInstantiateBy {
 
     /**
      * <p>
@@ -38,21 +38,21 @@ public @interface InstantiateBy {
      */
     Class<? extends Instantiator> value();
 
-    /** Factory for InstantiateBy instances. */
+    /** Factory for YamlInstantiateBy instances. */
     final class Factory {
         private Factory() {
         }
 
-        public static InstantiateBy of(Class<? extends Instantiator> instantiator) {
-            return new InstantiateByImpl(instantiator);
+        public static YamlInstantiateBy of(Class<? extends Instantiator> instantiator) {
+            return new YamlInstantiateByImpl(instantiator);
         }
 
         /** Internal implementation class. */
         @SuppressWarnings({ "all" })
-        private static final class InstantiateByImpl implements InstantiateBy {
+        private static final class YamlInstantiateByImpl implements YamlInstantiateBy {
             private final Class<? extends Instantiator> instantiatorType;
 
-            private InstantiateByImpl(Class<? extends Instantiator> instantiatorType) {
+            private YamlInstantiateByImpl(Class<? extends Instantiator> instantiatorType) {
                 Objects.requireNonNull(instantiatorType, "Instantiator Type must not be null");
                 this.instantiatorType = instantiatorType;
             }
@@ -64,7 +64,7 @@ public @interface InstantiateBy {
 
             @Override
             public Class<? extends Annotation> annotationType() {
-                return InstantiateBy.class;
+                return YamlInstantiateBy.class;
             }
         }
 

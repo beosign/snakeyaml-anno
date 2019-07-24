@@ -443,10 +443,10 @@ The passed in `defaultInstantiator` can be used to apply the normal instantiatio
 You can (independent of a Global Instantiator) also register an Instantiator on a per-type basis. This can either be done using an Annotation or using a programmatic API. If there is both an annotation and a programmatic registration present, the programmatic registration takes precedence.
 
 ##### Annotation
-You can use the `@InstantiatedBy` annotation to define an Instantiator:
+You can use the `@YamlInstantiateBy` annotation to define an Instantiator:
 
 ```java
-@InstantiatedBy(PersonInstantiator.class)
+@YamlInstantiateBy(PersonInstantiator.class)
 public class Person { ... }
 ```
 
@@ -463,7 +463,7 @@ In order to "remove" an instantiator for a given type, register with the `Instan
 annotationAwareConstructor.registerInstantiator(Person.class, Instantiator.class);
 ```
 
-This overrides an annotation, but prevents any custom instantiation logic for this type unless there is a Global Instantiator registered. If you also want to ignore the Global Instantiator logic, register a `DefaultInstantiator`:
+This overrides an annotation (if present) and prevents any custom instantiation logic for this type unless there is a Global Instantiator registered. If you also want to ignore the Global Instantiator logic, register a `DefaultInstantiator`:
 
 ```java
 annotationAwareConstructor.registerInstantiator(Person.class, DefaultInstantiator.class);

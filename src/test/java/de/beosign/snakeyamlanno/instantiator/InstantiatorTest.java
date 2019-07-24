@@ -122,7 +122,7 @@ public class InstantiatorTest {
             assertThat(person1.getAnimal().getClass().getName(), is(Animal.class.getName()));
             assertThat(person1.getAnimal().getName(), is("mydog"));
 
-            assertThat(InstantiateBy.Factory.of(Instantiator.class).annotationType().getName(), is(InstantiateBy.class.getName()));
+            assertThat(YamlInstantiateBy.Factory.of(Instantiator.class).annotationType().getName(), is(YamlInstantiateBy.class.getName()));
         }
     }
 
@@ -297,7 +297,7 @@ public class InstantiatorTest {
     }
 
     /** Test class where an {@link AnimalInstantiator} is applied to. */
-    @InstantiateBy(AnimalInstantiator.class)
+    @YamlInstantiateBy(AnimalInstantiator.class)
     public static class Animal {
         private String name;
 
@@ -358,7 +358,7 @@ public class InstantiatorTest {
     }
 
     /** Test class. */
-    @InstantiateBy(InvalidInstantiator.class)
+    @YamlInstantiateBy(InvalidInstantiator.class)
     public static class Invalid {
         private String brand;
 
