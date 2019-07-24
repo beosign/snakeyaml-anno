@@ -2,6 +2,7 @@ package de.beosign.snakeyamlanno.constructor;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 public class AnnotationAwareListConstructor extends AnnotationAwareConstructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareListConstructor.class);
 
-    private Class<?> collectionItemType;
+    private final Class<?> collectionItemType;
 
     /**
      * Creates a constructor for a sequence, typing the sequence items with the given collectionItemType.
@@ -28,6 +29,7 @@ public class AnnotationAwareListConstructor extends AnnotationAwareConstructor {
      */
     public AnnotationAwareListConstructor(Class<?> collectionItemType) {
         super(List.class);
+        Objects.requireNonNull(collectionItemType, "CollectionItemType parameter must not be null");
         this.collectionItemType = collectionItemType;
     }
 
@@ -39,6 +41,7 @@ public class AnnotationAwareListConstructor extends AnnotationAwareConstructor {
      */
     public AnnotationAwareListConstructor(Class<?> collectionItemType, boolean caseInsensitive) {
         super(List.class, caseInsensitive);
+        Objects.requireNonNull(collectionItemType, "CollectionItemType parameter must not be null");
         this.collectionItemType = collectionItemType;
     }
 
@@ -47,7 +50,7 @@ public class AnnotationAwareListConstructor extends AnnotationAwareConstructor {
      */
     @Override
     public Object getSingleData(Class<?> type) {
-        if (Collection.class.isAssignableFrom(type) && collectionItemType != null) {
+        if (Collection.class.isAssignableFrom(type)) {
             log.debug("Found a collection type as root node; set type of item nodes to " + collectionItemType.getTypeName());
             SequenceNode node = (SequenceNode) composer.getSingleNode();
             node.setTag(new Tag(type));

@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.Is.isA;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -124,6 +125,26 @@ public class RootListTest {
         assertThat(ints.size(), is(2));
         assertThat(ints.get(0), is(3));
         assertThat(ints.get(1), is(4));
+    }
+
+    /**
+     * Tests that passing <code>null</code> as collection item type causes a {@link NullPointerException}.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testNullArgument() throws Exception {
+        assertThrows(NullPointerException.class, () -> new AnnotationAwareListConstructor(null));
+    }
+
+    /**
+     * Tests that passing <code>null</code> as collection item type causes a {@link NullPointerException}.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testNullArgument2() throws Exception {
+        assertThrows(NullPointerException.class, () -> new AnnotationAwareListConstructor(null, false));
     }
 
 }
