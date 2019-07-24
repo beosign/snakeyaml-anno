@@ -26,6 +26,7 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.instantiator.InstantiateBy;
 import de.beosign.snakeyamlanno.instantiator.Instantiator;
+import de.beosign.snakeyamlanno.property.YamlProperty;
 
 /**
  * Constructor that takes care of annotations.
@@ -186,7 +187,7 @@ public class AnnotationAwareConstructor extends Constructor {
                                 e);
                     }
                 } else {
-                    de.beosign.snakeyamlanno.property.YamlProperty propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.property.YamlProperty.class);
+                    YamlProperty propertyAnnotation = property.getAnnotation(YamlProperty.class);
                     boolean ignoreExceptions = (propertyAnnotation != null && propertyAnnotation.ignoreExceptions());
 
                     if (ignoreExceptions) {

@@ -11,6 +11,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
+import de.beosign.snakeyamlanno.property.YamlProperty;
 import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
 import de.beosign.snakeyamlanno.skip.SkipIfEmpty;
 import de.beosign.snakeyamlanno.skip.SkipIfNull;
@@ -31,8 +32,8 @@ public class AnnotationAwareRepresenter extends Representer {
             int order1 = 0;
             int order2 = 0;
 
-            de.beosign.snakeyamlanno.property.YamlProperty propertyAnnotation1 = property1.getAnnotation(de.beosign.snakeyamlanno.property.YamlProperty.class);
-            de.beosign.snakeyamlanno.property.YamlProperty propertyAnnotation2 = property2.getAnnotation(de.beosign.snakeyamlanno.property.YamlProperty.class);
+            YamlProperty propertyAnnotation1 = property1.getAnnotation(YamlProperty.class);
+            YamlProperty propertyAnnotation2 = property2.getAnnotation(YamlProperty.class);
             if (propertyAnnotation1 != null) {
                 order1 = propertyAnnotation1.order();
             }
@@ -88,7 +89,7 @@ public class AnnotationAwareRepresenter extends Representer {
             return null;
         }
 
-        de.beosign.snakeyamlanno.property.YamlProperty propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.property.YamlProperty.class);
+        YamlProperty propertyAnnotation = property.getAnnotation(YamlProperty.class);
         if (propertyAnnotation != null) {
             if (propertyAnnotation.skipAtDump()) {
                 return null;
