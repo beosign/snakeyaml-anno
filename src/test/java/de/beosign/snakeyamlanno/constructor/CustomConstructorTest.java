@@ -22,7 +22,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.SequenceNode;
 
 import de.beosign.snakeyamlanno.constructor.Person.Dog;
 import de.beosign.snakeyamlanno.constructor.Person.Skill;
@@ -430,14 +429,6 @@ public class CustomConstructorTest {
 
         @Override
         public AbstractItem construct(Node node, Function<? super Node, ? extends AbstractItem> defaultConstructor) throws YAMLException {
-            if (node instanceof SequenceNode) {
-                return defaultConstructor.apply(node);
-            }
-
-            if (!(node instanceof MappingNode)) {
-                return defaultConstructor.apply(node);
-            }
-
             MappingNode mappingNode = (MappingNode) node;
             if (NodeUtil.getPropertyToValueMap(mappingNode).containsKey("interval")) {
                 mappingNode.setType(PeriodicItem.class);
