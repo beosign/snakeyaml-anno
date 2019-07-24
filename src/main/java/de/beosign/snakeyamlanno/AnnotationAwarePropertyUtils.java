@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
 
-import de.beosign.snakeyamlanno.convert.NoConverter;
+import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.property.AliasedProperty;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 import de.beosign.snakeyamlanno.property.ConvertedProperty;
@@ -78,7 +78,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
 
         YamlProperty propertyAnnotation = defaultProperty.getAnnotation(YamlProperty.class);
         if (propertyAnnotation != null) {
-            if (propertyAnnotation.converter() != NoConverter.class) {
+            if (propertyAnnotation.converter() != Converter.NoConverter.class) {
                 replacementProperty = new ConvertedProperty(replacementProperty, propertyAnnotation.converter());
             }
             if (!propertyAnnotation.key().equals("")) {

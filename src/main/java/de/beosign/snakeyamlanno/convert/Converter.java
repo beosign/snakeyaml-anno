@@ -24,4 +24,12 @@ public interface Converter<T> {
      * @throws ConverterException if conversion failed
      */
     T convertToModel(Object value);
+
+    /**
+     * <b>This interface is for internal purposes only.</b><br>
+     * Default value for the converter property; needed because one cannot define a type token with wildcards ({@code Class<? extends Converter<?>>}) from a
+     * generic type ({@code Converter<T>}).
+     */
+    interface NoConverter extends Converter<Object> {
+    }
 }

@@ -1,13 +1,13 @@
 package de.beosign.snakeyamlanno.property;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import de.beosign.snakeyamlanno.convert.Converter;
-import de.beosign.snakeyamlanno.convert.NoConverter;
 import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
 
 /**
@@ -31,7 +31,7 @@ public @interface YamlProperty {
      * 
      * @return Converter class.
      */
-    Class<? extends Converter<?>> converter() default NoConverter.class;
+    Class<? extends Converter<?>> converter() default Converter.NoConverter.class;
 
     /**
      * If true, exceptions are caught so the parsing process continues. This will leave some objects
