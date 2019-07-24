@@ -13,9 +13,9 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
-import de.beosign.snakeyamlanno.annotation.Property;
 import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.convert.ConverterException;
+import de.beosign.snakeyamlanno.property.Property;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
 // CHECKSTYLE:OFF - test classes

@@ -1,4 +1,4 @@
-package de.beosign.snakeyamlanno.annotation;
+package de.beosign.snakeyamlanno.property;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;

@@ -24,8 +24,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Tag;
 
-import de.beosign.snakeyamlanno.annotation.Property;
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
+import de.beosign.snakeyamlanno.property.Property;
 import de.beosign.snakeyamlanno.representer.AnnotationAwareRepresenter;
 
 /**

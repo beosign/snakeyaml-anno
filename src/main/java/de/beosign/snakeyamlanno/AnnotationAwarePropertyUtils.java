@@ -75,7 +75,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         Property replacementProperty = defaultProperty;
         String replacementName = defaultProperty.getName();
 
-        de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = defaultProperty.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+        de.beosign.snakeyamlanno.property.Property propertyAnnotation = defaultProperty.getAnnotation(de.beosign.snakeyamlanno.property.Property.class);
         if (propertyAnnotation != null) {
             if (propertyAnnotation.converter() != NoConverter.class) {
                 replacementProperty = new ConvertedProperty(replacementProperty, propertyAnnotation.converter());

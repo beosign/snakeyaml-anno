@@ -1,6 +1,6 @@
 package de.beosign.snakeyamlanno.convert;
 
-import de.beosign.snakeyamlanno.annotation.Property;
+import de.beosign.snakeyamlanno.property.Property;
 
 //CHECKSTYLE:OFF
 public class PersonWithConverter3 {

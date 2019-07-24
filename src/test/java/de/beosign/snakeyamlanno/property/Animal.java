@@ -1,7 +1,5 @@
 package de.beosign.snakeyamlanno.property;
 
-import de.beosign.snakeyamlanno.annotation.Property;
-
 // CHECKSTYLE:OFF
 public abstract class Animal {
     private String name;

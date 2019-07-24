@@ -2,8 +2,6 @@ package de.beosign.snakeyamlanno.property;
 
 import java.util.List;
 
-import de.beosign.snakeyamlanno.annotation.Property;
-
 //CHECKSTYLE:OFF
 public class Universe {
     private List<StellarObject> stellarObjects;

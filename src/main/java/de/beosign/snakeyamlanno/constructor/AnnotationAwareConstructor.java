@@ -186,7 +186,7 @@ public class AnnotationAwareConstructor extends Constructor {
                                 e);
                     }
                 } else {
-                    de.beosign.snakeyamlanno.annotation.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.annotation.Property.class);
+                    de.beosign.snakeyamlanno.property.Property propertyAnnotation = property.getAnnotation(de.beosign.snakeyamlanno.property.Property.class);
                     boolean ignoreExceptions = (propertyAnnotation != null && propertyAnnotation.ignoreExceptions());
 
                     if (ignoreExceptions) {

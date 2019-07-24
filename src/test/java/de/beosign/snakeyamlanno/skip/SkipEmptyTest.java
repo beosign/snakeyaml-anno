@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import de.beosign.snakeyamlanno.annotation.Property;
+import de.beosign.snakeyamlanno.property.Property;
 import de.beosign.snakeyamlanno.representer.AnnotationAwareRepresenter;
 
 /**
