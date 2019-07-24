@@ -246,11 +246,11 @@ So it could make sense to tell the parser to apply a custom logic when it encoun
 
 #### Register Custom Constructor by class annotation 
 Given the same classes as in the converter example, instead of defining a `Converter` and annotating each property of type `Gender` with it, you can 
-annotate the enum `Gender` with the `ConstructBy` annotation:
+annotate the enum `Gender` with the `YamlConstructBy` annotation:
 
 
 ```java
-@ConstructBy(GenderCustomConstructor.class)
+@YamlConstructBy(GenderCustomConstructor.class)
 public enum Gender {
     MALE("m"),
     FEMALE("f");
@@ -309,11 +309,11 @@ For example, if a custom constructor is registered for type `Number`, then it wi
 #### Custom Constructor Resolution
 Because a custom constructor can be registered via annotation or programmatically, it is possible that there are two definitions for a given (super-)type.
 
-The type hierarchy is relevant. Given a node of type `T`, the exact way for finding the `ConstructBy` instance (and thus the custom constructor class) is as follows:
+The type hierarchy is relevant. Given a node of type `T`, the exact way for finding the `YamlConstructBy` instance (and thus the custom constructor class) is as follows:
 
 1. Start with `T`, then walk the superclass hierarchy of `T`, then all interfaces of `T`.
-1. For each class/interface `S super T`, check first if there is an entry in the `getConstructByMap()` for `S` and if so, return the `ConstructBy` from the map
-1. Check if `S` is annotated with `ConstructBy`, and if so, return the `ConstructBy` from the annotation.
+1. For each class/interface `S super T`, check first if there is an entry in the `getConstructByMap()` for `S` and if so, return the `YamlConstructBy` from the map
+1. Check if `S` is annotated with `YamlConstructBy`, and if so, return the `YamlConstructBy` from the annotation.
 1. If there is no match for `S`, proceed with the next class/interface in the hierarchy
 1. If no match was found after walking the whole class hierarchy of `T`, no custom constructor is used.
 

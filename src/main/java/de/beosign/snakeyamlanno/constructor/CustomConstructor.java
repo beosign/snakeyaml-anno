@@ -7,7 +7,7 @@ import org.yaml.snakeyaml.nodes.Node;
 
 /**
  * A CustomConstructor can be used to define how to create a {@link Node} into a Java object. It can be applied on a per-type basis statically via the
- * <code>@ConstructBy</code> annotation or dynamically via code, or it can be applied on a per-property basis using the <code>@ConstructBy</code> annotation
+ * <code>@YamlConstructBy</code> annotation or dynamically via code, or it can be applied on a per-property basis using the <code>@YamlConstructBy</code> annotation
  * 
  * @author florian
  * @param <T> type of object to create

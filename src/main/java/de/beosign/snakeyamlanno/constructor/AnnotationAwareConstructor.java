@@ -36,7 +36,7 @@ import de.beosign.snakeyamlanno.property.YamlProperty;
 public class AnnotationAwareConstructor extends Constructor {
     private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
 
-    private Map<Class<?>, ConstructBy> constructByMap = new HashMap<>();
+    private Map<Class<?>, YamlConstructBy> constructByMap = new HashMap<>();
     private Map<Class<?>, InstantiateBy> instantiateByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
     private Instantiator globalInstantiator;
@@ -164,11 +164,11 @@ public class AnnotationAwareConstructor extends Constructor {
 
                 nodeToPropertyMap.put(valueNode, property);
 
-                if (property.getAnnotation(ConstructBy.class) != null) {
+                if (property.getAnnotation(YamlConstructBy.class) != null) {
                     Object value = null;
                     try {
                         @SuppressWarnings("unchecked")
-                        CustomConstructor<Object> cc = (CustomConstructor<Object>) property.getAnnotation(ConstructBy.class).value().newInstance();
+                        CustomConstructor<Object> cc = (CustomConstructor<Object>) property.getAnnotation(YamlConstructBy.class).value().newInstance();
                         Construct constructor = getConstructor(valueNode);
                         value = cc.construct(valueNode, constructor::construct);
                         property.set(object, value);
@@ -177,7 +177,7 @@ public class AnnotationAwareConstructor extends Constructor {
                         throw e;
                     } catch (InstantiationException | IllegalAccessException e) {
                         throw new YAMLException(
-                                "Custom constructor " + property.getAnnotation(ConstructBy.class).value() + //
+                                "Custom constructor " + property.getAnnotation(YamlConstructBy.class).value() + //
                                         " on property " + object.getClass().getTypeName() + "::" + property + " cannot be created",
                                 e);
                     } catch (Exception e) {
@@ -232,7 +232,7 @@ public class AnnotationAwareConstructor extends Constructor {
     /**
      * @return all programmatically registered class-to-constructBy associations.
      */
-    public Map<Class<?>, ConstructBy> getConstructByMap() {
+    public Map<Class<?>, YamlConstructBy> getConstructByMap() {
         return constructByMap;
     }
 
@@ -245,7 +245,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param <T> type for which a {@link CustomConstructor} is registered
      */
     public <T> void registerCustomConstructor(Class<T> forType, Class<? extends CustomConstructor<? extends T>> customConstructorClass) {
-        constructByMap.put(forType, ConstructBy.Factory.of(customConstructorClass));
+        constructByMap.put(forType, YamlConstructBy.Factory.of(customConstructorClass));
     }
 
     /**
@@ -268,7 +268,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @return constructed object
      */
     private <T> T constructObject(Node node, Function<Node, T> defaultConstructor) {
-        ConstructBy constructBy = getConstructBy(node.getType());
+        YamlConstructBy constructBy = getConstructBy(node.getType());
         if (constructBy != null) {
             try {
                 @SuppressWarnings("unchecked")
@@ -282,20 +282,20 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Returns a matching {@link ConstructBy} annotation by using the following rules, given the node is of type <code>T</code>:<br>
+     * Returns a matching {@link YamlConstructBy} annotation by using the following rules, given the node is of type <code>T</code>:<br>
      * Walk the superclass hierarchy of <code>T</code>, then all interfaces of <code>T</code>.<br>
      * For each superclass/interface <code>S super T</code>, check first if there is an entry in the {@link #getConstructByMap()} for <code>S</code>
-     * and if so, return the ConstructBy from the map;
-     * if not, check if <code>S</code> is annotated with ConstructBy, and if so, return the ConstructBy from the annotation.<br>
+     * and if so, return the {@code YamlConstructBy} from the map;
+     * if not, check if <code>S</code> is annotated with {@code YamlConstructBy}, and if so, return the {@code YamlConstructBy} from the annotation.<br>
      * If there is no match for <code>S</code>, proceed with the next superclass/interface.
      * if no match was found after walking the whole hierarchy, <code>null</code> is returned.
      * 
      * @param type type
-     * @return {@link ConstructBy} or <code>null</code> if no matching ConstructBy found
+     * @return {@link YamlConstructBy} or <code>null</code> if no matching {@code YamlConstructBy} found
      */
-    protected ConstructBy getConstructBy(Class<?> type) {
-        ConstructBy constructByFoundInMap = null;
-        ConstructBy constructByAnnotation = null;
+    protected YamlConstructBy getConstructBy(Class<?> type) {
+        YamlConstructBy constructByFoundInMap = null;
+        YamlConstructBy constructByAnnotation = null;
 
         List<Class<?>> typesInHierarchy = new ArrayList<>();
         typesInHierarchy.add(type);
@@ -307,7 +307,7 @@ public class AnnotationAwareConstructor extends Constructor {
             if (constructByFoundInMap != null) {
                 return constructByFoundInMap;
             }
-            constructByAnnotation = typeToFindInMap.getDeclaredAnnotation(ConstructBy.class);
+            constructByAnnotation = typeToFindInMap.getDeclaredAnnotation(YamlConstructBy.class);
             if (constructByAnnotation != null) {
                 return constructByAnnotation;
             }

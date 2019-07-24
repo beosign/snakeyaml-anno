@@ -31,24 +31,24 @@ import java.lang.annotation.Target;
 @Target({ TYPE, METHOD, FIELD })
 @Retention(RUNTIME)
 @Inherited
-public @interface ConstructBy {
+public @interface YamlConstructBy {
     Class<? extends CustomConstructor<?>> value();
 
     /**
-     * Factory that creates instances of {@link ConstructBy}.
+     * Factory that creates instances of {@link YamlConstructBy}.
      */
     final class Factory {
         private Factory() {
         }
 
         /**
-         * Creates a {@link ConstructBy}.
+         * Creates a {@link YamlConstructBy}.
          * 
          * @param customConstructorClass constructor type
-         * @return {@link ConstructBy}.
+         * @return {@link YamlConstructBy}.
          */
-        public static ConstructBy of(Class<? extends CustomConstructor<?>> customConstructorClass) {
-            return new ConstructByImpl(customConstructorClass);
+        public static YamlConstructBy of(Class<? extends CustomConstructor<?>> customConstructorClass) {
+            return new YamlConstructByImpl(customConstructorClass);
         }
 
         /**
@@ -57,16 +57,16 @@ public @interface ConstructBy {
          * @author florian
          */
         @SuppressWarnings({ "all" })
-        private static final class ConstructByImpl implements ConstructBy {
+        private static final class YamlConstructByImpl implements YamlConstructBy {
             private Class<? extends CustomConstructor<?>> value;
 
-            private ConstructByImpl(Class<? extends CustomConstructor<?>> value) {
+            private YamlConstructByImpl(Class<? extends CustomConstructor<?>> value) {
                 this.value = value;
             }
 
             @Override
             public Class<? extends Annotation> annotationType() {
-                return ConstructBy.class;
+                return YamlConstructBy.class;
             }
 
             @Override

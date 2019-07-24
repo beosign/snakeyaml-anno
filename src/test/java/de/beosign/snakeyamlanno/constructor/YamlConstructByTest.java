@@ -13,11 +13,11 @@ import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**
- * Tests the ConstructBy functionality.
+ * Tests the YamlConstructBy functionality.
  * 
  * @author florian
  */
-public class ConstructByTest {
+public class YamlConstructByTest {
 
     private AnnotationAwareConstructor annotationAwareConstructor;
 
@@ -28,7 +28,7 @@ public class ConstructByTest {
 
     @Test
     public void testAnnotationOnly() {
-        ConstructBy constructBy = annotationAwareConstructor.getConstructBy(TestConstructByClass.class);
+        YamlConstructBy constructBy = annotationAwareConstructor.getConstructBy(TestConstructByClass.class);
         assertEquals(TestConstructByClassConstructor.class, constructBy.value());
 
         // test annotation inheritance
@@ -42,10 +42,10 @@ public class ConstructByTest {
 
     @Test
     public void testMapOnly() {
-        annotationAwareConstructor.getConstructByMap().put(Number.class, ConstructBy.Factory.of(NumberCustomConstructor.class));
-        annotationAwareConstructor.getConstructByMap().put(BigInteger.class, ConstructBy.Factory.of(BigIntegerCustomConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(Number.class, YamlConstructBy.Factory.of(NumberCustomConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(BigInteger.class, YamlConstructBy.Factory.of(BigIntegerCustomConstructor.class));
 
-        ConstructBy constructBy = annotationAwareConstructor.getConstructBy(Number.class);
+        YamlConstructBy constructBy = annotationAwareConstructor.getConstructBy(Number.class);
         assertEquals(NumberCustomConstructor.class, constructBy.value());
 
         constructBy = annotationAwareConstructor.getConstructBy(BigInteger.class);
@@ -63,58 +63,58 @@ public class ConstructByTest {
 
     @Test
     public void testMapAndAnnotationExactType() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(BTestConstructByClassConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, YamlConstructBy.Factory.of(BTestConstructByClassConstructor.class));
 
         // Map wins
-        ConstructBy constructBy = annotationAwareConstructor.getConstructBy(TestConstructByClass.class);
+        YamlConstructBy constructBy = annotationAwareConstructor.getConstructBy(TestConstructByClass.class);
         assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
-        assertEquals(ConstructBy.class, constructBy.annotationType());
+        assertEquals(YamlConstructBy.class, constructBy.annotationType());
     }
 
     @Test
     public void testMapAndAnnotationRelatedTypesSameSupertype() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(BTestConstructByClassConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, YamlConstructBy.Factory.of(BTestConstructByClassConstructor.class));
 
         // Map and annotation have a match for same supertype, maps wins
-        ConstructBy constructBy = annotationAwareConstructor.getConstructBy(ATestConstructByClass.class);
+        YamlConstructBy constructBy = annotationAwareConstructor.getConstructBy(ATestConstructByClass.class);
         assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     @Test
     public void testMapAndAnnotationRelatedTypesMapMoreSpecificSupertype() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(BTestConstructByClassConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, YamlConstructBy.Factory.of(BTestConstructByClassConstructor.class));
 
         // Map and annotation have a match for a supertype, but maps' is more specific => map wins
-        ConstructBy constructBy = annotationAwareConstructor.getConstructBy(AATestConstructByClass.class);
+        YamlConstructBy constructBy = annotationAwareConstructor.getConstructBy(AATestConstructByClass.class);
         assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     @Test
     public void testMapAndAnnotationRelatedTypesAnnotationMoreSpecificSupertype() {
-        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, ConstructBy.Factory.of(NumberCustomConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(TestConstructByClass.class, YamlConstructBy.Factory.of(NumberCustomConstructor.class));
 
         // Map and annotation have a match for a supertype, but annotations' is more specific => annotation wins
-        ConstructBy constructBy = annotationAwareConstructor.getConstructBy(BBTestConstructByClass.class);
+        YamlConstructBy constructBy = annotationAwareConstructor.getConstructBy(BBTestConstructByClass.class);
         assertEquals(BTestConstructByClassConstructor.class, constructBy.value());
     }
 
     // CHECKSTYLE:OFF
     private static class TestAnnotationAwareConstructor extends AnnotationAwareConstructor {
-        private Map<Class<?>, ConstructBy> constructByMap;
+        private Map<Class<?>, YamlConstructBy> constructByMap;
 
-        public TestAnnotationAwareConstructor(Class<? extends Object> theRoot, Map<Class<?>, ConstructBy> constructByMap) {
+        public TestAnnotationAwareConstructor(Class<? extends Object> theRoot, Map<Class<?>, YamlConstructBy> constructByMap) {
             super(theRoot);
             this.constructByMap = constructByMap;
         }
 
         @Override
-        public Map<Class<?>, ConstructBy> getConstructByMap() {
+        public Map<Class<?>, YamlConstructBy> getConstructByMap() {
             return constructByMap;
         }
 
     }
 
-    @ConstructBy(TestConstructByClassConstructor.class)
+    @YamlConstructBy(TestConstructByClassConstructor.class)
     public static class TestConstructByClass {
     }
 
@@ -124,7 +124,7 @@ public class ConstructByTest {
     public static class AATestConstructByClass extends ATestConstructByClass {
     }
 
-    @ConstructBy(BTestConstructByClassConstructor.class)
+    @YamlConstructBy(BTestConstructByClassConstructor.class)
     public static class BTestConstructByClass extends TestConstructByClass {
     }
 

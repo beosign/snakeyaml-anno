@@ -40,7 +40,7 @@ public class CustomConstructorTest {
     @BeforeEach
     public void before() {
         annotationAwareConstructor = new AnnotationAwareConstructor(Person.class);
-        annotationAwareConstructor.getConstructByMap().put(Enum.class, ConstructBy.Factory.of(EnumConstructor.class));
+        annotationAwareConstructor.getConstructByMap().put(Enum.class, YamlConstructBy.Factory.of(EnumConstructor.class));
     }
 
     /**
@@ -212,7 +212,7 @@ public class CustomConstructorTest {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
 
-            annotationAwareConstructor.getConstructByMap().put(Dog.class, ConstructBy.Factory.of(PrivateCustomConstructor.class));
+            annotationAwareConstructor.getConstructByMap().put(Dog.class, YamlConstructBy.Factory.of(PrivateCustomConstructor.class));
             Yaml yaml = new Yaml(annotationAwareConstructor);
             try {
                 yaml.loadAs(yamlString, Person.class);
@@ -309,7 +309,7 @@ public class CustomConstructorTest {
             String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
             log.debug("Loaded YAML file:\n{}", yamlString);
 
-            annotationAwareConstructor.getConstructByMap().put(Skill.class, ConstructBy.Factory.of(WrongObjectConstructor.class));
+            annotationAwareConstructor.getConstructByMap().put(Skill.class, YamlConstructBy.Factory.of(WrongObjectConstructor.class));
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             try {
@@ -371,7 +371,7 @@ public class CustomConstructorTest {
         }
     }
 
-    @ConstructBy(AbstractItemConstructor.class)
+    @YamlConstructBy(AbstractItemConstructor.class)
     public abstract static class AbstractItem {
         private String name;
 

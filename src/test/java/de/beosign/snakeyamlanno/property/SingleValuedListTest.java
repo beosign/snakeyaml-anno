@@ -17,7 +17,7 @@ import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Node;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
-import de.beosign.snakeyamlanno.constructor.ConstructBy;
+import de.beosign.snakeyamlanno.constructor.YamlConstructBy;
 import de.beosign.snakeyamlanno.constructor.CustomConstructor;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
@@ -226,7 +226,7 @@ public class SingleValuedListTest {
      * 
      * @author florian
      */
-    @ConstructBy(NullPersonCustomConstructor.class)
+    @YamlConstructBy(NullPersonCustomConstructor.class)
     public static class Pet {
 
     }
@@ -236,7 +236,7 @@ public class SingleValuedListTest {
      * 
      * @author florian
      */
-    @ConstructBy(ColorCustomConstructor.class)
+    @YamlConstructBy(ColorCustomConstructor.class)
     public enum Color {
         BLUE, RED;
     }

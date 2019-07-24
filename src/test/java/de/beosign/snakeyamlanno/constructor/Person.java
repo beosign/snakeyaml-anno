@@ -34,7 +34,7 @@ public class Person {
     public Person() {
     }
 
-    @ConstructBy(AbstractCustomConstructor.class)
+    @YamlConstructBy(AbstractCustomConstructor.class)
     public String getNotConstructable() {
         return notConstructable;
     }
@@ -43,7 +43,7 @@ public class Person {
         this.notConstructable = notConstructable;
     }
 
-    @ConstructBy(WrongTypeCustomConstructor.class)
+    @YamlConstructBy(WrongTypeCustomConstructor.class)
     public Integer getNotSettable() {
         return notSettable;
     }
@@ -68,7 +68,7 @@ public class Person {
         this.skill = skill;
     }
 
-    @ConstructBy(ClassConstructor.class)
+    @YamlConstructBy(ClassConstructor.class)
     public Class<?> getType() {
         return type;
     }
@@ -77,7 +77,7 @@ public class Person {
         this.type = type;
     }
 
-    @ConstructBy(DogByYearConstructor.class)
+    @YamlConstructBy(DogByYearConstructor.class)
     public Animal getFirstPet() {
         return firstPet;
     }
@@ -94,7 +94,7 @@ public class Person {
         this.secondPet = secondPet;
     }
 
-    @ConstructBy(DogByYearConstructor.class)
+    @YamlConstructBy(DogByYearConstructor.class)
     @YamlProperty(converter = DogConverter.class)
     public Animal getThirdPet() {
         return thirdPet;
@@ -125,7 +125,7 @@ public class Person {
         return "Person [name=" + name + ", skill=" + skill + ", favoriteColors=" + favoriteColors + ", pets=" + pets + ", firstPet=" + firstPet + ", type=" + type + "]";
     }
 
-    @ConstructBy(SkillConstructor.class)
+    @YamlConstructBy(SkillConstructor.class)
     public static enum Skill {
         PRO(1), AMATEUR(2), BEGINNER(3);
 
@@ -144,7 +144,7 @@ public class Person {
         RED, BLUE, GREEN, YELLOW;
     }
 
-    @ConstructBy(AnimalConstructor.class)
+    @YamlConstructBy(AnimalConstructor.class)
     public abstract static class Animal {
         private String name;
         private int age;
@@ -166,7 +166,7 @@ public class Person {
         }
     }
 
-    @ConstructBy(DogConstructor.class)
+    @YamlConstructBy(DogConstructor.class)
     public static class Dog extends Animal {
         private int nrBarksPerDay;
 
@@ -200,7 +200,7 @@ public class Person {
 
     }
 
-    @ConstructBy(DefaultCustomConstructor.class)
+    @YamlConstructBy(DefaultCustomConstructor.class)
     public static class Cat extends Animal {
         private int nrMiceCaught;
 
