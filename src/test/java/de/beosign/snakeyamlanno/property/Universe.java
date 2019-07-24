@@ -16,7 +16,7 @@ public class Universe {
         this.stellarObjects = stellarObjects;
     }
 
-    @Property(key = "age")
+    @YamlProperty(key = "age")
     public double getUniverseAge() {
         return universeAge;
     }

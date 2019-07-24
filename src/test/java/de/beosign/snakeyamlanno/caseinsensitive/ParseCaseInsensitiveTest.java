@@ -12,7 +12,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
-import de.beosign.snakeyamlanno.property.Property;
+import de.beosign.snakeyamlanno.property.YamlProperty;
 
 /**
  * Tests the ignore errors functionality.
@@ -100,7 +100,7 @@ public class ParseCaseInsensitiveTest {
         private int age;
         private String aliasProperty;
 
-        @Property(key = "AliaS")
+        @YamlProperty(key = "AliaS")
         public String getAliasProperty() {
             return aliasProperty;
         }
@@ -168,7 +168,7 @@ public class ParseCaseInsensitiveTest {
         private String name;
         private int age;
 
-        @Property(key = "AliaS")
+        @YamlProperty(key = "AliaS")
         private String aliasProperty;
 
         public String getAliasProperty() {

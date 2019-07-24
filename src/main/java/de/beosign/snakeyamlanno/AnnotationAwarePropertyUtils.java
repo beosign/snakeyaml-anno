@@ -17,7 +17,7 @@ import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.property.SkippedProperty;
 
 /**
- * Property Utils where properties are replaced by delegating properties so features like converting and aliasing can be implemented.
+ * YamlProperty Utils where properties are replaced by delegating properties so features like converting and aliasing can be implemented.
  * 
  * @author florian
  */
@@ -75,7 +75,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         Property replacementProperty = defaultProperty;
         String replacementName = defaultProperty.getName();
 
-        de.beosign.snakeyamlanno.property.Property propertyAnnotation = defaultProperty.getAnnotation(de.beosign.snakeyamlanno.property.Property.class);
+        de.beosign.snakeyamlanno.property.YamlProperty propertyAnnotation = defaultProperty.getAnnotation(de.beosign.snakeyamlanno.property.YamlProperty.class);
         if (propertyAnnotation != null) {
             if (propertyAnnotation.converter() != NoConverter.class) {
                 replacementProperty = new ConvertedProperty(replacementProperty, propertyAnnotation.converter());
@@ -123,7 +123,7 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
     }
 
     /**
-     * Name/Property value holder.
+     * Name/YamlProperty value holder.
      * 
      * @author florian
      */

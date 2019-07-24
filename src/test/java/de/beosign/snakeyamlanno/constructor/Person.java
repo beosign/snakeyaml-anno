@@ -15,7 +15,7 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.convert.ConverterException;
-import de.beosign.snakeyamlanno.property.Property;
+import de.beosign.snakeyamlanno.property.YamlProperty;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
 // CHECKSTYLE:OFF - test classes
@@ -95,7 +95,7 @@ public class Person {
     }
 
     @ConstructBy(DogByYearConstructor.class)
-    @Property(converter = DogConverter.class)
+    @YamlProperty(converter = DogConverter.class)
     public Animal getThirdPet() {
         return thirdPet;
     }

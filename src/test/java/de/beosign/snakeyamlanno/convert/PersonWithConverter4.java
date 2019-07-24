@@ -1,6 +1,6 @@
 package de.beosign.snakeyamlanno.convert;
 
-import de.beosign.snakeyamlanno.property.Property;
+import de.beosign.snakeyamlanno.property.YamlProperty;
 
 //CHECKSTYLE:OFF
 public class PersonWithConverter4 {
@@ -22,7 +22,7 @@ public class PersonWithConverter4 {
         this.length = length;
     }
 
-    @Property(converter = NotInstantiableConverter.class)
+    @YamlProperty(converter = NotInstantiableConverter.class)
     private Integer length;
 
     public static class NotInstantiableConverter implements Converter<Integer> {

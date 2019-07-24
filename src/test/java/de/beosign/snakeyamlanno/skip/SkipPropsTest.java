@@ -25,7 +25,7 @@ import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
-import de.beosign.snakeyamlanno.property.Property;
+import de.beosign.snakeyamlanno.property.YamlProperty;
 import de.beosign.snakeyamlanno.representer.AnnotationAwareRepresenter;
 
 /**
@@ -37,7 +37,7 @@ public class SkipPropsTest {
     private static final Logger log = LoggerFactory.getLogger(SkipPropsTest.class);
 
     /**
-     * Tests {@link Property#skipAtLoad()}.
+     * Tests {@link YamlProperty#skipAtLoad()}.
      * 
      * @throws Exception on exception
      */
@@ -57,7 +57,7 @@ public class SkipPropsTest {
     }
 
     /**
-     * Tests {@link Property#skipAtLoad()}.
+     * Tests {@link YamlProperty#skipAtLoad()}.
      * 
      * @throws Exception on exception
      */
@@ -86,7 +86,7 @@ public class SkipPropsTest {
     }
 
     /**
-     * Tests {@link Property#skipAtDump()}.
+     * Tests {@link YamlProperty#skipAtDump()}.
      * 
      * @throws Exception on exception
      */
@@ -110,7 +110,7 @@ public class SkipPropsTest {
     }
 
     /**
-     * Tests {@link Property#skipAtDump()} overrides {@link Property#skipAtDumpIf()}.
+     * Tests {@link YamlProperty#skipAtDump()} overrides {@link YamlProperty#skipAtDumpIf()}.
      * 
      * @throws Exception on exception
      */
@@ -295,7 +295,7 @@ public class SkipPropsTest {
         private Map<String, Object> skipDumpIfEmptyMap = new HashMap<>();
         private String name;
 
-        @Property(skipAtLoad = true)
+        @YamlProperty(skipAtLoad = true)
         public String getSkipLoad() {
             return skipLoad;
         }
@@ -304,7 +304,7 @@ public class SkipPropsTest {
             this.skipLoad = skipLoad;
         }
 
-        @Property(skipAtDump = true)
+        @YamlProperty(skipAtDump = true)
         public String getSkipDump() {
             return skipDump;
         }
@@ -321,7 +321,7 @@ public class SkipPropsTest {
             this.name = name;
         }
 
-        @Property(skipAtDump = true, skipAtDumpIf = SkipNever.class)
+        @YamlProperty(skipAtDump = true, skipAtDumpIf = SkipNever.class)
         public String getSkipDumpOverridingIf() {
             return skipDumpOverridingIf;
         }
@@ -330,7 +330,7 @@ public class SkipPropsTest {
             this.skipDumpOverridingIf = skipDumpOverridingIf;
         }
 
-        @Property(skipAtDumpIf = SkipIfEmpty.class)
+        @YamlProperty(skipAtDumpIf = SkipIfEmpty.class)
         public String getSkipDumpIfEmpty() {
             return skipDumpIfEmpty;
         }
@@ -339,7 +339,7 @@ public class SkipPropsTest {
             this.skipDumpIfEmpty = skipDumpIfEmpty;
         }
 
-        @Property(skipAtDumpIf = SkipIfEmpty.class)
+        @YamlProperty(skipAtDumpIf = SkipIfEmpty.class)
         public Collection<String> getSkipDumpIfEmptyCollection() {
             return skipDumpIfEmptyCollection;
         }
@@ -348,7 +348,7 @@ public class SkipPropsTest {
             this.skipDumpIfEmptyCollection = skipDumpIfEmptyCollection;
         }
 
-        @Property(skipAtDumpIf = SkipIfEmpty.class)
+        @YamlProperty(skipAtDumpIf = SkipIfEmpty.class)
         public Map<String, Object> getSkipDumpIfEmptyMap() {
             return skipDumpIfEmptyMap;
         }
@@ -357,7 +357,7 @@ public class SkipPropsTest {
             this.skipDumpIfEmptyMap = skipDumpIfEmptyMap;
         }
 
-        @Property(skipAtDumpIf = SkipIfNull.class)
+        @YamlProperty(skipAtDumpIf = SkipIfNull.class)
         public String getSkipDumpIfNull() {
             return skipDumpIfNull;
         }
@@ -366,7 +366,7 @@ public class SkipPropsTest {
             this.skipDumpIfNull = skipDumpIfNull;
         }
 
-        @Property(skipAtDumpIf = SkipIfEmpty.class)
+        @YamlProperty(skipAtDumpIf = SkipIfEmpty.class)
         public Date getSkipDumpOtherType() {
             return skipDumpOtherType;
         }
@@ -380,7 +380,7 @@ public class SkipPropsTest {
     public static class SkipPropsBadClass {
         private String prop;
 
-        @Property(skipAtDumpIf = PrivatePredicate.class)
+        @YamlProperty(skipAtDumpIf = PrivatePredicate.class)
         public String getProp() {
             return prop;
         }
@@ -408,7 +408,7 @@ public class SkipPropsTest {
         private String notLoadedButDumped;
         private String loadedAndDumped;
 
-        @Property(skipAtDump = true)
+        @YamlProperty(skipAtDump = true)
         public String getNotDumpedButLoaded() {
             return notDumpedButLoaded;
         }
@@ -417,7 +417,7 @@ public class SkipPropsTest {
             this.notDumpedButLoaded = notDumpedButLoaded;
         }
 
-        @Property(skipAtLoad = true)
+        @YamlProperty(skipAtLoad = true)
         public String getNotLoadedButDumped() {
             return notLoadedButDumped;
         }

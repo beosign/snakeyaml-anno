@@ -29,7 +29,7 @@ public abstract class Animal {
             return "Dog [loudness=" + loudness + ", aliasedProperty=" + aliasedProperty + ", getName()=" + getName() + "]";
         }
 
-        @Property(key = "alias")
+        @YamlProperty(key = "alias")
         public String getAliasedProperty() {
             return aliasedProperty;
         }

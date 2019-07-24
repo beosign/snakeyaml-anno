@@ -10,7 +10,7 @@ public class StellarObject {
     private long radius;
     private double absoluteMag;
 
-    @Property(key = "nameAlias", order = 10)
+    @YamlProperty(key = "nameAlias", order = 10)
     public String getName() {
         return name;
     }
@@ -35,7 +35,7 @@ public class StellarObject {
         this.location = location;
     }
 
-    @Property(order = -5)
+    @YamlProperty(order = -5)
     public String getDistance() {
         return distance;
     }
@@ -44,7 +44,7 @@ public class StellarObject {
         this.distance = distance;
     }
 
-    @Property(order = 5)
+    @YamlProperty(order = 5)
     public long getRadius() {
         return radius;
     }
@@ -53,7 +53,7 @@ public class StellarObject {
         this.radius = radius;
     }
 
-    @Property(key = "absMag")
+    @YamlProperty(key = "absMag")
     public double getAbsoluteMag() {
         return absoluteMag;
     }

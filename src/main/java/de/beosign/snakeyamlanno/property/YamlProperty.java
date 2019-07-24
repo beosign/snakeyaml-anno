@@ -18,7 +18,7 @@ import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
  */
 @Target({ METHOD, FIELD })
 @Retention(RUNTIME)
-public @interface Property {
+public @interface YamlProperty {
     /**
      * The key as used in the YAML file.
      * 

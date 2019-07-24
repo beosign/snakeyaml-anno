@@ -134,7 +134,7 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 This section covers the details of the feature including examples how to use them. 
 
 ### Property name mapping
-If the properties of your POJO and in your yaml do not match regarding the names, you can supply a mapping by using the `Property` annotation.
+If the properties of your POJO and in your yaml do not match regarding the names, you can supply a mapping by using the `YamlProperty` annotation.
 
 Suppose you have the following yaml:
 
@@ -158,7 +158,7 @@ In order to be able to parse the yaml file, you can do the following:
 
 ```java
 public class Person {
-    @Property(key = "name")
+    @YamlProperty(key = "name")
     private String firstName;
     private String lastName;
 }
@@ -171,7 +171,7 @@ It is also possible to annotate the getter instead:
     private String firstName;
     private String lastName;
   
-    @Property(key = "name")
+    @YamlProperty(key = "name")
     public String getFirstName() {...}
 }
 ```
@@ -209,7 +209,7 @@ public enum Gender {
  public class Person {     
     private String name;
    
-    @Property(converter=GenderConverter.class)
+    @YamlProperty(converter=GenderConverter.class)
     private Gender gender;
 }
 ```
@@ -556,7 +556,7 @@ In a complex hierarchy it may be desirable to ignore parse errors in a given sub
     private String firstName;
     private String lastName;
     
-    @Property(ignoreExceptions = true)
+    @YamlProperty(ignoreExceptions = true)
     private Gender gender;
   
 }
@@ -584,7 +584,7 @@ It is possible to skip properties during load or dump. In order to skip a proper
 ```java 
 public class Person {
 
-   @Property(skipAtLoad = true)     
+   @YamlProperty(skipAtLoad = true)     
    private String name;
 }
 ```
@@ -594,7 +594,7 @@ In order to prevent dumping of a property, use `skipAtDump`:
 ```java 
 public class Person {
 
-   @Property(skipAtDump = true)     
+   @YamlProperty(skipAtDump = true)     
    private String name;
 }
 ```
@@ -605,7 +605,7 @@ You can use your implementation by using the `skipAtDumpIf` member:
 ```java 
 public class Person {
 
-   @Property(skipAtDumpIf = SkipIfNull.class)     
+   @YamlProperty(skipAtDumpIf = SkipIfNull.class)     
    private String name;
 }
 ```
@@ -621,13 +621,13 @@ It is possible to order properties during the dump process by providing a value 
 ```java 
 public class Person {
 
-   @Property(order = 5)     
+   @YamlProperty(order = 5)     
    private String first;
 
      
    private String between;
 
-   @Property(order = -5)     
+   @YamlProperty(order = -5)     
    private String last;
 }
 ```

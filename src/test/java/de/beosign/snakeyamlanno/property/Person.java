@@ -35,7 +35,7 @@ public class Person {
         this.name = name;
     }
 
-    @Property(converter = GenderConverter.class)
+    @YamlProperty(converter = GenderConverter.class)
     public Gender getGender() {
         return gender;
     }
@@ -49,7 +49,7 @@ public class Person {
         return "Person [name=" + name + ", height=" + height + ", gender=" + gender + ", animal=" + animal + "]";
     }
 
-    @Property(ignoreExceptions = true)
+    @YamlProperty(ignoreExceptions = true)
     public Animal getAnimal() {
         return animal;
     }
@@ -58,7 +58,7 @@ public class Person {
         this.animal = animal;
     }
 
-    @Property(converter = LengthToCmConverter.class)
+    @YamlProperty(converter = LengthToCmConverter.class)
     public int getHeight() {
         return height;
     }

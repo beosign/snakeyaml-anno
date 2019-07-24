@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import de.beosign.snakeyamlanno.property.Property;
+import de.beosign.snakeyamlanno.property.YamlProperty;
 import de.beosign.snakeyamlanno.representer.AnnotationAwareRepresenter;
 
 /**
@@ -65,7 +65,7 @@ public class SkipEmptyTest {
         private String emptyString = "";
         private String nullString;
 
-        @Property(skipAtDump = true)
+        @YamlProperty(skipAtDump = true)
         public String getSkipDump() {
             return skipDump;
         }
@@ -98,7 +98,7 @@ public class SkipEmptyTest {
             this.map = map;
         }
 
-        @Property(skipAtDump = false)
+        @YamlProperty(skipAtDump = false)
         public String getEmptyString() {
             return emptyString;
         }
