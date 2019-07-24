@@ -18,11 +18,12 @@ import java.lang.annotation.Target;
  * The difference to a {@link de.beosign.snakeyamlanno.convert.Converter} is that a {@link CustomConstructor} can be applied on a per-type basis, whereas a
  * Converter can only be used on a per-property basis.
  * For example, if you have an Enum that should be parseable in a custom way, and that enum is used multiple times, then a CustomConstructor is preferable
- * because it is only necessary to register it once for the enum, and not on each property of that enum type.
+ * because it is only necessary to register it once for the enum, and not on each property of that enum type.<br>
+ * However, it is also possible to register a CustomConstructor on a per-property basis only.
  * </p>
  * <p>
  * Additionally, one can register CustomConstructors for any class using a programmatic approach. This is useful if an already existing class cannot be
- * modified, see {@link AnnotationAwareConstructor#getConstructByMap()}.
+ * modified, see {@link AnnotationAwareConstructor#registerCustomConstructor()}.
  * </p>
  * 
  * @author florian
