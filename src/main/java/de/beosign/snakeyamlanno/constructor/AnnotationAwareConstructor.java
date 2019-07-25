@@ -91,7 +91,7 @@ public class AnnotationAwareConstructor extends Constructor {
         Instantiator<Object> defaultInstantiator = (nodeType, n, tryDef, anc, def) -> super.newInstance(anc, n, tryDef);
         Object instance = null;
         YamlInstantiateBy instantiateBy = getInstantiateBy(node.getType());
-        if (instantiateBy != null && !instantiateBy.value().equals(Instantiator.class)) {
+        if (instantiateBy != null && !instantiateBy.value().equals(Instantiator.NoInstantiator.class)) {
             try {
                 instance = instantiateBy.value().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
             } catch (IllegalAccessException e) {

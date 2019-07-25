@@ -32,4 +32,11 @@ public interface Instantiator<T> {
      */
     T createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException;
 
+    /**
+     * <b>This interface is for internal purposes only.</b><br>
+     * Default value for the converter property; needed because one cannot define a type token with wildcards ({@code Class<? extends Instantiator<?>>}) from a
+     * generic type ({@code Instantiator<T>}).
+     */
+    interface NoInstantiator extends Instantiator<Object> {
+    }
 }
