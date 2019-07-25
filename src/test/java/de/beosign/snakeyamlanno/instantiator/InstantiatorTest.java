@@ -111,7 +111,7 @@ public class InstantiatorTest {
 
             // manually register instantiator
             annotationAwareConstructor.setGlobalInstantiator(new AnimalInstantiator());
-            annotationAwareConstructor.registerInstantiator(Animal.class, DefaultInstantiator.class);
+            annotationAwareConstructor.registerDefaultInstantiator(Animal.class);
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             Person1 person1 = yaml.loadAs(yamlString, Person1.class);
@@ -122,7 +122,32 @@ public class InstantiatorTest {
             assertThat(person1.getAnimal().getClass().getName(), is(Animal.class.getName()));
             assertThat(person1.getAnimal().getName(), is("mydog"));
 
-            assertThat(YamlInstantiateBy.Factory.of(Instantiator.class).annotationType().getName(), is(YamlInstantiateBy.class.getName()));
+            assertThat(YamlInstantiateBy.Factory.of(DefaultInstantiator.class).annotationType().getName(), is(YamlInstantiateBy.class.getName()));
+        }
+    }
+
+    /**
+     * Test an instantiator using the default instantiator to return the result.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testValidInstantiatorUsingDefaultInstantiator() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("person1c.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            // manually register instantiator
+            annotationAwareConstructor.setGlobalInstantiator(new AnimalInstantiator());
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Person1 person1 = yaml.loadAs(yamlString, Person1.class);
+
+            assertThat(person1.getName(), is("Homer"));
+
+            assertThat(person1.getAnimal().getClass().getName(), is(Animal.class.getName()));
+            assertThat(person1.getAnimal().getName(), is("any pet"));
         }
     }
 
@@ -339,6 +364,18 @@ public class InstantiatorTest {
         }
     }
 
+    /** Test class. */
+    public static class Mouse extends Animal {
+        public Mouse(String name) {
+            setName(name);
+        }
+
+        @Override
+        public String toString() {
+            return "Mouse [name=" + super.getName() + "]";
+        }
+    }
+
     /** Test class with an empty Type annotation (makes no sense, but does not cause any errors). */
     public static class Car {
         private String brand;
@@ -377,10 +414,10 @@ public class InstantiatorTest {
     }
 
     /** Instantiator that creates a PersonBean using a static factory method if the node is a scalar node. */
-    public static class PersonBeanInstantiator implements Instantiator {
+    public static class PersonBeanInstantiator implements Instantiator<PersonBean> {
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+        public PersonBean createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
             if (nodeType.equals(PersonBean.class)) {
                 if (node instanceof ScalarNode) {
                     // a name was passed
@@ -399,10 +436,10 @@ public class InstantiatorTest {
     }
 
     /** Creates Animal instances or a Dog instance if "mydog" is used as node value. */
-    public static class AnimalInstantiator implements Instantiator {
+    public static class AnimalInstantiator implements Instantiator<Animal> {
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+        public Animal createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
 
             if (Animal.class.isAssignableFrom(nodeType)) {
                 if (Objects.toString(NodeUtil.getValue(node), "").equals("mydog")) {
@@ -410,12 +447,18 @@ public class InstantiatorTest {
                 }
                 if (node instanceof MappingNode) {
                     MappingNode mappingNode = (MappingNode) node;
-                    return mappingNode.getValue().stream()//
-                            .filter(nt -> NodeUtil.getValue(nt.getKeyNode()).equals("name"))//
+                    Dog dog = mappingNode.getValue().stream()//
+                            .filter(nt -> NodeUtil.getValue(nt.getKeyNode()).equals("loudness"))//
+                            .filter(nt -> !Objects.toString(NodeUtil.getValue(nt.getValueNode())).contains("pet"))//
                             .findFirst()//
                             .map(nt -> Objects.toString(NodeUtil.getValue(nt.getValueNode()), ""))//
                             .map(name -> new Dog(name))//
                             .orElse(null);
+                    if (dog != null) {
+                        return dog;
+                    }
+
+                    return (Animal) defaultInstantiator.createInstance(nodeType, mappingNode, tryDefault, ancestor, defaultInstantiator);
                 }
             }
             return null;
@@ -426,7 +469,7 @@ public class InstantiatorTest {
     public static class DogInstantiator extends AnimalInstantiator {
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+        public Animal createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
 
             if (Dog.class.isAssignableFrom(nodeType)) {
                 if (Objects.toString(NodeUtil.getValue(node), "").equals("mydog")) {
@@ -454,12 +497,12 @@ public class InstantiatorTest {
     }
 
     /** Private constructor, so causes errors when used. */
-    public static final class InvalidInstantiator implements Instantiator {
+    public static final class InvalidInstantiator implements Instantiator<Object> {
         private InvalidInstantiator() {
         }
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
             return null;
         }
     }
@@ -522,7 +565,7 @@ public class InstantiatorTest {
     public static class Person1CatInstantiator extends AnimalInstantiator {
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+        public Animal createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
             if (node instanceof ScalarNode) {
                 return new Cat((String) NodeUtil.getValue(node));
             } else if (node instanceof MappingNode) {

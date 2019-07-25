@@ -36,29 +36,29 @@ public @interface YamlInstantiateBy {
      * 
      * @return instantiator class
      */
-    Class<? extends Instantiator> value();
+    Class<? extends Instantiator<?>> value();
 
     /** Factory for YamlInstantiateBy instances. */
     final class Factory {
         private Factory() {
         }
 
-        public static YamlInstantiateBy of(Class<? extends Instantiator> instantiator) {
+        public static YamlInstantiateBy of(Class<? extends Instantiator<?>> instantiator) {
             return new YamlInstantiateByImpl(instantiator);
         }
 
         /** Internal implementation class. */
         @SuppressWarnings({ "all" })
         private static final class YamlInstantiateByImpl implements YamlInstantiateBy {
-            private final Class<? extends Instantiator> instantiatorType;
+            private final Class<? extends Instantiator<?>> instantiatorType;
 
-            private YamlInstantiateByImpl(Class<? extends Instantiator> instantiatorType) {
+            private YamlInstantiateByImpl(Class<? extends Instantiator<?>> instantiatorType) {
                 Objects.requireNonNull(instantiatorType, "Instantiator Type must not be null");
                 this.instantiatorType = instantiatorType;
             }
 
             @Override
-            public Class<? extends Instantiator> value() {
+            public Class<? extends Instantiator<?>> value() {
                 return instantiatorType;
             }
 

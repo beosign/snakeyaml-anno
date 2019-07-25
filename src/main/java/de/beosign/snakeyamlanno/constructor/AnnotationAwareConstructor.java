@@ -24,8 +24,9 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
-import de.beosign.snakeyamlanno.instantiator.YamlInstantiateBy;
+import de.beosign.snakeyamlanno.instantiator.DefaultInstantiator;
 import de.beosign.snakeyamlanno.instantiator.Instantiator;
+import de.beosign.snakeyamlanno.instantiator.YamlInstantiateBy;
 import de.beosign.snakeyamlanno.property.YamlProperty;
 
 /**
@@ -39,7 +40,7 @@ public class AnnotationAwareConstructor extends Constructor {
     private Map<Class<?>, YamlConstructBy> constructByMap = new HashMap<>();
     private Map<Class<?>, YamlInstantiateBy> instantiateByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
-    private Instantiator globalInstantiator;
+    private Instantiator<?> globalInstantiator;
 
     /**
      * Creates constructor.
@@ -72,7 +73,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param globalInstantiator instantiator instance that is global to this Constructor.
      * @since 0.9.0
      */
-    public void setGlobalInstantiator(Instantiator globalInstantiator) {
+    public void setGlobalInstantiator(Instantiator<?> globalInstantiator) {
         this.globalInstantiator = globalInstantiator;
     }
 
@@ -87,7 +88,7 @@ public class AnnotationAwareConstructor extends Constructor {
          *  2. call instantiator; if return value is null, check global instantiator within this constructor if present
          *  3. call global instantiator; if return value is null, call super (default instantiation logic)
          */
-        Instantiator defaultInstantiator = (nodeType, n, tryDef, anc, def) -> super.newInstance(anc, n, tryDef);
+        Instantiator<Object> defaultInstantiator = (nodeType, n, tryDef, anc, def) -> super.newInstance(anc, n, tryDef);
         Object instance = null;
         YamlInstantiateBy instantiateBy = getInstantiateBy(node.getType());
         if (instantiateBy != null && !instantiateBy.value().equals(Instantiator.class)) {
@@ -253,9 +254,19 @@ public class AnnotationAwareConstructor extends Constructor {
      * 
      * @param forType type for which an {@link Instantiator} is to be registered
      * @param instantiator {@link Instantiator} type
+     * @param <T> type for which an {@link Instantiator} is registered and thus the (sub-)type that the instantiator creates
      */
-    public void registerInstantiator(Class<?> forType, Class<? extends Instantiator> instantiator) {
+    public <T> void registerInstantiator(Class<T> forType, Class<? extends Instantiator<? extends T>> instantiator) {
         instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(instantiator));
+    }
+
+    /**
+     * Programmatically registers the {@link DefaultInstantiator} for the given type. This means that the type is constructed using the default SnakeYaml logic.
+     * 
+     * @param forType type for which the {@link DefaultInstantiator} is to be registered
+     */
+    public void registerDefaultInstantiator(Class<?> forType) {
+        instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(DefaultInstantiator.class));
     }
 
     /**

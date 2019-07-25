@@ -9,10 +9,10 @@ import org.yaml.snakeyaml.nodes.Node;
  * @author florian
  * @since 0.9.0
  */
-public class DefaultInstantiator implements Instantiator {
+public class DefaultInstantiator implements Instantiator<Object> {
 
     @Override
-    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
         return defaultInstantiator.createInstance(nodeType, node, tryDefault, ancestor, null);
     }
 

@@ -406,17 +406,17 @@ However, there is no way to use a **static method** to construct an object, or t
 
 #### Interface
 
-The central interface is `de.beosign.snakeyamlanno.instantiator.Instantiator` that defines a single method `createInstance`.
+The central interface is `de.beosign.snakeyamlanno.instantiator.Instantiator<T>` that defines a single method `createInstance`.
 
 
 #### Registering a Global Instantiator
 You can register a *Global Instantiator* on the `AnnotationAwareConstructor` by using the corresponding setter right after constructor creation. The effect is that each time an object has to be created for a node, the `Instantiator`'s `createInstance` method is called. Example:
 
 ```java
-public class CdiInstantiator implements Instantiator {
+public class CdiInstantiator implements Instantiator<Object> {
 
     @Override
-    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator defaultInstantiator) throws InstantiationException {
+    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
        if (isValidBean(nodeType)) {
           // a CDI bean has been detected, so provide an instance via CDI
           return getBean(nodeType);
