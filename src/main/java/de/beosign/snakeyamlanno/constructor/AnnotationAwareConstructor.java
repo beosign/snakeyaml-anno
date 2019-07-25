@@ -237,6 +237,7 @@ public class AnnotationAwareConstructor extends Constructor {
         return constructByMap;
     }
 
+    // TODO add method "unregisterCustomConstructor"
     /**
      * Programmatically registers a {@link CustomConstructor} for a given type. This is a convenience method for putting something into
      * {@link #getConstructByMap()}.
@@ -261,12 +262,18 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Programmatically registers the {@link DefaultInstantiator} for the given type. This means that the type is constructed using the default SnakeYaml logic.
+     * Programmatically unregisters an {@link Instantiator} for the given type.
      * 
-     * @param forType type for which the {@link DefaultInstantiator} is to be registered
+     * @param forType type for which an {@link Instantiator} is to be unregistered
+     * @param ignoreGlobalInstantiator if <code>true</code>, a registered global instantiator will be ignored, so the instantiation logic is the default
+     *            SnakeYaml logic; if <code>false</code>, a global instantiator is still considered.
      */
-    public void registerDefaultInstantiator(Class<?> forType) {
-        instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(DefaultInstantiator.class));
+    public void unregisterInstantiator(Class<?> forType, boolean ignoreGlobalInstantiator) {
+        if (ignoreGlobalInstantiator) {
+            instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(DefaultInstantiator.class));
+        } else {
+            instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(Instantiator.NoInstantiator.class));
+        }
     }
 
     /**

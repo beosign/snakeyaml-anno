@@ -457,18 +457,27 @@ The programmatic counterpart is:
 annotationAwareConstructor.registerInstantiator(Person.class, PersonInstantiator.class);
 ```
 
-In order to "remove" an instantiator for a given type, register with the `Instantiator` interface.
+#### Instantiation logic priority
+The following order is applied for a type `T` to determine how to create an instance:
+
+1. If an instantiator is present for `T` and that instantiator returns not `null`, use this instance
+1. If a Global Instantiator is present that returns not `null`, use this instance
+1. Apply the Snakeyaml instantiation logic and return this instance
+
+
+In order to "remove" an instantiator for a given type, call
 
 ```java
-annotationAwareConstructor.registerInstantiator(Person.class, Instantiator.class);
+annotationAwareConstructor.unregisterInstantiator(Person.class, false);
 ```
 
-This overrides an annotation (if present) and prevents any custom instantiation logic for this type unless there is a Global Instantiator registered. If you also want to ignore the Global Instantiator logic, register a `DefaultInstantiator`:
+This overrides an annotation (if present) and prevents any custom instantiation logic for this type unless there is a Global Instantiator registered. If you also want to ignore the Global Instantiator logic, pass `true` as flag:
 
 ```java
-annotationAwareConstructor.registerInstantiator(Person.class, DefaultInstantiator.class);
+annotationAwareConstructor.unregisterInstantiator(Person.class, true);
 ```
 
+This behaves as if there were no Instantiator present at all.
 
 ### Case insensitive parsing
 A flag can be passed so that parsing is possible even if the keys in the yaml file do not match the case of the java property where it sould be parsed into. To enable it, use `AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class, true)`.

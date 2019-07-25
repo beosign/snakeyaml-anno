@@ -95,10 +95,9 @@ public class InstantiatorTest {
      * Tests the following setup.
      * <ul>
      * <li>A global instantiator is present in constructor</li>
-     * <li>An instantiator is configured (programmatically) for a type, but calls the snakeyaml default "newInstance" method</li>
+     * <li>An instantiator is unregistered (programmatically) for a type, and a global instantiator is ignored</li>
      * </ul>
-     * <b>Expectation:</b> The instantiator on the type renders the global instantiator for this type ineffective and behaves as if no instantiator were present
-     * at all
+     * <b>Expectation:</b> The instance is created as if no (global) instantiator were present at all
      * 
      * @throws Exception on any exception
      */
@@ -111,7 +110,7 @@ public class InstantiatorTest {
 
             // manually register instantiator
             annotationAwareConstructor.setGlobalInstantiator(new AnimalInstantiator());
-            annotationAwareConstructor.registerDefaultInstantiator(Animal.class);
+            annotationAwareConstructor.unregisterInstantiator(Animal.class, true);
             Yaml yaml = new Yaml(annotationAwareConstructor);
 
             Person1 person1 = yaml.loadAs(yamlString, Person1.class);
@@ -155,9 +154,11 @@ public class InstantiatorTest {
      * Tests the following setup.
      * <ul>
      * <li>A global instantiator is present in constructor</li>
+     * <li>An instantiator is configured (annotation) for a type, with a different logic</li>
      * <li>An instantiator is configured (programmatically) for a type, with a different logic</li>
      * </ul>
-     * <b>Expectation:</b> The instantiator on the type renders the global instantiator for this type ineffective and uses its own instantiaton logic to create
+     * <b>Expectation:</b> The instantiator on the type renders the global instantiator and the annotation for this type ineffective and uses its own
+     * instantiaton logic to create
      * a Cat
      * 
      * @throws Exception on any exception
@@ -181,6 +182,110 @@ public class InstantiatorTest {
             // although the name is "mydog", which should usually let the AnimalConstructor create a Dog instance, an "Animal" is created
             assertThat(person1.getAnimal(), instanceOf(Cat.class));
             assertThat(person1.getAnimal().getName(), is("cat"));
+            System.out.println(person1);
+
+        }
+    }
+
+    /**
+     * Tests the following setup.
+     * <ul>
+     * <li>A global instantiator is present in constructor</li>
+     * <li>An instantiator is configured (annotation) for a type, with a different logic</li>
+     * <li>An instantiator is removed (programmatically) for a type, ignoring the global instantiator</li>
+     * </ul>
+     * <b>Expectation:</b> The normal Snakeyaml instantiation logic must have been applied
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testValidInstantiatorUnregisteredGlobalNotEffective() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("person1d.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            // manually register instantiator
+            annotationAwareConstructor.setGlobalInstantiator(new MouseInstantiator());
+            annotationAwareConstructor.unregisterInstantiator(Animal.class, true);
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Person1 person1 = yaml.loadAs(yamlString, Person1.class);
+
+            assertThat(person1.getName(), is("Homer"));
+
+            // since the type specific instantiator is ignored, and also the global one, we get an Animal
+            assertThat(person1.getAnimal(), instanceOf(Animal.class));
+            assertThat(person1.getAnimal().getName(), is("my animal"));
+            System.out.println(person1);
+
+        }
+    }
+
+    /**
+     * Tests the following setup.
+     * <ul>
+     * <li>A global instantiator is <b>NOT</b> present in constructor</li>
+     * <li>An instantiator is configured (annotation) for a type, with a different logic</li>
+     * <li>An instantiator is removed (programmatically) for a type, not ignoring the (not present) global instantiator</li>
+     * </ul>
+     * <b>Expectation:</b> The normal Snakeyaml instantiation logic must have been applied
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testValidInstantiatorUnregisteredGlobalNotPresent() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("person1d.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            // manually register instantiator
+            annotationAwareConstructor.unregisterInstantiator(Animal.class, true);
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Person1 person1 = yaml.loadAs(yamlString, Person1.class);
+
+            assertThat(person1.getName(), is("Homer"));
+
+            // since the type specific instantiator is ignored, and there is no global one, we get an Animal
+            assertThat(person1.getAnimal(), instanceOf(Animal.class));
+            assertThat(person1.getAnimal().getName(), is("my animal"));
+            System.out.println(person1);
+
+        }
+    }
+
+    /**
+     * Tests the following setup.
+     * <ul>
+     * <li>A global instantiator is present in constructor</li>
+     * <li>An instantiator is configured (annotation) for a type, with a different logic</li>
+     * <li>An instantiator is removed (programmatically) for a type, but considering the global instantiator</li>
+     * </ul>
+     * <b>Expectation:</b> The global instantiator's instantiation logic must have been applied
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testValidInstantiatorUnregisteredButGlobalStillEffective() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("person1d.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            // manually register instantiator
+            annotationAwareConstructor.setGlobalInstantiator(new MouseInstantiator()); // creates a Mouse
+            annotationAwareConstructor.unregisterInstantiator(Animal.class, false); // creates an Animal
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            Person1 person1 = yaml.loadAs(yamlString, Person1.class);
+
+            assertThat(person1.getName(), is("Homer"));
+
+            // since the type specific instantiator is ignored, but not the global one, we get a Mouse
+            assertThat(person1.getAnimal(), instanceOf(Mouse.class));
+            assertThat(person1.getAnimal().getName(), is("my mouse"));
             System.out.println(person1);
 
         }
@@ -460,6 +565,18 @@ public class InstantiatorTest {
 
                     return (Animal) defaultInstantiator.createInstance(nodeType, mappingNode, tryDefault, ancestor, defaultInstantiator);
                 }
+            }
+            return null;
+        }
+    }
+
+    /** Creates Mouse instances. */
+    public static class MouseInstantiator extends AnimalInstantiator {
+        @Override
+        public Animal createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
+            if (Animal.class.isAssignableFrom(nodeType)) {
+                NodeUtil.removeNode((MappingNode) node, "name");
+                return new Mouse("my mouse");
             }
             return null;
         }
