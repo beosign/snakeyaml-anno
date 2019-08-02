@@ -1,19 +1,25 @@
 package de.beosign.snakeyamlanno.instantiator;
 
+import org.yaml.snakeyaml.constructor.BaseConstructor;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**
- * This instantiator just uses the passed in default instantiator to create an instance. It can be used in cases where one wants to cancel out the
- * <i>global</i> instantiator that is set at the Constructor level for a particular type and to apply the normal instantiation logic instead.
+ * This interface represents the SnakeYaml interface for creating a new instance. It has the same signature as {@link BaseConstructor#newInstance(Node)}.
  * 
  * @author florian
- * @since 0.9.0
+ * @since 1.0.0
  */
-public class DefaultInstantiator implements Instantiator<Object> {
+public interface DefaultInstantiator {
 
-    @Override
-    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
-        return defaultInstantiator.createInstance(nodeType, node, tryDefault, ancestor, null);
-    }
+    /**
+     * Creates an instance.
+     * 
+     * @param ancestor ancestor
+     * @param node node
+     * @param tryDefault default flag
+     * @return created instance
+     * @throws InstantiationException if an instance could not be created
+     */
+    Object createInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException;
 
 }

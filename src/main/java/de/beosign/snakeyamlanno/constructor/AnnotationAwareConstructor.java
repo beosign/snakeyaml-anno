@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.ClassUtils;
@@ -24,8 +25,11 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
+import de.beosign.snakeyamlanno.instantiator.CustomInstantiator;
+import de.beosign.snakeyamlanno.instantiator.DefaultCustomInstantiator;
 import de.beosign.snakeyamlanno.instantiator.DefaultInstantiator;
-import de.beosign.snakeyamlanno.instantiator.Instantiator;
+import de.beosign.snakeyamlanno.instantiator.GlobalCustomInstantiator;
+import de.beosign.snakeyamlanno.instantiator.GlobalInstantiator;
 import de.beosign.snakeyamlanno.instantiator.YamlInstantiateBy;
 import de.beosign.snakeyamlanno.property.YamlProperty;
 
@@ -40,7 +44,7 @@ public class AnnotationAwareConstructor extends Constructor {
     private Map<Class<?>, YamlConstructBy> constructByMap = new HashMap<>();
     private Map<Class<?>, YamlInstantiateBy> instantiateByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
-    private Instantiator<?> globalInstantiator;
+    private GlobalInstantiator globalInstantiator = new GlobalInstantiator();
 
     /**
      * Creates constructor.
@@ -65,15 +69,16 @@ public class AnnotationAwareConstructor extends Constructor {
     }
 
     /**
-     * Sets a <i>global</i> instantiator that can be used to create instance for all types that the given instantiator wishes to consider. If the instantiator
-     * wants to apply the default instantiation logic of SnakeYaml, it can return <code>null</code>.<br>
-     * In order to apply an {@link Instantiator} for a given type only, or if you want to override the behaviour for a particular type, use the
-     * {@link YamlInstantiateBy} annotation or use the programmatic way (e.g. {@link #registerInstantiator(Class, Class)}.
+     * Sets a <i>global</i> instantiator that can be used to create instance for all types that the given instantiator wishes to consider.<br>
+     * In order to apply an instantiator for a given type only, or if you want to override the behaviour for a particular type, use a CustomInstantiator by
+     * using the {@link YamlInstantiateBy} annotation or the programmatic counterpart (e.g. {@link #registerCustomInstantiator(Class, Class)}.
      * 
-     * @param globalInstantiator instantiator instance that is global to this Constructor.
+     * @param globalInstantiator instantiator instance that is global to this Constructor - must not be <code>null</code>
+     * @throws NullPointerException if parameter is null
      * @since 0.9.0
      */
-    public void setGlobalInstantiator(Instantiator<?> globalInstantiator) {
+    public void setGlobalInstantiator(GlobalInstantiator globalInstantiator) {
+        Objects.requireNonNull(globalInstantiator, "Global instantiator must not be set to null");
         this.globalInstantiator = globalInstantiator;
     }
 
@@ -84,29 +89,21 @@ public class AnnotationAwareConstructor extends Constructor {
     protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) throws InstantiationException {
         /*
          *  Create an instance using the following order:
-         *  1. check node type for an instantiator registration and create one if present
-         *  2. call instantiator; if return value is null, check global instantiator within this constructor if present
-         *  3. call global instantiator; if return value is null, call super (default instantiation logic)
+         *  1. check node type for an instantiator registration and create one if present => done
+         *  2. call global instantiator and return value => done
          */
-        Instantiator<Object> defaultInstantiator = (nodeType, n, tryDef, anc, def) -> super.newInstance(anc, n, tryDef);
-        Object instance = null;
+        DefaultInstantiator defaultInstantiator = super::newInstance;
         YamlInstantiateBy instantiateBy = getInstantiateBy(node.getType());
-        if (instantiateBy != null && !instantiateBy.value().equals(Instantiator.NoInstantiator.class)) {
+        if (instantiateBy != null) {
             try {
-                instance = instantiateBy.value().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
+                return instantiateBy.value().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator, globalInstantiator);
             } catch (IllegalAccessException e) {
-                throw new InstantiationException("Cannot access constructor of " + instantiateBy.value() + ": " + e.getMessage());
+                throw new InstantiationException(
+                        "Cannot create instance using custom instantiator " + instantiateBy.value() + "for node " + node + " of type " + node.getType() + ": " + e.getMessage());
             }
         }
 
-        if (instance == null && globalInstantiator != null) {
-            instance = globalInstantiator.createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
-        }
-
-        if (instance == null) {
-            instance = super.newInstance(ancestor, node, tryDefault);
-        }
-        return instance;
+        return globalInstantiator.createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
     }
 
     /**
@@ -116,7 +113,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param defaultConstructor default constructor
      * @return a singleton list or <code>null</code>
      */
-    protected List<?> constructNodeAsList(Node node, Function<Node, Object> defaultConstructor) {
+    protected List<?> constructNodeAsList(Node node, Function<? super Node, ? extends Object> defaultConstructor) {
         Class<?> origType = node.getType();
         Property propertyOfNode = nodeToPropertyMap.get(node);
         if (propertyOfNode.getActualTypeArguments() != null && propertyOfNode.getActualTypeArguments().length > 0) {
@@ -237,7 +234,6 @@ public class AnnotationAwareConstructor extends Constructor {
         return constructByMap;
     }
 
-    // TODO add method "unregisterCustomConstructor"
     /**
      * Programmatically registers a {@link CustomConstructor} for a given type. This is a convenience method for putting something into
      * {@link #getConstructByMap()}.
@@ -250,30 +246,38 @@ public class AnnotationAwareConstructor extends Constructor {
         constructByMap.put(forType, YamlConstructBy.Factory.of(customConstructorClass));
     }
 
+    public <T> void registerDefaultConstructor(Class<T> forType) {
+        constructByMap.put(forType, YamlConstructBy.Factory.of(DefaultCustomConstructor.class));
+    }
+
     /**
-     * Programmatically registers an {@link Instantiator} for a given type.
+     * Programmatically registers a {@link CustomInstantiator} for a given type.
      * 
-     * @param forType type for which an {@link Instantiator} is to be registered
-     * @param instantiator {@link Instantiator} type
-     * @param <T> type for which an {@link Instantiator} is registered and thus the (sub-)type that the instantiator creates
+     * @param forType type for which a {@link CustomInstantiator} is to be registered
+     * @param instantiator {@link CustomInstantiator} type
+     * @param <T> type for which a {@link CustomInstantiator} is registered and thus the (sub-)type that the instantiator creates
      */
-    public <T> void registerInstantiator(Class<T> forType, Class<? extends Instantiator<? extends T>> instantiator) {
+    public <T> void registerCustomInstantiator(Class<T> forType, Class<? extends CustomInstantiator<? extends T>> instantiator) {
         instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(instantiator));
     }
 
     /**
-     * Programmatically unregisters an {@link Instantiator} for the given type.
+     * Programmatically registers a {@link GlobalInstantiator} for a given type. This overrides any {@link CustomInstantiator} for that type.
      * 
-     * @param forType type for which an {@link Instantiator} is to be unregistered
-     * @param ignoreGlobalInstantiator if <code>true</code>, a registered global instantiator will be ignored, so the instantiation logic is the default
-     *            SnakeYaml logic; if <code>false</code>, a global instantiator is still considered.
+     * @param forType type for which an {@link GlobalInstantiator} is to be registered
      */
-    public void unregisterInstantiator(Class<?> forType, boolean ignoreGlobalInstantiator) {
-        if (ignoreGlobalInstantiator) {
-            instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(DefaultInstantiator.class));
-        } else {
-            instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(Instantiator.NoInstantiator.class));
-        }
+    public void registerGlobalInstantiator(Class<?> forType) {
+        instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(GlobalCustomInstantiator.class));
+    }
+
+    /**
+     * Programmatically registers a {@link DefaultCustomInstantiator} for a given type. This overrides any {@link GlobalInstantiator} and any
+     * {@link CustomInstantiator} for that type.
+     * 
+     * @param forType type for which an {@link DefaultCustomInstantiator} is to be registered
+     */
+    public void registerDefaultInstantiator(Class<?> forType) {
+        instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(DefaultCustomInstantiator.class));
     }
 
     /**
@@ -285,7 +289,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * @param <T> object type
      * @return constructed object
      */
-    private <T> T constructObject(Node node, Function<Node, T> defaultConstructor) {
+    private <T> T constructObject(Node node, Function<? super Node, ? extends T> defaultConstructor) {
         YamlConstructBy constructBy = getConstructBy(node.getType());
         if (constructBy != null) {
             try {

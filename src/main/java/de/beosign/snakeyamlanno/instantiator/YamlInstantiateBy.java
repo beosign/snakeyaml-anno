@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 import java.util.Objects;
 
 /**
- * Register an {@link Instantiator} class that determines how new instances are created. Usually, they are created using the
+ * Register a {@link CustomInstantiator} class that determines how new instances are created. Usually, they are created using the
  * default no-arg constructor. An instantiator can however use a different approach.
  * 
  * @author florian
@@ -23,10 +23,11 @@ public @interface YamlInstantiateBy {
 
     /**
      * <p>
-     * Sets an {@link Instantiator} that will be used to create new instances.
+     * Sets an {@link CustomInstantiator} that will be used to create new instances.
      * </p>
      * <p>
-     * A common use case might be to use a static factory method for objects or a dependency injection framework that should create instances, like CDI.
+     * A common use case might be to use a static factory method for objects. If you are looking for a way to customize the instantiation process for all types
+     * in general, consider using a specialized {@link GlobalInstantiator} instead.
      * </p>
      * <p>
      * Please consider that Snakeyaml already provides some mechanisms to create instances with no default (no-arg) constructor, see
@@ -36,29 +37,29 @@ public @interface YamlInstantiateBy {
      * 
      * @return instantiator class
      */
-    Class<? extends Instantiator<?>> value();
+    Class<? extends CustomInstantiator<?>> value();
 
     /** Factory for YamlInstantiateBy instances. */
     final class Factory {
         private Factory() {
         }
 
-        public static YamlInstantiateBy of(Class<? extends Instantiator<?>> instantiator) {
+        public static YamlInstantiateBy of(Class<? extends CustomInstantiator<?>> instantiator) {
             return new YamlInstantiateByImpl(instantiator);
         }
 
         /** Internal implementation class. */
         @SuppressWarnings({ "all" })
         private static final class YamlInstantiateByImpl implements YamlInstantiateBy {
-            private final Class<? extends Instantiator<?>> instantiatorType;
+            private final Class<? extends CustomInstantiator<?>> instantiatorType;
 
-            private YamlInstantiateByImpl(Class<? extends Instantiator<?>> instantiatorType) {
-                Objects.requireNonNull(instantiatorType, "Instantiator Type must not be null");
+            private YamlInstantiateByImpl(Class<? extends CustomInstantiator<?>> instantiatorType) {
+                Objects.requireNonNull(instantiatorType, "CustomInstantiator Type must not be null");
                 this.instantiatorType = instantiatorType;
             }
 
             @Override
-            public Class<? extends Instantiator<?>> value() {
+            public Class<? extends CustomInstantiator<?>> value() {
                 return instantiatorType;
             }
 
