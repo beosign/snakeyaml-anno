@@ -238,7 +238,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * Programmatically registers a {@link CustomConstructor} for a given type. This is a convenience method for putting something into
      * {@link #getConstructByMap()}.
      * 
-     * @param forType type for which a CustomConverter is to be registered
+     * @param forType type for which a {@link CustomConstructor} is to be registered
      * @param customConstructorClass {@link CustomConstructor} type
      * @param <T> type for which a {@link CustomConstructor} is registered
      */
@@ -246,7 +246,14 @@ public class AnnotationAwareConstructor extends Constructor {
         constructByMap.put(forType, YamlConstructBy.Factory.of(customConstructorClass));
     }
 
-    public <T> void registerDefaultConstructor(Class<T> forType) {
+    /**
+     * Programmatically registers a {@link DefaultCustomConstructor} for a given type. This ensures that for a given type, no special logic will be invoked.
+     * However, if there is an {@link CustomConstructor} set at the property level, then that will take precedence over the {@link DefaultCustomConstructor}
+     * that is applied here.
+     * 
+     * @param forType type for which a {@link DefaultCustomConstructor} is to be registered
+     */
+    public void registerDefaultConstructor(Class<?> forType) {
         constructByMap.put(forType, YamlConstructBy.Factory.of(DefaultCustomConstructor.class));
     }
 

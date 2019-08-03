@@ -1,0 +1,4 @@
+name: Homer
+secondPet: !!de.beosign.snakeyamlanno.constructor.Person$Dog
+  name: dog1
+  dogYears: 42

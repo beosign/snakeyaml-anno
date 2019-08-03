@@ -1,6 +1,7 @@
 package de.beosign.snakeyamlanno.constructor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -246,6 +247,34 @@ public class CustomConstructorTest {
                 assertThat(e.getCause(), instanceOf(YAMLException.class));
                 assertThat(e.getCause().getCause(), instanceOf(InstantiationException.class));
             }
+        }
+    }
+
+    /**
+     * Fails because the DogConstructor that handles 'dogYears' property is overridden by the DefaultConstructor.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void parseWithDefaultCustomConstructor() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("personWithDogAsSecondPet.yaml")) {
+
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            annotationAwareConstructor.registerDefaultConstructor(Dog.class); // Override annotation on type "Dog"
+            Yaml yaml = new Yaml(annotationAwareConstructor);
+
+            try {
+                yaml.loadAs(yamlString, Person.class);
+                fail("Expected exception");
+            } catch (Exception e) {
+                assertThat(e, instanceOf(YAMLException.class));
+                assertThat(e.getCause(), instanceOf(YAMLException.class));
+                assertThat(e.getCause().getCause(), instanceOf(YAMLException.class));
+                assertThat(e.getCause().getCause().getMessage(), containsString("Unable to find property 'dogYears'"));
+            }
+
         }
     }
 
