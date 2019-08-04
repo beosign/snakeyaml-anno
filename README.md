@@ -245,8 +245,7 @@ However, imagine that a property of type `Gender` would be more than once. When 
 So it could make sense to tell the parser to apply a custom logic when it encounters a property of a certain type like `Gender`. This is where the concept of a _CustomConstructor_ comes in handy.
 
 #### Register Custom Constructor by class annotation 
-Given the same classes as in the converter example, instead of defining a `Converter` and annotating each property of type `Gender` with it, you can 
-annotate the enum `Gender` with the `YamlConstructBy` annotation:
+Given the same classes as in the converter example, instead of defining a `Converter` and annotating each property of type `Gender` with it, you can annotate the enum `Gender` with the `YamlConstructBy` annotation:
 
 
 ```java
@@ -319,7 +318,7 @@ The type hierarchy is relevant. Given a node of type `T`, the exact way for find
 
 #### Register Custom Constructor on property
 
-It is also possible to register a custom constructor on a per-property-basis. Use this instead of a `Converter` if you need more than a simple  conversion mechanism. 
+It is also possible to register a custom constructor on a per-property-basis. Use this instead of a `Converter` if you need more than a simple conversion mechanism. 
 
 #### Use a Custom Constructor to create specific instances
 
@@ -404,25 +403,36 @@ package.Name(argument1, property1=value1, property2=value2)
 
 However, there is no way to use a **static method** to construct an object, or to make use of an dependency injection framework like **CDI** (exception: [Spring](https://bitbucket.org/asomov/snakeyaml/wiki/Documentation#markdown-header-spring)).
 
-#### Interface
+#### Instantiator types
+There are three different types of instantiators in SnakeyamlAnno:
+* **DefaultInstantiator**
 
-The central interface is `de.beosign.snakeyamlanno.instantiator.Instantiator<T>` that defines a single method `createInstance`.
+  Represents the Snakeyaml default way of instantiating objects; its method signature thus matches `org.yaml.snakeyaml.constructor.BaseConstructor.newInstance(Class<?>, Node, boolean)`
+* **GlobalInstantiator**
 
+  Used for creation of **every** object that needs to be created during parsing, thus *global*; can make use of the DefaultInstantiator to create an object 
+* **CustomInstantiator**
 
-#### Registering a Global Instantiator
-You can register a *Global Instantiator* on the `AnnotationAwareConstructor` by using the corresponding setter right after constructor creation. The effect is that each time an object has to be created for a node, the `Instantiator`'s `createInstance` method is called. Example:
+  Used for creation of an object of a certain type; can make use of the GlobalInstantiator or the DefaultInstantiator to create an object
+
+#### Default Instantiator
+This is just an interface with the signatature that matches the default instantiation method of SnakeYaml. An instance is passed to the Global Instantiator and to the Custom Instantiator so they can always fall back to the SnakeYaml default mechanism.  
+
+#### Global Instantiator
+There must always be a global instantiator; by default, it is the `DefaultGlobalInstantiator` that just uses the `DefaultInstantiator`.
+You can register your own *Global Instantiator* by implementing the `GlobalInstantiator` interface and register it on the `AnnotationAwareConstructor` by using the corresponding setter right after constructor creation. The effect is that each time an object has to be created for a node, your specialized `GlobalInstantiator`'s `createInstance` method is called. Example:
 
 ```java
-public class CdiInstantiator implements Instantiator<Object> {
+public class CdiGlobalInstantiator implements GlobalInstantiator {
 
     @Override
-    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, Instantiator<?> defaultInstantiator) throws InstantiationException {
+    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException {
        if (isValidBean(nodeType)) {
           // a CDI bean has been detected, so provide an instance via CDI
           return getBean(nodeType);
        }
        // node type does not correspond to a CDI bean, so use the default instantiation logic
-       return defaultInstantiator.createInstance(nodeType, node, tryDefault, ancestor, null);
+       return defaultInstantiator.createInstance(ancestor, node, tryDefault);
     }
     
     private <T> T getBean(Class<T> type) {
@@ -435,15 +445,36 @@ public class CdiInstantiator implements Instantiator<Object> {
     
 
 }
+
+...
+   // before parsing:
+   annotationAwareConstructor.setGlobalInstantiator(new CdiGlobalInstantiator());
+...   
+   
 ```
 
-The passed in `defaultInstantiator` can be used to apply the normal instantiation logic. This means, `org.yaml.snakeyaml.constructor.BaseConstructor.newInstance(Class<?>, Node, boolean)` is called. You can also return `null` to let the default mechanism apply. For a Global Instantiator, there is no difference between calling the default instantiator or returning `null`.
+The passed in `defaultInstantiator` can be used to apply the normal instantiation logic. This means, `org.yaml.snakeyaml.constructor.BaseConstructor.newInstance(Class<?>, Node, boolean)` is called.
 
-#### Registering an Instantiator for a Type
-You can (independent of a Global Instantiator) also register an Instantiator on a per-type basis. This can either be done using an Annotation or using a programmatic API. If there is both an annotation and a programmatic registration present, the programmatic registration takes precedence.
+
+#### CustomInstantiator
+You can (independent of a `GlobalInstantiator`) also register a `CustomInstantiator` on a per-type basis. This takes precendence over the GlobalInstantiator. Such an instantiator can either be registered using an Annotation or the programmatic API. It has access to both the DefaultInstantiator and the GlobalInstantiator in order to fall back to their instance creation logic. If there is both an annotation and a programmatic registration present, the programmatic registration takes precedence.
+
+You have to implement the `CustomInstantiator<T>` interface:
+
+```java
+public class PersonInstantiator implements CustomInstantiator<Person> {
+  @Override
+  Person createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator) throws InstantiationException {
+     // create instance using the global instantiator
+     Person person = globalInstantiator.createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator);
+     // any custom initialization for example
+     person.init();
+     return person;
+  }
+```
 
 ##### Annotation
-You can use the `@YamlInstantiateBy` annotation to define an Instantiator:
+You can use the `@YamlInstantiateBy` annotation to define a `CustomInstantiator`:
 
 ```java
 @YamlInstantiateBy(PersonInstantiator.class)
@@ -457,27 +488,27 @@ The programmatic counterpart is:
 annotationAwareConstructor.registerInstantiator(Person.class, PersonInstantiator.class);
 ```
 
-#### Instantiation logic priority
+#### Instantiation logic priority and overriding it
 The following order is applied for a type `T` to determine how to create an instance:
 
-1. If an instantiator is present for `T` and that instantiator returns not `null`, use this instance
-1. If a Global Instantiator is present that returns not `null`, use this instance
-1. Apply the Snakeyaml instantiation logic and return this instance
+1. If present, use the `CustomInstantiator` for `T`
+1. Use the `GlobalInstantiator`; by default, this is the `DefaultGlobalInstantiator` that uses the Snakeyaml default logic
 
 
-In order to "remove" an instantiator for a given type, call
-
-```java
-annotationAwareConstructor.unregisterInstantiator(Person.class, false);
-```
-
-This overrides an annotation (if present) and prevents any custom instantiation logic for this type unless there is a Global Instantiator registered. If you also want to ignore the Global Instantiator logic, pass `true` as flag:
+In order to override an instantiator that is registered by an annotation, you can use one of the following:
+If you want to "remove" a CustomInstantiator's logic for a given type `T`, while still using a GlobalInstantiator's logic use:
 
 ```java
-annotationAwareConstructor.unregisterInstantiator(Person.class, true);
+annotationAwareConstructor.registerGlobalInstantiator(T.class)
 ```
 
-This behaves as if there were no Instantiator present at all.
+If you also want to disable any GlobalInstantiator logic for `T`, use
+
+```java
+annotationAwareConstructor.registerDefaultInstantiator(T.class)
+```
+
+This behaves as if there were no Instantiators present at all for `T`.
 
 ### Case insensitive parsing
 A flag can be passed so that parsing is possible even if the keys in the yaml file do not match the case of the java property where it sould be parsed into. To enable it, use `AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class, true)`.
