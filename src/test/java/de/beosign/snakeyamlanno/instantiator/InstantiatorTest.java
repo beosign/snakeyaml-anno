@@ -157,8 +157,7 @@ public class InstantiatorTest {
      * <li>An instantiator is configured (programmatically) for a type, with a different logic</li>
      * </ul>
      * <b>Expectation:</b> The instantiator on the type renders the global instantiator and the annotation for this type ineffective and uses its own
-     * instantiaton logic to create
-     * a Cat
+     * instantiaton logic to create a Cat
      * 
      * @throws Exception on any exception
      */
