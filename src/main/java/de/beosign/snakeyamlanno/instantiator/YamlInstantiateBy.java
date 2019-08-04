@@ -27,7 +27,7 @@ public @interface YamlInstantiateBy {
      * </p>
      * <p>
      * A common use case might be to use a static factory method for objects. If you are looking for a way to customize the instantiation process for all types
-     * in general, consider using a specialized {@link GlobalInstantiator} instead.
+     * in general, consider using a {@link GlobalInstantiator} instead.
      * </p>
      * <p>
      * Please consider that Snakeyaml already provides some mechanisms to create instances with no default (no-arg) constructor, see

@@ -3,18 +3,15 @@ package de.beosign.snakeyamlanno.instantiator;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**
- * <p>
- * A global instantiator can be used to create instances for a node in a special way. Unlike a {@link CustomInstantiator}, it is automatically applied to all
- * types. A {@link CustomInstantiator} that is registered to create an instance for the current type takes precedence.
- * </p>
+ * This global instantiator just uses the Snakeyaml default instantiation logic.
  * 
  * @author florian
  * @since 1.0.0
  */
-public interface GlobalInstantiator {
+public class DefaultGlobalInstantiator implements GlobalInstantiator {
 
     /**
-     * Creates an instance, must not be <code>null</code>.
+     * Creates an instance using SnakeYaml's default logic.
      * 
      * @param nodeType type of node
      * @param node node node
@@ -24,6 +21,9 @@ public interface GlobalInstantiator {
      * @return created instance, not <code>null</code>
      * @throws InstantiationException if an exception occurs
      */
-    Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException;
+    @Override
+    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException {
+        return defaultInstantiator.createInstance(ancestor, node, tryDefault);
+    }
 
 }

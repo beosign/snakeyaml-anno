@@ -27,6 +27,7 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
 import de.beosign.snakeyamlanno.instantiator.CustomInstantiator;
 import de.beosign.snakeyamlanno.instantiator.DefaultCustomInstantiator;
+import de.beosign.snakeyamlanno.instantiator.DefaultGlobalInstantiator;
 import de.beosign.snakeyamlanno.instantiator.DefaultInstantiator;
 import de.beosign.snakeyamlanno.instantiator.GlobalCustomInstantiator;
 import de.beosign.snakeyamlanno.instantiator.GlobalInstantiator;
@@ -44,7 +45,7 @@ public class AnnotationAwareConstructor extends Constructor {
     private Map<Class<?>, YamlConstructBy> constructByMap = new HashMap<>();
     private Map<Class<?>, YamlInstantiateBy> instantiateByMap = new HashMap<>();
     private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
-    private GlobalInstantiator globalInstantiator = new GlobalInstantiator();
+    private GlobalInstantiator globalInstantiator = new DefaultGlobalInstantiator();
 
     /**
      * Creates constructor.
@@ -271,7 +272,7 @@ public class AnnotationAwareConstructor extends Constructor {
     /**
      * Programmatically registers a {@link GlobalInstantiator} for a given type. This overrides any {@link CustomInstantiator} for that type.
      * 
-     * @param forType type for which an {@link GlobalInstantiator} is to be registered
+     * @param forType type for which an {@link GlobalCustomInstantiator} is to be registered
      */
     public void registerGlobalInstantiator(Class<?> forType) {
         instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(GlobalCustomInstantiator.class));
@@ -281,7 +282,7 @@ public class AnnotationAwareConstructor extends Constructor {
      * Programmatically registers a {@link DefaultCustomInstantiator} for a given type. This overrides any {@link GlobalInstantiator} and any
      * {@link CustomInstantiator} for that type.
      * 
-     * @param forType type for which an {@link DefaultCustomInstantiator} is to be registered
+     * @param forType type for which a {@link DefaultCustomInstantiator} is to be registered
      */
     public void registerDefaultInstantiator(Class<?> forType) {
         instantiateByMap.put(forType, YamlInstantiateBy.Factory.of(DefaultCustomInstantiator.class));

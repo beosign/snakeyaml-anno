@@ -517,7 +517,7 @@ public class InstantiatorTest {
     }
 
     /** CustomInstantiator that creates a PersonBean using a static factory method if the node is a scalar node. */
-    public static class PersonBeanInstantiator extends GlobalInstantiator implements CustomInstantiator<PersonBean> {
+    public static class PersonBeanInstantiator extends DefaultGlobalInstantiator implements CustomInstantiator<PersonBean> {
 
         @Override
         public PersonBean createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
@@ -546,7 +546,7 @@ public class InstantiatorTest {
     }
 
     /** Creates Animal instances or a Dog instance if "mydog" is used as node value. */
-    public static class AnimalInstantiator extends GlobalInstantiator implements CustomInstantiator<Animal> {
+    public static class AnimalInstantiator extends DefaultGlobalInstantiator implements CustomInstantiator<Animal> {
 
         @Override
         public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator)
