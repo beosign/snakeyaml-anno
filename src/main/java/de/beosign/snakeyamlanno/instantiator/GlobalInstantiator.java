@@ -16,7 +16,6 @@ public interface GlobalInstantiator {
     /**
      * Creates an instance, must not be <code>null</code>.
      * 
-     * @param nodeType type of node
      * @param node node node
      * @param tryDefault tryDefault flag, see {@link org.yaml.snakeyaml.constructor.BaseConstructor#newInstance}
      * @param ancestor see {@link org.yaml.snakeyaml.constructor.BaseConstructor#newInstance}
@@ -24,6 +23,6 @@ public interface GlobalInstantiator {
      * @return created instance, not <code>null</code>
      * @throws InstantiationException if an exception occurs
      */
-    Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException;
+    Object createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException;
 
 }

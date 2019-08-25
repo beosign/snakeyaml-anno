@@ -97,14 +97,14 @@ public class AnnotationAwareConstructor extends Constructor {
         YamlInstantiateBy instantiateBy = getInstantiateBy(node.getType());
         if (instantiateBy != null) {
             try {
-                return instantiateBy.value().newInstance().createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator, globalInstantiator);
+                return instantiateBy.value().newInstance().createInstance(node, tryDefault, ancestor, defaultInstantiator, globalInstantiator);
             } catch (IllegalAccessException e) {
                 throw new InstantiationException(
                         "Cannot create instance using custom instantiator " + instantiateBy.value() + "for node " + node + " of type " + node.getType() + ": " + e.getMessage());
             }
         }
 
-        return globalInstantiator.createInstance(node.getType(), node, tryDefault, ancestor, defaultInstantiator);
+        return globalInstantiator.createInstance(node, tryDefault, ancestor, defaultInstantiator);
     }
 
     /**

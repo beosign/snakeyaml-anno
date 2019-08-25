@@ -426,10 +426,10 @@ You can register your own *Global Instantiator* by implementing the `GlobalInsta
 public class CdiGlobalInstantiator implements GlobalInstantiator {
 
     @Override
-    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException {
-       if (isValidBean(nodeType)) {
+    public Object createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException {
+       if (isValidBean(node.getType())) {
           // a CDI bean has been detected, so provide an instance via CDI
-          return getBean(nodeType);
+          return getBean(node.getType());
        }
        // node type does not correspond to a CDI bean, so use the default instantiation logic
        return defaultInstantiator.createInstance(ancestor, node, tryDefault);
@@ -457,16 +457,16 @@ The passed in `defaultInstantiator` can be used to apply the normal instantiatio
 
 
 #### CustomInstantiator
-You can (independent of a `GlobalInstantiator`) also register a `CustomInstantiator` on a per-type basis. This takes precendence over the GlobalInstantiator. Such an instantiator can either be registered using an Annotation or the programmatic API. It has access to both the DefaultInstantiator and the GlobalInstantiator in order to fall back to their instance creation logic. If there is both an annotation and a programmatic registration present, the programmatic registration takes precedence.
+You can (independent of a `GlobalInstantiator`) also register a `CustomInstantiator` on a per-type basis. This takes precedence over the GlobalInstantiator. Such an instantiator can either be registered using an Annotation or the programmatic API. It has access to both the DefaultInstantiator and the GlobalInstantiator in order to fall back to their instance creation logic. If there is both an annotation and a programmatic registration present, the programmatic registration takes precedence.
 
 You have to implement the `CustomInstantiator<T>` interface:
 
 ```java
 public class PersonInstantiator implements CustomInstantiator<Person> {
   @Override
-  Person createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator) throws InstantiationException {
+  Person createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator) throws InstantiationException {
      // create instance using the global instantiator
-     Person person = globalInstantiator.createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator);
+     Person person = globalInstantiator.createInstance(node, tryDefault, ancestor, defaultInstantiator);
      // any custom initialization for example
      person.init();
      return person;

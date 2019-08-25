@@ -520,14 +520,14 @@ public class InstantiatorTest {
     public static class PersonBeanInstantiator extends DefaultGlobalInstantiator implements CustomInstantiator<PersonBean> {
 
         @Override
-        public PersonBean createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
+        public PersonBean createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
                 throws InstantiationException {
-            return (PersonBean) createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator);
+            return (PersonBean) createInstance(node, tryDefault, ancestor, defaultInstantiator);
         }
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException {
-            if (nodeType.equals(PersonBean.class)) {
+        public Object createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator) throws InstantiationException {
+            if (node.getType().equals(PersonBean.class)) {
                 if (node instanceof ScalarNode) {
                     // a name was passed
                     PersonBean personBean = PersonBean.of(Objects.toString(NodeUtil.getValue(node)));
@@ -549,18 +549,18 @@ public class InstantiatorTest {
     public static class AnimalInstantiator extends DefaultGlobalInstantiator implements CustomInstantiator<Animal> {
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator)
+        public Object createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator)
                 throws InstantiationException {
-            if (Animal.class.isAssignableFrom(nodeType)) {
-                return createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator, null);
+            if (Animal.class.isAssignableFrom(node.getType())) {
+                return createInstance(node, tryDefault, ancestor, defaultInstantiator, null);
             }
             return defaultInstantiator.createInstance(ancestor, node, tryDefault);
         }
 
         @Override
-        public Animal createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
+        public Animal createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
                 throws InstantiationException {
-            if (Animal.class.isAssignableFrom(nodeType)) {
+            if (Animal.class.isAssignableFrom(node.getType())) {
                 if (Objects.toString(NodeUtil.getValue(node), "").equals("mydog")) {
                     return new Dog("MYDOG");
                 }
@@ -587,13 +587,13 @@ public class InstantiatorTest {
     /** Creates Mouse instances. */
     public static class MouseInstantiator extends AnimalInstantiator {
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator)
+        public Object createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator)
                 throws InstantiationException {
-            if (Animal.class.isAssignableFrom(nodeType)) {
+            if (Animal.class.isAssignableFrom(node.getType())) {
                 NodeUtil.removeNode((MappingNode) node, "name");
                 return new Mouse("my mouse");
             }
-            return super.createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator);
+            return super.createInstance(node, tryDefault, ancestor, defaultInstantiator);
         }
     }
 
@@ -601,10 +601,10 @@ public class InstantiatorTest {
     public static class DogInstantiator extends AnimalInstantiator {
 
         @Override
-        public Animal createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
+        public Animal createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
                 throws InstantiationException {
 
-            if (Dog.class.isAssignableFrom(nodeType)) {
+            if (Dog.class.isAssignableFrom(node.getType())) {
                 if (Objects.toString(NodeUtil.getValue(node), "").equals("mydog")) {
                     return new Dog("MY LITTLE DOG");
                 }
@@ -625,7 +625,7 @@ public class InstantiatorTest {
 
                 }
             }
-            return super.createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator, globalInstantiator);
+            return super.createInstance(node, tryDefault, ancestor, defaultInstantiator, globalInstantiator);
         }
     }
 
@@ -635,7 +635,7 @@ public class InstantiatorTest {
         }
 
         @Override
-        public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
+        public Object createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
                 throws InstantiationException {
             return null;
         }
@@ -699,14 +699,14 @@ public class InstantiatorTest {
     public static class Person1CatInstantiator extends AnimalInstantiator {
 
         @Override
-        public Animal createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
+        public Animal createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
                 throws InstantiationException {
             if (node instanceof ScalarNode) {
                 return new Cat((String) NodeUtil.getValue(node));
             } else if (node instanceof MappingNode) {
                 return new Cat((String) NodeUtil.getPropertyToValueMap((MappingNode) node).get("name"));
             } else {
-                return super.createInstance(nodeType, node, tryDefault, ancestor, defaultInstantiator, globalInstantiator);
+                return super.createInstance(node, tryDefault, ancestor, defaultInstantiator, globalInstantiator);
             }
         }
     }

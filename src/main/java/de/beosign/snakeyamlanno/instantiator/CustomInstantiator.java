@@ -21,7 +21,6 @@ public interface CustomInstantiator<T> {
     /**
      * Creates an instance, must not be <code>null</code>.
      * 
-     * @param nodeType type of node
      * @param node node node
      * @param tryDefault tryDefault flag, see {@link org.yaml.snakeyaml.constructor.BaseConstructor#newInstance}
      * @param ancestor see {@link org.yaml.snakeyaml.constructor.BaseConstructor#newInstance}
@@ -33,7 +32,7 @@ public interface CustomInstantiator<T> {
      * @return created instance, not <code>null</code>
      * @throws InstantiationException if an exception occurs
      */
-    T createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
+    T createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
             throws InstantiationException;
 
 }

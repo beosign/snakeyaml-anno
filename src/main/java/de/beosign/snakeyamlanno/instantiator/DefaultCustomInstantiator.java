@@ -13,7 +13,7 @@ import org.yaml.snakeyaml.nodes.Node;
 public class DefaultCustomInstantiator implements CustomInstantiator<Object> {
 
     @Override
-    public Object createInstance(Class<?> nodeType, Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
+    public Object createInstance(Node node, boolean tryDefault, Class<?> ancestor, DefaultInstantiator defaultInstantiator, GlobalInstantiator globalInstantiator)
             throws InstantiationException {
         return defaultInstantiator.createInstance(ancestor, node, tryDefault);
     }
