@@ -485,7 +485,7 @@ public class Person { ... }
 The programmatic counterpart is:
 
 ```java
-annotationAwareConstructor.registerInstantiator(Person.class, PersonInstantiator.class);
+annotationAwareConstructor.registerCustomInstantiator(Person.class, PersonInstantiator.class);
 ```
 
 #### Instantiation logic priority and overriding it
@@ -493,10 +493,11 @@ The following order is applied for a type `T` to determine how to create an inst
 
 1. If present, use the `CustomInstantiator` for `T`
 1. Use the `GlobalInstantiator`; by default, this is the `DefaultGlobalInstantiator` that uses the Snakeyaml default logic
+1. Use the Snakeyaml default logic
 
 
 In order to override an instantiator that is registered by an annotation, you can use one of the following:
-If you want to "remove" a CustomInstantiator's logic for a given type `T`, while still using a GlobalInstantiator's logic use:
+If you want to "remove" a CustomInstantiator's logic for a given type `T`, while still using a GlobalInstantiator's logic, use:
 
 ```java
 annotationAwareConstructor.registerGlobalInstantiator(T.class)
@@ -508,7 +509,7 @@ If you also want to disable any GlobalInstantiator logic for `T`, use
 annotationAwareConstructor.registerDefaultInstantiator(T.class)
 ```
 
-This behaves as if there were no Instantiators present at all for `T`.
+This behaves as if there were no instantiator present at all for `T`.
 
 ### Case insensitive parsing
 A flag can be passed so that parsing is possible even if the keys in the yaml file do not match the case of the java property where it sould be parsed into. To enable it, use `AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(Person.class, true)`.
