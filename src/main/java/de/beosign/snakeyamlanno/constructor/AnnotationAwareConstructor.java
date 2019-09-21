@@ -93,7 +93,7 @@ public class AnnotationAwareConstructor extends Constructor {
          *  1. check node type for an instantiator registration and create one if present => done
          *  2. call global instantiator and return value => done
          */
-        DefaultInstantiator defaultInstantiator = super::newInstance;
+        DefaultInstantiator defaultInstantiator = (anc, n, tryDef) -> super.newInstance(anc, n, tryDef);
         YamlInstantiateBy instantiateBy = getInstantiateBy(node.getType());
         if (instantiateBy != null) {
             try {
