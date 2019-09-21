@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
   
 before_install:
     - wget http://services.gradle.org/distributions/gradle-4.10-bin.zip
