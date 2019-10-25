@@ -24,6 +24,12 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.25** by S
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
   </tr>
+  <tr>
+    <td class="tg-us36">1.1.0<br></td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">?</td>
+    <td class="tg-us36">YES</td>
+  </tr>
 </table>
 
 ## Compatibility before 1.0.0
@@ -148,6 +154,8 @@ Yaml yaml = new Yaml(new AnnotationAwareRepresenter());
 * Ignore parsing errors in a subtree
 * Skipping properties
 * Ordering properties
+* Allow to collect unmapped properties during construction (aka Any-Setter)
+* Allow to dump a map flattened (aka Any-Getter)
 
 ## Feature Details
 
@@ -701,4 +709,15 @@ This will dump the properties in the order:
 
 The default value for `order` is 0. A higher value means that the property is dumped before a property with a lower value. So in order to dump a property at the beginning, you can provide a positive value. To make sure that a property is dumped at the end, you can provide a negative value. The order of properties with the same `order` value is unspecified.
 
+### Collect unmapped properties
+It is possible to allow unmapped properties, i.e. those properties in a yaml file that do not have a corresponding writable property in the target Java object, to be processed differently. So instead of throwing an exception, a fallback method annotated with `@YamlAnySetter` will be called. This method must be **public** and take exactly two parameters, the first of type `String`, the second of type `Object`. The first parameter contains the key where no matching writable property could be found; the second parameter contains the value. So by this it is possible to collect all unmapped properties in a map.
+
+The idea is taken from Jackson's `@JsonAnySetter` annotation, see [Jackson Annotations](https://github.com/FasterXML/jackson-annotations/wiki/Jackson-Annotations) and [Jackson-Any-Setter](https://www.logicbig.com/tutorials/misc/jackson/jackson-any-setter.html).
+
+**Caveat:** If the flag `skipMissingProperties` is set, **this annotation will have no effect**! If there is more than one method that is annotated within the Java class, it is unspecified which method will be called. If the annotated method 
+does not have the required parameters, an exception will be thrown.
+
+The annotated method may reside in the class itself or in any of its superclasses or interfaces. If there are several annotated methods in the class hierarchy, the method within the class takes precedence over the ones in its superclasses and over the ones in its interfaces.
+
+ 
  
