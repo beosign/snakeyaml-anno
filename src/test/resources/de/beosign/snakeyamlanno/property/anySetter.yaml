@@ -1,0 +1,7 @@
+brand: Ferrari
+doors: 3
+color: red
+engine:
+  id: my engine
+  power: 800
+  builtOn: 1970-01-01
