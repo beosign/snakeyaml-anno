@@ -26,8 +26,8 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.25** by S
   </tr>
   <tr>
     <td class="tg-us36">1.1.0<br></td>
-    <td class="tg-us36">?</td>
-    <td class="tg-us36">?</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
   </tr>
 </table>
@@ -720,4 +720,47 @@ does not have the required parameters, an exception will be thrown.
 The annotated method may reside in the class itself or in any of its superclasses or interfaces. If there are several annotated methods in the class hierarchy, the method within the class takes precedence over the ones in its superclasses and over the ones in its interfaces.
 
  
+ #### Example
  
+ Given the following Java Class:
+ 
+ ```java 
+public class Person {
+   private String first;
+   private String last;
+
+   public String getFirst() { return this.first; }
+   public void setFirst(String first) { this.first = first; }
+   
+   public String getLast() { return this.last; }
+   public void setLast(String last) { this.last = last; }     
+   
+   @YamlAnySetter
+   public void anySetter(String key, Object value) {
+       System.out.println("Unknown property: " + key + " with value " + value);
+   }     
+}
+```
+
+And this yaml:
+
+```javascript
+!Person
+first: Homer
+last: Simpson
+age: 42
+wife: !Person
+  first: Marge
+  last: Simpson 
+  haircolor: blue
+children:
+- name: Bart
+- name: Lisa
+- name: Maggie
+```
+
+Then the parsing process will succeed, and the anySetter method will be called for:
+* age: 42
+* wife: A Person instance
+* haircolor: blue
+* children: A List<Map<String, Object>> containing each child as list item where each list item is a map
