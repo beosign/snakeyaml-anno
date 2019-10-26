@@ -310,6 +310,11 @@ public class AnySetterTest {
                 Label label = (Label) labels.get(i);
                 assertThat(label.getName(), is(labelNames[i]));
                 assertThat(label.getColor(), is(colorNames[i]));
+                if (i == labels.size() - 1) { // last entry
+                    assertThat(label.unmapped.get("type"), is(1));
+                } else {
+                    assertThat(label.unmapped.keySet(), hasSize(0));
+                }
             }
 
         }
@@ -542,6 +547,7 @@ public class AnySetterTest {
     public static class Label {
         private String name;
         private String color;
+        private Map<String, Object> unmapped = new HashMap<>();
 
         public String getName() {
             return name;
@@ -557,6 +563,11 @@ public class AnySetterTest {
 
         public void setColor(String color) {
             this.color = color;
+        }
+
+        @YamlAnySetter
+        public void addUnmapped(String key, Object value) {
+            unmapped.put(key, value);
         }
     }
 

@@ -9,3 +9,4 @@ labels:
 - !Label
   name: labelBlue
   color: blue
+  type: 1
