@@ -349,6 +349,33 @@ public class AnySetterTest {
     }
 
     /**
+     * Tests that {@link YamlAnySetter} also works on a static method.
+     * 
+     * @throws Exception on any exception
+     */
+    @Test
+    public void testAnySetterCalledForStaticMethod() throws Exception {
+        try (InputStream is = getClass().getResourceAsStream("anySetter.yaml")) {
+            String yamlString = IOUtils.toString(is, StandardCharsets.UTF_8);
+            log.debug("Loaded YAML file:\n{}", yamlString);
+
+            Yaml yaml = new Yaml(new AnnotationAwareConstructor(CarStatic.class));
+
+            CarStatic parseResult = yaml.loadAs(yamlString, CarStatic.class);
+            log.debug("Parsed YAML file:\n{}", parseResult);
+
+            assertThat(parseResult, notNullValue());
+            assertThat(parseResult.getBrand(), is("Ferrari"));
+            assertThat(CarStatic.getUnmapped().size(), is(2));
+            assertThat(CarStatic.getUnmapped().get("doors"), is(3));
+            assertThat(CarStatic.getUnmapped().get("color"), is("red"));
+            assertThat(parseResult.getEngine().getId(), is("my engine"));
+            assertThat(parseResult.getEngine().getUnmapped().get("power"), is(800));
+            assertThat(parseResult.getEngine().getUnmapped().get("builtOn"), is(new Date(0)));
+        }
+    }
+
+    /**
      * Test class.
      */
     public static class Car {
@@ -370,6 +397,40 @@ public class AnySetterTest {
 
         @YamlAnySetter
         public void addUnmapped(String key, Object value) {
+            unmapped.put(key, value);
+        }
+
+        public Engine getEngine() {
+            return engine;
+        }
+
+        public void setEngine(Engine engine) {
+            this.engine = engine;
+        }
+    }
+
+    /**
+     * Test class.
+     */
+    public static class CarStatic {
+        private static Map<String, Object> unmapped = new HashMap<>();
+        private String brand;
+        private Engine engine = new Engine();
+
+        public String getBrand() {
+            return brand;
+        }
+
+        public void setBrand(String brand) {
+            this.brand = brand;
+        }
+
+        public static Map<String, Object> getUnmapped() {
+            return unmapped;
+        }
+
+        @YamlAnySetter
+        public static void addUnmapped(String key, Object value) {
             unmapped.put(key, value);
         }
 
