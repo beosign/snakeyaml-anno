@@ -179,8 +179,8 @@ In order to be able to parse the yaml file, you can do the following:
 ```java
 public class Person {
     @YamlProperty(key = "name")
-    private String firstName;
-    private String lastName;
+    public String firstName;
+    public String lastName;
 }
 ```
    
@@ -618,7 +618,7 @@ In a complex hierarchy it may be desirable to ignore parse errors in a given sub
     private String lastName;
     
     @YamlProperty(ignoreExceptions = true)
-    private Gender gender;
+    public Gender gender;
   
 }
 ```
@@ -646,7 +646,7 @@ It is possible to skip properties during load or dump. In order to skip a proper
 public class Person {
 
    @YamlProperty(skipAtLoad = true)     
-   private String name;
+   public String name;
 }
 ```
 
@@ -656,7 +656,7 @@ In order to prevent dumping of a property, use `skipAtDump`:
 public class Person {
 
    @YamlProperty(skipAtDump = true)     
-   private String name;
+   public String name;
 }
 ```
 
@@ -667,7 +667,7 @@ You can use your implementation by using the `skipAtDumpIf` member:
 public class Person {
 
    @YamlProperty(skipAtDumpIf = SkipIfNull.class)     
-   private String name;
+   public String name;
 }
 ```
 
@@ -683,13 +683,13 @@ It is possible to order properties during the dump process by providing a value 
 public class Person {
 
    @YamlProperty(order = 5)     
-   private String first;
+   public String first;
 
      
    private String between;
 
    @YamlProperty(order = -5)     
-   private String last;
+   public String last;
 }
 ```
 
