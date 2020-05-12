@@ -1,10 +1,16 @@
 package de.beosign.snakeyamlanno;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.introspector.Property;
@@ -13,8 +19,10 @@ import org.yaml.snakeyaml.introspector.PropertyUtils;
 import de.beosign.snakeyamlanno.convert.Converter;
 import de.beosign.snakeyamlanno.property.AliasedProperty;
 import de.beosign.snakeyamlanno.property.AnnotatedProperty;
+import de.beosign.snakeyamlanno.property.AnySetterProperty;
 import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.property.SkippedProperty;
+import de.beosign.snakeyamlanno.property.YamlAnySetter;
 import de.beosign.snakeyamlanno.property.YamlProperty;
 
 /**
@@ -23,7 +31,9 @@ import de.beosign.snakeyamlanno.property.YamlProperty;
  * @author florian
  */
 public class AnnotationAwarePropertyUtils extends PropertyUtils {
-    private Map<Class<?>, Map<String, Property>> typeToPropertiesMap = new HashMap<>();
+    private final Map<Class<?>, Map<String, Property>> typeToPropertiesMap = new HashMap<>();
+    private final Map<Class<?>, Method> typeToAnySetterMap = new HashMap<>();
+
     private final boolean caseInsensitive;
 
     public AnnotationAwarePropertyUtils() {
@@ -61,6 +71,38 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
 
         typeToPropertiesMap.put(type, replacedMap);
         return replacedMap;
+    }
+
+    /**
+     * Overridden to implement "Yaml-Any-Setter" feature.
+     */
+    @Override
+    public Property getProperty(Class<? extends Object> type, String name, BeanAccess bAccess) {
+        try {
+            return super.getProperty(type, name, bAccess);
+        } catch (YAMLException e) {
+            Method anySetterMethod = typeToAnySetterMap.get(type);
+            if (anySetterMethod == null) {
+                List<Class<?>> typesInHierarchy = new ArrayList<>();
+                typesInHierarchy.add(type);
+                typesInHierarchy.addAll(ClassUtils.getAllSuperclasses(type));
+                typesInHierarchy.addAll(ClassUtils.getAllInterfaces(type));
+
+                anySetterMethod = typesInHierarchy.stream()
+                        .flatMap(t -> Arrays.stream(t.getDeclaredMethods()))
+                        .filter(m -> Modifier.isPublic(m.getModifiers()))
+                        .filter(m -> m.isAnnotationPresent(YamlAnySetter.class))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (anySetterMethod != null) {
+                typeToAnySetterMap.put(type, anySetterMethod);
+                return new AnySetterProperty(name, anySetterMethod);
+            }
+            throw e;
+        }
+
     }
 
     /**

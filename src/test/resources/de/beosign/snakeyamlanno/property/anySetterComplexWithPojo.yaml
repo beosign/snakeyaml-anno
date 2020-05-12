@@ -1,0 +1,12 @@
+brand: Ferrari
+labels:
+- !Label
+  name: labelRed
+  color: red
+- !Label
+  name: labelGreen
+  color: green
+- !Label
+  name: labelBlue
+  color: blue
+  type: 1
