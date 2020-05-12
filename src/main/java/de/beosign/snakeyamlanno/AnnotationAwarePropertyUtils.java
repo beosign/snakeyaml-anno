@@ -22,6 +22,7 @@ import de.beosign.snakeyamlanno.property.AnnotatedProperty;
 import de.beosign.snakeyamlanno.property.AnySetterProperty;
 import de.beosign.snakeyamlanno.property.ConvertedProperty;
 import de.beosign.snakeyamlanno.property.SkippedProperty;
+import de.beosign.snakeyamlanno.property.YamlAnyGetter;
 import de.beosign.snakeyamlanno.property.YamlAnySetter;
 import de.beosign.snakeyamlanno.property.YamlProperty;
 
@@ -55,6 +56,11 @@ public class AnnotationAwarePropertyUtils extends PropertyUtils {
         // Search for annotations and create instances of AnnotatedProperty in this case
         Map<String, Property> replacedMap = new LinkedHashMap<String, Property>();
         for (String name : properties.keySet()) {
+            // validate that "YamlAnyGetter" annotation is placed on a property of type Map; future releases might even allow that property on a Pojo
+            if (properties.get(name).getAnnotation(YamlAnyGetter.class) != null && !Map.class.isAssignableFrom(properties.get(name).getType())) {
+                throw new YAMLException(YamlAnyGetter.class.getSimpleName() + " may only be placed on properties of type " + Map.class.getName());
+            }
+
             ReplacementResult replacementResult;
             try {
                 replacementResult = getReplacement(properties.get(name));

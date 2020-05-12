@@ -6,15 +6,18 @@ import java.util.TreeSet;
 
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.introspector.Property;
+import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import de.beosign.snakeyamlanno.AnnotationAwarePropertyUtils;
+import de.beosign.snakeyamlanno.property.YamlAnyGetter;
 import de.beosign.snakeyamlanno.property.YamlProperty;
 import de.beosign.snakeyamlanno.skip.SkipAtDumpPredicate;
 import de.beosign.snakeyamlanno.skip.SkipIfEmpty;
 import de.beosign.snakeyamlanno.skip.SkipIfNull;
+import de.beosign.snakeyamlanno.util.NodeUtil;
 
 /**
  * Representer that is aware of annotations. Implements the features "order properties" and "skip properties to dump".
@@ -78,6 +81,36 @@ public class AnnotationAwareRepresenter extends Representer {
         orderedProperties.addAll(propertySet);
 
         return orderedProperties;
+    }
+
+    /**
+     * Overridden to implement "YamlAnyGetter" feature.
+     * 
+     * @since 1.1.0
+     */
+    @Override
+    protected MappingNode representJavaBean(Set<Property> properties, Object javaBean) {
+        MappingNode mappingNode = super.representJavaBean(properties, javaBean);
+
+        Property anyGetterProperty = (properties.stream().filter(p -> p.getAnnotation(YamlAnyGetter.class) != null)).findFirst().orElse(null);
+        if (anyGetterProperty != null) {
+            String name = anyGetterProperty.getName();
+            NodeTuple anyGetterNodeTuple = null;
+            for (NodeTuple nt : mappingNode.getValue()) {
+                if (name.equals(NodeUtil.getValue(nt.getKeyNode()))) {
+                    anyGetterNodeTuple = nt;
+                    break;
+                }
+            }
+            if (anyGetterNodeTuple != null) {
+                mappingNode.getValue().remove(anyGetterNodeTuple);
+                for (NodeTuple nt : ((MappingNode) anyGetterNodeTuple.getValueNode()).getValue()) {
+                    mappingNode.getValue().add(nt);
+                }
+            }
+        }
+
+        return mappingNode;
     }
 
     @Override
