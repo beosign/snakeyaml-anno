@@ -766,3 +766,50 @@ Then the parsing process will succeed, and the anySetter method will be called f
 * wife: A Person instance
 * haircolor: blue
 * children: A List<Map<String, Object>> containing each child as list item where each list item is a map
+
+### Flatten unmapped properties
+`Since 1.1.0`
+
+To reverse the function of the `@YamlAnySetter` feature when dumping, you can annotate a property of type `Map` with `@YamlAnyGetter`. This will cause the map to be _flattened_ when dumped, so as if the map entries were direct properties of the object containing the map.
+
+#### Example
+ 
+Given the following Java Class:
+ 
+```java 
+public class Person {
+   private String first = "Homer;
+   private String last = "Simpson";
+   private Map<String,Object> map = new HashMap<>() {
+      {
+         put("age", 42);
+         put("type", "type1");
+      }
+   };
+   
+
+   public String getFirst() { return this.first; }
+   public String getLast() { return this.last; }
+      
+   @YamlAnyGetter
+   public Map<String,Object> map() {
+      return map; 
+   }     
+}
+```
+
+Then the dumped yaml will look like that:
+
+
+```javascript
+!Person
+first: Homer
+last: Simpson
+age: 42
+type: type1
+```
+
+#### Remarks
+The property annotated with `@YamlAnyGetter` **must** be of type `Map` or a subtype thereof. Otherwise the dumping process will fail with a `YamlException`.
+
+If a key of the map has the same name as a property in the object that contains the map, the dumper will output the property twice.
