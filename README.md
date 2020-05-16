@@ -4,7 +4,7 @@
 
 
 # snakeyaml-anno
-Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.25** by Sergey Pariev, https://github.com/spariev/snakeyaml/.
+Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.26** by Sergey Pariev, https://github.com/spariev/snakeyaml/.
 
 ## Compatibility starting with 1.0.0
 <table class="tg">
