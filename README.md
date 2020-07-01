@@ -33,6 +33,13 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.26** by S
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
   </tr>
+  <tr>
+    <td class="tg-us36">1.1.1<br></td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+  </tr>
 </table>
 
 ## Compatibility before 1.0.0
