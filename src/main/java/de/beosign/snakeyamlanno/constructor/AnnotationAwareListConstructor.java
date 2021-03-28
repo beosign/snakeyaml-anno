@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -18,7 +16,6 @@ import org.yaml.snakeyaml.nodes.Tag;
  * @since 0.8.0
  */
 public class AnnotationAwareListConstructor extends AnnotationAwareConstructor {
-    private static final Logger log = LoggerFactory.getLogger(AnnotationAwareListConstructor.class);
 
     private final Class<?> collectionItemType;
 
@@ -51,7 +48,6 @@ public class AnnotationAwareListConstructor extends AnnotationAwareConstructor {
     @Override
     public Object getSingleData(Class<?> type) {
         if (Collection.class.isAssignableFrom(type)) {
-            log.debug("Found a collection type as root node; set type of item nodes to " + collectionItemType.getTypeName());
             SequenceNode node = (SequenceNode) composer.getSingleNode();
             node.setTag(new Tag(type));
             for (Node n : node.getValue()) {

@@ -11,8 +11,6 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -40,11 +38,10 @@ import de.beosign.snakeyamlanno.property.YamlProperty;
  * @author florian
  */
 public class AnnotationAwareConstructor extends Constructor {
-    private static final Logger log = LoggerFactory.getLogger(AnnotationAwareConstructor.class);
 
-    private Map<Class<?>, YamlConstructBy> constructByMap = new HashMap<>();
-    private Map<Class<?>, YamlInstantiateBy> instantiateByMap = new HashMap<>();
-    private IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
+    private final Map<Class<?>, YamlConstructBy> constructByMap = new HashMap<>();
+    private final Map<Class<?>, YamlInstantiateBy> instantiateByMap = new HashMap<>();
+    private final IdentityHashMap<Node, Property> nodeToPropertyMap = new IdentityHashMap<>();
     private GlobalInstantiator globalInstantiator = new DefaultGlobalInstantiator();
 
     /**
@@ -197,7 +194,6 @@ public class AnnotationAwareConstructor extends Constructor {
                             Construct constructor = getConstructor(valueNode);
                             constructor.construct(valueNode);
                         } catch (Exception e) {
-                            log.debug("Ignore: Could not construct property {}.{}: {}", beanType, key, e.getMessage());
                             nodeTuplesToBeRemoved.add(tuple);
                         }
                     }
