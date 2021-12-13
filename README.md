@@ -18,6 +18,7 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.26** by S
     <td class="tg-us36">1.24</td>
     <td class="tg-us36">1.25</td>
     <td class="tg-us36">1.26</td>
+    <td class="tg-us36">1.29</td>
   </tr>
   <tr>
     <td class="tg-us36">1.0.0<br></td>
@@ -25,6 +26,7 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.26** by S
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
+    <td class="tg-us36">?</td>
   </tr>
   <tr>
     <td class="tg-us36">1.1.0<br></td>
@@ -32,6 +34,7 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.26** by S
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
+    <td class="tg-us36">?</td>    
   </tr>
   <tr>
     <td class="tg-us36">1.1.1<br></td>
@@ -39,9 +42,19 @@ Parse YAML files by using annotation in POJOS - based on SnakeYaml **1.26** by S
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
+    <td class="tg-us36">?</td>    
   </tr>
   <tr>
     <td class="tg-us36">1.2.0<br></td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">YES</td>
+    <td class="tg-us36">?</td>    
+  </tr>
+  <tr>
+    <td class="tg-us36">1.3.0<br></td>
+    <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
     <td class="tg-us36">YES</td>
