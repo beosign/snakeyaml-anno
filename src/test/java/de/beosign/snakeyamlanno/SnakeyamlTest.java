@@ -22,6 +22,7 @@ import org.yaml.snakeyaml.nodes.Node;
 
 import de.beosign.snakeyamlanno.constructor.AnnotationAwareConstructor;
 import de.beosign.snakeyamlanno.constructor.CustomConstructor;
+import de.beosign.snakeyamlanno.constructor.YamlConstructBy;
 import de.beosign.snakeyamlanno.property.Person;
 import de.beosign.snakeyamlanno.util.NodeUtil;
 
@@ -55,11 +56,11 @@ public class SnakeyamlTest {
         String yamlString = "entities:\n  entity1:\n    someProperty: abc"; // entity without "id" being set
 
         AnnotationAwareConstructor constructor = new AnnotationAwareConstructor(EntitiesMap.class);
-        constructor.registerCustomConstructor(Map.class, IdMapConstructor.class);
+
         Yaml yaml = new Yaml(constructor);
 
         EntitiesMap parseResult = yaml.loadAs(yamlString, EntitiesMap.class);
-        log.debug("Parsed entites :\n{}", parseResult);
+        log.debug("Parsed entites:\n{}", parseResult);
 
         assertThat(parseResult, notNullValue());
 
@@ -71,6 +72,7 @@ public class SnakeyamlTest {
     }
 
     public static class IdMapConstructor implements CustomConstructor<Map<String, Entity>> {
+        private final EntityConstructor entityConstructor = new EntityConstructor();
 
         @Override
         public Map<String, Entity> construct(Node node, Function<? super Node, ? extends Map<String, Entity>> defaultConstructor) throws YAMLException {
@@ -78,19 +80,39 @@ public class SnakeyamlTest {
             Map<String, Node> keyValueNodeMap = NodeUtil.getPropertyToValueNodeMap((MappingNode) node);
             for (Map.Entry<String, Node> entry : keyValueNodeMap.entrySet()) {
                 String id = entry.getKey();
-                Node valueNode = entry.getValue();
+                MappingNode valueNode = (MappingNode) entry.getValue();
 
-                Entity entity = (Entity) defaultConstructor.apply(valueNode); // throws ClassCastException
+                Entity entity = entityConstructor.constructEntity(valueNode);
+
+                /* The next line throws ClassCastException because the defaultConstructor is only allowed to be
+                 * applied to the passed in node, not to any sub-nodes of it.
+                 * Best would be to pass the calling AnnotationAwareConstructor into this method and use it for creation
+                 * so special handling would also be applied when constructing the Entity and the Entity would itself be a complex class with annotations
+                 */
+                // Entity entity = (Entity) defaultConstructor.apply(valueNode);
                 entity.setId(id);
                 myEntityMap.put(id, entity);
             }
             return myEntityMap;
+        }
+
+        /** Helper class to construct an Entity from a mapping node. */
+        private static final class EntityConstructor extends Constructor {
+            private EntityConstructor() {
+                super(Entity.class);
+            }
+
+            private Entity constructEntity(MappingNode node) {
+                node.setType(Entity.class);
+                return (Entity) constructObject(node);
+            }
         }
     }
 
     protected static class EntitiesMap {
         private Map<String, Entity> entities;
 
+        @YamlConstructBy(IdMapConstructor.class)
         public Map<String, Entity> getEntities() {
             return entities;
         }
